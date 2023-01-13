@@ -104,29 +104,21 @@ public:
 	// 메시 자르는 액터 스폰
 	void SpawnMeshSlicer();
 
-private:
 	// 무브셋
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
 	TArray<class UAnimMontage*> Attacks;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
 	TArray<class UAnimMontage*> JumpAttacks;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Finishers")
 	TArray<UAnimMontage*> Finishers;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
 	TArray<UAnimMontage*> GuardHits;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
 	TArray<UAnimMontage*> GuardBreaks;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Dodges")
 	TArray<class UAnimMontage*> Dodges;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
 	TArray<UAnimMontage*> Interactions;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
 	TArray<UAnimMontage*> HitReactions;
 
@@ -134,6 +126,7 @@ private:
 	bool bIsAttacking = false;
 	bool bIsBlocking = false;
 	bool bIsDashing = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	bool bIsTargeting = false;
 
 	// 공격 콤보 카운트
@@ -141,10 +134,10 @@ private:
 	int MaxAttackCount;
 
 	// 적을 향한 부드러운 회전 속도 ( 회전 완료까지 1/x 초. 0이면 즉시 회전 완료 )
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float RInterpSpeed = 0.f;
 
-	/* 오토 타게팅 개선 중
+	/* 오토 타게팅 개선 예정
 	UFUNCTION(BlueprintCallable)
 	bool NewTryAutoTargeting();
 	AActor* SearchEnemies();

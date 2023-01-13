@@ -10,17 +10,28 @@ UCLASS()
 class AVE_API AMeshSlicer : public AActor
 {
 	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision", meta = (AllowPrivateAccess = "true"))
+	class UBoxComponent* Box;
 	
 public:	
-	// Sets default values for this actor's properties
 	AMeshSlicer();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	//virtual void Tick(float DeltaTime) override;
 
+	//UFUNCTION()
+	//void OnBoxOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnBoxOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	// 메시 자르기
+	void SliceMesh(UPrimitiveComponent* TargetMesh);
+
+	// 단면에 씌울 머터리얼
+	UMaterial* MatForSlicedSection = nullptr;
 };

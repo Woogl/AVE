@@ -2,23 +2,33 @@
 
 
 #include "SliceableActorBase.h"
+#include "ProceduralMeshComponent.h"
+#include "KismetProceduralMeshLibrary.h"
 
-// Sets default values
 ASliceableActorBase::ASliceableActorBase()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	OriginalMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OriginalMesh"));
+	OriginalMesh->SetCollisionProfileName(TEXT("NoCollision"));
+	OriginalMesh->SetHiddenInGame(true);
+	RootComponent = OriginalMesh;
+
+	ProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("ProceduralMesh"));
+	ProceduralMesh->bUseComplexAsSimpleCollision = false;
+	ProceduralMesh->SetSimulatePhysics(true);
+	ProceduralMesh->SetCollisionProfileName(TEXT("Destructible"));
+	ProceduralMesh->SetupAttachment(RootComponent);
 }
 
-// Called when the game starts or when spawned
 void ASliceableActorBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	// OriginalMesh를 복사하여 ProceduralMesh에 보관
+	UKismetProceduralMeshLibrary::CopyProceduralMeshFromStaticMeshComponent(OriginalMesh, 0, ProceduralMesh, true);
 }
 
-// Called every frame
 void ASliceableActorBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
