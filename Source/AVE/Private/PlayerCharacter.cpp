@@ -81,6 +81,7 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = 350.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 500.f;
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 300.f, 0.f);
 
 	// 공격 판정을 관리하는 컴포넌트
 	CombatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp"));
