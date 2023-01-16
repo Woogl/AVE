@@ -23,8 +23,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	// 공격 판정을 계산할 무기 지정
 	UFUNCTION(BlueprintCallable)
 	void SetupWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness);

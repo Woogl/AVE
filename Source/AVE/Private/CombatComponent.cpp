@@ -8,7 +8,6 @@
 
 UCombatComponent::UCombatComponent()
 {
-	//PrimaryComponentTick.bCanEverTick = true;
 
 }
 
@@ -17,15 +16,6 @@ void UCombatComponent::BeginPlay()
 	Super::BeginPlay();
 	
 }
-
-/*
-void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
-*/
 
 void UCombatComponent::SetupWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness)
 {
@@ -62,6 +52,9 @@ void UCombatComponent::AttackCheckTick()
 	// 중복 타격 방지
 	for (auto hit : hits)
 	{
+		// 디버그
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("HitAttack"));
+
 		auto hitActor = hit.GetActor();
 		// 이미 때린 액터인지 체크
 		if (!AlreadyHitActors.Contains(hitActor))

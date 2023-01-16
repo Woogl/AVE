@@ -77,11 +77,3 @@ void AMeshSlicer::SliceMesh(UPrimitiveComponent* TargetMesh)
 		meshToSlice->AddRadialImpulse(planePosition, 1000.f, 500.f, ERadialImpulseFalloff::RIF_Constant, true);
 	}
 }
-
-/*
-void AMeshSlicer::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-*/
