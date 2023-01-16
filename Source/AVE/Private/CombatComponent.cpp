@@ -88,10 +88,10 @@ void UCombatComponent::AttackCheckEnd()
 	AlreadyHitActors.Empty();
 }
 
-void UCombatComponent::SetDamageInfo(float InBaseDamage, EAttackType InAttackType)
+void UCombatComponent::SetDamageInfo(float InBaseDamage, EDamageType InDamageType)
 {
 	BaseDamage = InBaseDamage;
-	AttackType = InAttackType;
+	DamageType = InDamageType;
 }
 
 void UCombatComponent::DealDamage(AActor* Target)
@@ -103,7 +103,7 @@ void UCombatComponent::DealDamage(AActor* Target)
 	FVector hitFromLocation = Target->GetActorLocation();
 	// 추가 정보
 	FHitResult hitinfo;
-	hitinfo.Item = (int32)AttackType;	// 0=Standard, 1=KnockDown, 2=KnockDown, 3=KnockUp, 4=NoReaction
+	hitinfo.Item = (int32)DamageType;	// 0=Standard, 1=KnockDown, 2=KnockDown, 3=KnockUp, 4=NoReaction
 	// 가해자 컨트롤러
 	AController* instigator = GetOwner()->GetInstigatorController();
 	// 유발자

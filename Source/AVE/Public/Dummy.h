@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "EBodyPart.h"
+#include "AVEEnums.h"
 #include "Dummy.generated.h"
 
 UCLASS()

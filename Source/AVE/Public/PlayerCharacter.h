@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "ECameraPosition.h"
+#include "AVEEnums.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
@@ -87,6 +87,7 @@ public:
 	AActor* GetNearestEnemy();
 
 	// 공격
+	//void PerformLightAttack(int Combo);
 	void PerformLightAttack();
 	void PerformJumpAttack();
 
@@ -137,18 +138,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float RInterpSpeed = 0.f;
 
-	/* 오토 타게팅 개선 예정
+	/* 오토 타게팅 개선 예정*/
 	UFUNCTION(BlueprintCallable)
 	bool NewTryAutoTargeting();
-	AActor* SearchEnemies();
+	UFUNCTION(BlueprintCallable)
+	bool SearchEnemies();
+	UFUNCTION(BlueprintCallable)
 	void ScoreEnemies();
-	void SetEnemyTarget(AActor* Target);
+	UFUNCTION(BlueprintCallable)
+	void SetEnemyTarget();
+	UFUNCTION(BlueprintCallable)
 	void ClearScores();
+	TArray<FHitResult> SearchHits;
 	TArray<AActor*> SearchedEnemies;
 	TArray<float> DistanceScores;
 	TArray<float> AngleScores;
 	TArray<float> TotalScores;
-	*/
+	
 
 public:
 	/** Returns CameraBoom subobject **/

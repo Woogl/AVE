@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "ECameraPosition.h"
+#include "AVEEnums.h"
 #include "MoveCamera.generated.h"
 
 /**

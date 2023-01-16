@@ -10,8 +10,12 @@ ADummy::ADummy()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	// 플레이어의 스프링암에 걸리지 않게
+	// 스프링암이 카메라에 안걸리게
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	
+	// 데미지 피격 감지하게
+	GetMesh()->SetCollisionProfileName(TEXT("PhysicsActor"));
+	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 }
 
 void ADummy::BeginPlay()

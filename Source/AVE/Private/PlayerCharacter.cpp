@@ -81,7 +81,7 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = 350.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 500.f;
-	GetCharacterMovement()->RotationRate = FRotator(0.f, 300.f, 0.f);
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 350.f, 0.f);
 
 	// 공격 판정을 관리하는 컴포넌트
 	CombatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp"));
@@ -194,13 +194,6 @@ void APlayerCharacter::Attack()
 	// 스무스하게 회전
 	RInterpSpeed = 5.f;
 
-	/*
-	if (EnemyTarget)
-	{
-		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), EnemyTarget->GetActorLocation()));
-	}
-	*/
-
 	// 공격 분기
 	if (GetCharacterMovement()->IsFalling() == true)
 	{
@@ -214,8 +207,7 @@ void APlayerCharacter::Attack()
 
 void APlayerCharacter::Guard()
 {
-	// TO DO : 방어 가능한 상태인지 체크
-
+	// TODO: 가드 가능한 상태인지 체크
 	bIsBlocking = true;
 
 	// ABP의 스테이트 변경
@@ -457,6 +449,17 @@ AActor* APlayerCharacter::GetNearestEnemy()
 	return nearestEnemy;
 }
 
+/* TODO: 합칠 예정
+void APlayerCharacter::PerformLightAttack(int Combo)
+{
+	// 몽타주 재생
+	if (Combo > -1)
+	{
+		PlayAnimMontage(Attacks[Combo]);
+	}
+}
+*/
+
 void APlayerCharacter::PerformLightAttack()
 {
 	// 몽타주 재생
@@ -513,4 +516,95 @@ void APlayerCharacter::SpawnMeshSlicer()
 	FActorSpawnParameters spawnParams;
 	FTransform spawnTransform = Weapon->GetComponentTransform();
 	GetWorld()->SpawnActor<AMeshSlicer>(AMeshSlicer::StaticClass(), spawnTransform, spawnParams);
+}
+
+bool APlayerCharacter::NewTryAutoTargeting()
+{
+	// 거리 + 각도 숫자가 가장 가까운 Pawn을 EnemyTarget으로 지정
+	if (SearchEnemies() == true)
+	{
+		ScoreEnemies();
+		SetEnemyTarget();
+		ClearScores();
+		return true;
+	}
+
+	// 찾은 적이 없으면 false
+	return false;
+}
+
+bool APlayerCharacter::SearchEnemies()
+{
+	// "Targeting" 채널로 트레이스
+	TArray<AActor*> actorToIgnore;
+	bool outValue = UKismetSystemLibrary::SphereTraceMulti(this, GetActorLocation(), GetActorLocation(), 300.f, TraceTypeQuery3, false, actorToIgnore, EDrawDebugTrace::ForDuration, SearchHits, true);
+
+	// 범위 내 적을 못찾으면 false 반환
+	if (outValue == false)
+		return false;
+	
+	// 범위 내 적을 찾으면 배열에 추가하고 true 반환
+	for (int i = 0; i < SearchHits.Num(); i++)
+	{
+		SearchedEnemies.Add(SearchHits[i].GetActor());
+
+		// 디버그
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, FString::Printf(TEXT("%s"), *SearchHits[i].GetActor()->GetName()));
+	}
+	return true;
+}
+
+void APlayerCharacter::ScoreEnemies()
+{
+	for (int i = 0; i < SearchHits.Num(); i++)
+	{
+		// 거리 점수 기록하기
+		DistanceScores.Add(SearchHits[i].Distance);
+
+		// 각도 점수 기록하기
+		FVector inputVector = GetLastMovementInputVector();
+		FVector direction = SearchedEnemies[i]->GetActorLocation() - GetActorLocation();
+		float deltaRadian = FMath::Acos(FVector::DotProduct(inputVector, direction));
+		float deltaDegree = FMath::RadiansToDegrees(deltaRadian);
+		AngleScores.Add(deltaDegree);
+
+		// 합계 점수 기록하기
+		TotalScores.Add(DistanceScores[i] + AngleScores[i]);
+
+		// 디버그
+		//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, FString::Printf(TEXT("Name:%s, Dist:%f, Angle:%f, Total:%f"), 
+			//*SearchHits[i].GetActor()->GetName(), SearchHits[i].Distance, deltaDegree, DistanceScores[i] + AngleScores[i]));
+	}
+}
+
+void APlayerCharacter::SetEnemyTarget()
+{
+	// 최저점 찾기
+	float minScore = 5000.f;
+	int index = 0;
+	int outIndex = 0;
+	for (index; index < SearchHits.Num(); index++)
+	{
+		if (TotalScores[index] < minScore)
+		{
+			minScore = TotalScores[index];
+			outIndex = index;
+		}
+	}
+
+	// 최저점 나온 에너미를 타겟으로 지정
+	EnemyTarget = SearchedEnemies[outIndex];
+
+	// 디버그
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("%s"), *EnemyTarget->GetName()));
+}
+
+void APlayerCharacter::ClearScores()
+{
+	// 사용한 배열 초기화
+	SearchHits.Empty();
+	SearchedEnemies.Empty();
+	DistanceScores.Empty();
+	AngleScores.Empty();
+	TotalScores.Empty();
 }

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "EAttackType.h"
+#include "AVEEnums.h"
 #include "CombatComponent.generated.h"
 
 /**
@@ -34,7 +34,7 @@ public:
 
 	// 가할 대미지량, 공격 타입 설정
 	UFUNCTION(BlueprintCallable)
-	void SetDamageInfo(float InBaseDamage, EAttackType InAttackType);
+	void SetDamageInfo(float InBaseDamage, EDamageType InDamageType);
 
 	// 가할 대미지
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Custom")
@@ -46,7 +46,7 @@ public:
 
 	// 대미지 피격 시 반응 (ex : 경직, 다운, 넉백, 공중에 뜸 등 )
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Custom")
-	EAttackType AttackType;
+	EDamageType DamageType;
 
 	// 자르기 가능하게 할지
 	bool bEnableSlice = false;
