@@ -39,6 +39,9 @@ void ADummy::LookAtPlayer()
 
 void ADummy::OnFinishered()
 {
+	//디버그
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("OnFinishered"));
+
 	// 플레이어 쳐다보기
 	LookAtPlayer();
 
@@ -86,6 +89,7 @@ void ADummy::SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float RagdollDe
 		// 디버그
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Invalid Body Part !!!"));
 	}
+
 	// 시간 지나면 Ragdoll 활성화
 	if (RagdollDelay <= 0.f)
 	{
@@ -103,8 +107,10 @@ void ADummy::ActivateRagdoll()
 {
 	// 콜리전 변경
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 
 	// 래그돌 활성화

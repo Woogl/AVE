@@ -52,9 +52,6 @@ void UCombatComponent::AttackCheckTick()
 	// 중복 타격 방지
 	for (auto hit : hits)
 	{
-		// 디버그
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("HitAttack"));
-
 		auto hitActor = hit.GetActor();
 		// 이미 때린 액터인지 체크
 		if (!AlreadyHitActors.Contains(hitActor))
@@ -99,6 +96,9 @@ void UCombatComponent::SetDamageInfo(float InBaseDamage, EAttackType InAttackTyp
 
 void UCombatComponent::DealDamage(AActor* Target)
 {
+	// 디버그
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("DealDamage"));
+
 	// 때린 곳
 	FVector hitFromLocation = Target->GetActorLocation();
 	// 추가 정보

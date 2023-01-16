@@ -18,6 +18,6 @@ void UMoveCamera::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase*
 	auto player = Cast<APlayerCharacter>(MeshComp->GetOwner());
 	if (player)
 	{
-		player->MoveCamera(NewPosition);
+		player->MoveCamera(ECameraPosition::ECP_Default);
 	}
 }

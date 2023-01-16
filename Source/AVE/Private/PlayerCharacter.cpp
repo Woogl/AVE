@@ -191,11 +191,15 @@ void APlayerCharacter::Attack()
 	// 오토 타겟팅할 적 탐색
 	TryAutoTargeting();
 
-	// TODO : 타겟 바라보게
+	// 스무스하게 회전
+	RInterpSpeed = 5.f;
+
+	/*
 	if (EnemyTarget)
 	{
 		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), EnemyTarget->GetActorLocation()));
 	}
+	*/
 
 	// 공격 분기
 	if (GetCharacterMovement()->IsFalling() == true)
@@ -310,7 +314,11 @@ void APlayerCharacter::Finisher()
 	if (CanAttack() == false) return;
 
 	EnemyTarget = GetNearestEnemy();
-	MotionMorph();
+
+	if (EnemyTarget)
+	{
+		MotionMorph();
+	}
 }
 
 bool APlayerCharacter::CanJump()
@@ -422,7 +430,7 @@ AActor* APlayerCharacter::GetNearestEnemy()
 	TArray< AActor* > actorsToIgnore;
 
 	UKismetSystemLibrary::SphereTraceMultiForObjects(this, start, end, radius, objectTypes, false, actorsToIgnore,
-		EDrawDebugTrace::None, hits, true);
+		EDrawDebugTrace::ForDuration, hits, true);
 
 	// 반환할 액터를 담을 변수
 	AActor* nearestEnemy = nullptr;
@@ -445,7 +453,7 @@ AActor* APlayerCharacter::GetNearestEnemy()
 		}
 	}
 
-	// 찾은 액터를 반환. 못찾았으면 nullptr 그대로 반환함
+	// 찾은 액터를 반환. 못찾았으면 nullptr 그대로 반환
 	return nearestEnemy;
 }
 
