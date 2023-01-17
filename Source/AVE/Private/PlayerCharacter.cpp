@@ -208,6 +208,10 @@ void APlayerCharacter::Guard()
 {
 	// TODO: 가드 가능한 상태인지 체크
 	bIsBlocking = true;
+	
+	// 0.3초 동안 패링 판정 발동 
+	bIsParrying = true;
+	GetWorldTimerManager().SetTimer(ParryingTimer, this, &APlayerCharacter::OnParryEnd, 0.3f, false);
 
 	// ABP의 스테이트 변경
 	auto animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
@@ -222,6 +226,10 @@ void APlayerCharacter::Guard()
 void APlayerCharacter::StopGuard()
 {
 	bIsBlocking = false;
+
+	// 패링 판정 끝
+	bIsParrying = false;
+	GetWorldTimerManager().ClearTimer(ParryingTimer);
 
 	// ABP의 스테이트 변경
 	auto animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
@@ -379,6 +387,11 @@ void APlayerCharacter::PerformJumpAttack()
 
 	// 몽타주 재생
 	PlayAnimMontage(JumpAttacks[0]);
+}
+
+void APlayerCharacter::OnParryEnd()
+{
+	bIsParrying = false;
 }
 
 void APlayerCharacter::PerformDodge()

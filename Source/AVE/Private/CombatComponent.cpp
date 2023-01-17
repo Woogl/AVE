@@ -100,7 +100,7 @@ void UCombatComponent::DealDamage(AActor* Target)
 	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("DealDamage"));
 
 	// 때린 곳
-	FVector hitFromLocation = Target->GetActorLocation();
+	FVector hitFromLocation = GetOwner()->GetActorLocation();
 	// 추가 정보
 	FHitResult hitinfo;
 	hitinfo.Item = (int32)DamageType;	// 0=Standard, 1=KnockDown, 2=KnockDown, 3=KnockUp, 4=NoReaction

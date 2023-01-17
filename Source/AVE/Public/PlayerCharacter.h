@@ -90,6 +90,9 @@ public:
 	void PerformLightAttack();
 	void PerformJumpAttack();
 
+	// 방어
+	void OnParryEnd();
+
 	// 회피
 	void PerformDodge();
 
@@ -117,6 +120,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
 	TArray<UAnimMontage*> GuardHits;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
+	TArray<UAnimMontage*> Parryings;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
 	TArray<UAnimMontage*> GuardBreaks;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Dodges")
 	TArray<class UAnimMontage*> Dodges;
@@ -139,9 +144,12 @@ public:
 	bool bIsAttacking = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
 	bool bIsBlocking = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
+	bool bIsParrying = false;
 	bool bIsDashing = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsTargeting = false;
+	FTimerHandle ParryingTimer;
 
 	// 공격 콤보 카운트
 	int AttackCount = 0;
