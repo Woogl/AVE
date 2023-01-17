@@ -29,13 +29,8 @@ APlayerCharacter::APlayerCharacter()
 
 	// 칼
 	Weapon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Katana"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> katanaAsset(TEXT("StaticMesh'/Game/MarketplaceAssets/ARPG_Samurai/Demo/Weapon/Mesh/katana.katana'"));
-	if (katanaAsset.Succeeded())
-	{
-		Weapon->SetStaticMesh(katanaAsset.Object);
-		Weapon->SetupAttachment(GetMesh(), TEXT("katana3"));
-		Weapon->SetCollisionProfileName(TEXT("NoCollision"));
-	}
+	Weapon->SetupAttachment(GetMesh(), TEXT("katana3"));
+	Weapon->SetCollisionProfileName(TEXT("NoCollision"));
 
 	// 칼집
 	Scabbard = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Scabbard"));
@@ -48,7 +43,7 @@ APlayerCharacter::APlayerCharacter()
 	DefaultCameraBoom->TargetArmLength = 300.0f;
 	DefaultCameraBoom->bUsePawnControlRotation = true;
 	DefaultCameraBoom->bEnableCameraLag = true;	// 카메라 랙 활성화
-	DefaultCameraBoom->CameraLagSpeed = 10.f;
+	DefaultCameraBoom->CameraLagSpeed = 4.f;
 
 	// 좌측 사이드뷰 스프링암
 	LeftCameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("LeftCameraBoom"));
@@ -78,7 +73,7 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
 	GetCharacterMovement()->JumpZVelocity = 400.f;
 	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 350.f;
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 500.f;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 350.f, 0.f);
@@ -91,11 +86,15 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	// 기본 무기, 무기 두께 설정
+	// 컴뱃 컴포넌트에 무기 설정
 	CombatComp->SetupWeapon(Weapon, 5.0f);
 
-	// 기본 무기 최대 콤보 수 설정
+	// 최대 콤보 수 설정
 	MaxAttackCount = Attacks.Num() - 1;
+
+	// 최대 체력, 체간 설정
+	CurHealth = MaxHealth;
+	CurPosture = MaxPosture;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -215,7 +214,7 @@ void APlayerCharacter::Guard()
 	animIns->bIsBlocking = true;
 
 	// 이동속도 감소
-	GetCharacterMovement()->MaxWalkSpeed = 200.f;
+	GetCharacterMovement()->MaxWalkSpeed = 150.f;
 	GetCharacterMovement()->MaxAcceleration = 512.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 32.f;
 }
@@ -229,7 +228,7 @@ void APlayerCharacter::StopGuard()
 	animIns->bIsBlocking = false;
 
 	// 이동속도 초기화
-	GetCharacterMovement()->MaxWalkSpeed = 350.f;
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 	GetCharacterMovement()->MaxAcceleration = 2048.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 500.f;
 }
@@ -243,6 +242,7 @@ void APlayerCharacter::Dash()
 {
 	// TODO: 대시 가능한 상태인지 체크
 
+	// 상태 변경
 	bIsDashing = true;
 
 	// 4방향 회피
@@ -254,9 +254,11 @@ void APlayerCharacter::Dash()
 
 void APlayerCharacter::StopDash()
 {
+	// 상태 변경
 	bIsDashing = false;
+
 	// 이동속도 초기화
-	GetCharacterMovement()->MaxWalkSpeed = 350.f;
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
 }
 
 void APlayerCharacter::Finisher()

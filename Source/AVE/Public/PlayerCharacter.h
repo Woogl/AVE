@@ -125,11 +125,22 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
 	TArray<UAnimMontage*> HitReactions;
 
+	// 체력
+	float MaxHealth = 100.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
+	float CurHealth;
+
+	// 체간
+	float MaxPosture = 100.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
+	float CurPosture;
+	
 	// 상태 변수
 	bool bIsAttacking = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
 	bool bIsBlocking = false;
 	bool bIsDashing = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsTargeting = false;
 
 	// 공격 콤보 카운트
