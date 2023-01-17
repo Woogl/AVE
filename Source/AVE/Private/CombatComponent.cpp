@@ -52,7 +52,7 @@ void UCombatComponent::AttackCheckTick()
 	// 중복 타격 방지
 	for (auto hit : hits)
 	{
-		auto hitActor = hit.GetActor();
+		AActor* hitActor = hit.GetActor();
 		// 이미 때린 액터인지 체크
 		if (!AlreadyHitActors.Contains(hitActor))
 		{

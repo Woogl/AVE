@@ -5,6 +5,7 @@
 #include <GameFramework/Character.h>
 #include <GameFramework/CharacterMovementComponent.h>
 #include <Kismet/KismetMathLibrary.h>
+#include "PlayerCharacter.h"
 
 UPlayerAnimInstance::UPlayerAnimInstance()
 {
@@ -30,7 +31,12 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 }
 
-void UPlayerAnimInstance::SetIsBlocking(bool Value)
+void UPlayerAnimInstance::AnimNotify_StartiFrame()
 {
-	bIsBlocking = Value;
+	Character->SetCanBeDamaged(false);
+}
+
+void UPlayerAnimInstance::AnimNotify_EndiFrame()
+{
+	Character->SetCanBeDamaged(true);
 }

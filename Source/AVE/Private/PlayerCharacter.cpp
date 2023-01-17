@@ -212,7 +212,7 @@ void APlayerCharacter::Guard()
 
 	// ABP의 스테이트 변경
 	auto animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-	animIns->SetIsBlocking(true);
+	animIns->bIsBlocking = true;
 
 	// 이동속도 감소
 	GetCharacterMovement()->MaxWalkSpeed = 200.f;
@@ -226,7 +226,7 @@ void APlayerCharacter::StopGuard()
 
 	// ABP의 스테이트 변경
 	auto animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-	animIns->SetIsBlocking(false);
+	animIns->bIsBlocking = false;
 
 	// 이동속도 초기화
 	GetCharacterMovement()->MaxWalkSpeed = 350.f;
@@ -343,51 +343,6 @@ float APlayerCharacter::CalculateDirection(const FVector& Velocity, const FRotat
 
 	return 0.f;
 }
-
-/* TryAutoTargeting으로 대체됨
-AActor* APlayerCharacter::GetNearestEnemy()
-{
-	// 트레이스 결과를 저장
-	TArray<FHitResult> hits;
-	// 트레이스 범위
-	FVector start = GetActorLocation();
-	FVector end = GetActorLocation() + GetActorForwardVector() * 100.f;
-	float radius = 200.f;
-	// 찾을 오브젝트 타입 = Pawn
-	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
-	TEnumAsByte<EObjectTypeQuery> pawn = UEngineTypes::ConvertToObjectType(ECC_Pawn);
-	objectTypes.Add(pawn);
-	// 무시할 오브젝트 타입 = 없음
-	TArray< AActor* > actorsToIgnore;
-
-	UKismetSystemLibrary::SphereTraceMultiForObjects(this, start, end, radius, objectTypes, false, actorsToIgnore,
-		EDrawDebugTrace::ForDuration, hits, true);
-
-	// 반환할 액터를 담을 변수
-	AActor* nearestEnemy = nullptr;
-	float lastDistanceToEnemy = radius + 100.f;
-	float distanceToEnemy;
-
-	// 가장 가까운 적 찾기
-	for (auto hit : hits)	// 모든 FHitResult에 for문 탐색
-	{
-		if (hit.GetActor())
-		{
-			// 적과의 거리 체크
-			distanceToEnemy = GetDistanceTo(hit.GetActor());
-			// 가장 가까운 적인지 체크. 더 가까우면 nearestEnemy 갱신
-			if (distanceToEnemy <= lastDistanceToEnemy)
-			{
-				lastDistanceToEnemy = distanceToEnemy;
-				nearestEnemy = hit.GetActor();
-			}
-		}
-	}
-
-	// 찾은 액터를 반환. 못찾았으면 nullptr 그대로 반환
-	return nearestEnemy;
-}
-*/
 
 /* TODO: 합칠 예정
 void APlayerCharacter::PerformLightAttack(int Combo)
@@ -514,7 +469,8 @@ bool APlayerCharacter::SearchEnemies()
 {
 	// "Targeting" 채널로 트레이스
 	TArray<AActor*> actorToIgnore;
-	bool outValue = UKismetSystemLibrary::SphereTraceMulti(this, GetActorLocation(), GetActorLocation(), 300.f, TraceTypeQuery3, false, actorToIgnore, EDrawDebugTrace::ForDuration, SearchHits, true);
+	bool outValue = UKismetSystemLibrary::SphereTraceMulti(this, GetActorLocation(), GetActorLocation(), 300.f, TraceTypeQuery3, false, actorToIgnore, 
+		EDrawDebugTrace::ForDuration, SearchHits, true, FColor::Red, FColor::Green, 1.f);
 
 	// 범위 내 적을 못찾으면 false 반환
 	if (outValue == false)

@@ -39,10 +39,13 @@ void AMeshSlicer::OnBoxOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAct
 {
 	// 단면에 덮어씌울 머터리얼 가져오기
 	auto sliceTarget = Cast<ASliceableActorBase>(OtherActor);
-	MatForSlicedSection = sliceTarget->SectionMaterial;
 
-	// 충돌한 메시 자르고 파괴
-	SliceMesh(OtherComp);
+	if (sliceTarget)
+	{
+		MatForSlicedSection = sliceTarget->SectionMaterial;
+		// 충돌한 메시 자르고 파괴
+		SliceMesh(OtherComp);
+	}
 }
 
 void AMeshSlicer::SliceMesh(UPrimitiveComponent* TargetMesh)

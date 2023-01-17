@@ -20,25 +20,27 @@ public:
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Reference", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Reference")
 	ACharacter* Character;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance")
 	FVector Velocity;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance")
 	float GroundSpeed;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance")
 	float Direction;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance")
 	bool bIsFalling;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance")
 	bool bIsBlocking;
 
-public:
-	void SetIsBlocking(bool Value);
+	// È¸ÇÇ ¸ùÅ¸ÁÖ
+	UFUNCTION()
+	void AnimNotify_StartiFrame();
+	UFUNCTION()
+	void AnimNotify_EndiFrame();
 };
