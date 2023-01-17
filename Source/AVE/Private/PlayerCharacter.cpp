@@ -188,8 +188,8 @@ void APlayerCharacter::Attack()
 {
 	// TODO : 공격 가능한 상태인지 체크
 
-	// 오토 타겟팅할 적 탐색
-	TryAutoTargeting();
+	// 오토 타겟팅으로 타겟 지정
+	NewTryAutoTargeting();
 
 	// 스무스하게 회전
 	RInterpSpeed = 5.f;
@@ -526,10 +526,12 @@ bool APlayerCharacter::NewTryAutoTargeting()
 		ScoreEnemies();
 		SetEnemyTarget();
 		ClearScores();
+		bIsTargeting = true;
 		return true;
 	}
 
 	// 찾은 적이 없으면 false
+	bIsTargeting = false;
 	return false;
 }
 
@@ -543,13 +545,10 @@ bool APlayerCharacter::SearchEnemies()
 	if (outValue == false)
 		return false;
 	
-	// 범위 내 적을 찾으면 배열에 추가하고 true 반환
+	// 범위 내 모든 적을 찾아 배열에 추가하고 true 반환
 	for (int i = 0; i < SearchHits.Num(); i++)
 	{
 		SearchedEnemies.Add(SearchHits[i].GetActor());
-
-		// 디버그
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, FString::Printf(TEXT("%s"), *SearchHits[i].GetActor()->GetName()));
 	}
 	return true;
 }
@@ -559,21 +558,23 @@ void APlayerCharacter::ScoreEnemies()
 	for (int i = 0; i < SearchHits.Num(); i++)
 	{
 		// 거리 점수 기록하기
-		DistanceScores.Add(SearchHits[i].Distance);
+		float dist = FVector::Distance(SearchedEnemies[i]->GetActorLocation(), GetActorLocation());
+		DistanceScores.Add(dist);
 
 		// 각도 점수 기록하기
 		FVector inputVector = GetLastMovementInputVector();
 		FVector direction = SearchedEnemies[i]->GetActorLocation() - GetActorLocation();
+		direction.Normalize();
 		float deltaRadian = FMath::Acos(FVector::DotProduct(inputVector, direction));
 		float deltaDegree = FMath::RadiansToDegrees(deltaRadian);
 		AngleScores.Add(deltaDegree);
 
 		// 합계 점수 기록하기
-		TotalScores.Add(DistanceScores[i] + AngleScores[i]);
+		TotalScores.Add(DistanceScores[i] + AngleScores[i] * 4);
 
 		// 디버그
-		//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, FString::Printf(TEXT("Name:%s, Dist:%f, Angle:%f, Total:%f"), 
-			//*SearchHits[i].GetActor()->GetName(), SearchHits[i].Distance, deltaDegree, DistanceScores[i] + AngleScores[i]));
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, FString::Printf(TEXT("Name:%s,    Dist:%f,    Angle:%f,    Total:%f"), 
+			*SearchHits[i].GetActor()->GetName(), DistanceScores[i], AngleScores[i], TotalScores[i]));
 	}
 }
 
