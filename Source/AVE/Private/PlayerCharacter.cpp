@@ -189,7 +189,7 @@ void APlayerCharacter::Attack()
 	// TODO : 공격 가능한 상태인지 체크
 
 	// 오토 타겟팅으로 타겟 지정
-	NewTryAutoTargeting();
+	TryAutoTargeting();
 
 	// 스무스하게 회전
 	RInterpSpeed = 5.f;
@@ -245,50 +245,8 @@ void APlayerCharacter::Dash()
 
 	bIsDashing = true;
 
-	// 회피 방향 계산
-	FVector inputVector = GetLastMovementInputVector();
-	FRotator baseRotation = GetActorRotation();
-	float dodgeAngle = CalculateDirection(inputVector, baseRotation);
-
-	if (bIsTargeting == true)
-	{
-		// 조준 상태 회피
-		if (dodgeAngle >= -45.0f && dodgeAngle <= 45.f)
-		{
-			PlayAnimMontage(Dodges[0]); // 앞으로
-		}
-		else if (dodgeAngle > 45.f && dodgeAngle <= 135.f)
-		{
-			PlayAnimMontage(Dodges[1]); // 오른쪽으로
-		}
-		else if (dodgeAngle > -135.f && dodgeAngle < -45.f)
-		{
-			PlayAnimMontage(Dodges[2]); // 왼쪽으로
-		}
-		else // (dodgeAngle 135.f > && dodgeAngle < -135.f)
-		{
-			PlayAnimMontage(Dodges[3]); // 뒤로
-		}
-	}
-	else // 비조준 상태 회피
-	{
-		if (dodgeAngle >= -45.0f && dodgeAngle <= 45.f)
-		{
-			PlayAnimMontage(Dodges[4]); // 앞으로
-		}
-		else if (dodgeAngle > 45.f && dodgeAngle <= 135.f)
-		{
-			PlayAnimMontage(Dodges[5]); // 오른쪽으로
-		}
-		else if (dodgeAngle > -135.f && dodgeAngle < -45.f)
-		{
-			PlayAnimMontage(Dodges[6]); // 왼쪽으로
-		}
-		else // (dodgeAngle 135.f > && dodgeAngle < -135.f)
-		{
-			PlayAnimMontage(Dodges[7]); // 뒤로
-		}
-	}
+	// 4방향 회피
+	PerformDodge();
 
 	// 이동속도 증가
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
@@ -305,9 +263,9 @@ void APlayerCharacter::Finisher()
 {
 	if (CanAttack() == false) return;
 
-	EnemyTarget = GetNearestEnemy();
-
-	if (EnemyTarget)
+	// 대상 찾기
+	// TODO: 체간 수치 체크
+	if (TryAutoTargeting() == true)
 	{
 		MotionMorph();
 	}
@@ -386,26 +344,7 @@ float APlayerCharacter::CalculateDirection(const FVector& Velocity, const FRotat
 	return 0.f;
 }
 
-bool APlayerCharacter::TryAutoTargeting()
-{
-	AActor* target = GetNearestEnemy();
-
-	// 타게팅할 적을 찾았을 경우
-	if (target != nullptr)
-	{
-		EnemyTarget = target;
-		bIsTargeting = true;
-		return true;
-	}
-	// 타게팅할 적을 못 찾았을 경우
-	else
-	{
-		EnemyTarget = nullptr;
-		bIsTargeting = false;
-		return false;
-	}
-}
-
+/* TryAutoTargeting으로 대체됨
 AActor* APlayerCharacter::GetNearestEnemy()
 {
 	// 트레이스 결과를 저장
@@ -448,6 +387,7 @@ AActor* APlayerCharacter::GetNearestEnemy()
 	// 찾은 액터를 반환. 못찾았으면 nullptr 그대로 반환
 	return nearestEnemy;
 }
+*/
 
 /* TODO: 합칠 예정
 void APlayerCharacter::PerformLightAttack(int Combo)
@@ -484,6 +424,41 @@ void APlayerCharacter::PerformJumpAttack()
 	PlayAnimMontage(JumpAttacks[0]);
 }
 
+void APlayerCharacter::PerformDodge()
+{
+	// 회피 방향 계산
+	FVector inputVector = GetLastMovementInputVector();
+	FRotator baseRotation = GetActorRotation();
+	float dodgeAngle = CalculateDirection(inputVector, baseRotation);
+
+	if (bIsTargeting == true)
+	{
+		// 조준 상태 회피
+		if (dodgeAngle >= -45.0f && dodgeAngle <= 45.f)
+		{
+			PlayAnimMontage(Dodges[0]); // 앞으로
+		}
+		else if (dodgeAngle > 45.f && dodgeAngle <= 135.f)
+		{
+			PlayAnimMontage(Dodges[1]); // 오른쪽으로
+		}
+		else if (dodgeAngle > -135.f && dodgeAngle < -45.f)
+		{
+			PlayAnimMontage(Dodges[2]); // 왼쪽으로
+		}
+		else // (dodgeAngle 135.f > && dodgeAngle < -135.f)
+		{
+			PlayAnimMontage(Dodges[3]); // 뒤로
+		}
+	}
+	else // 비조준 상태 회피
+	{
+		FRotator newRotation = FRotationMatrix::MakeFromX(GetLastMovementInputVector()).Rotator();
+		SetActorRotation(newRotation);	// 방향 전환
+		PlayAnimMontage(Dodges[0]);		// 앞으로
+	}
+}
+
 void APlayerCharacter::FinishEnemy()
 {
 	if (CanAttack() == false) return;
@@ -518,7 +493,7 @@ void APlayerCharacter::SpawnMeshSlicer()
 	GetWorld()->SpawnActor<AMeshSlicer>(AMeshSlicer::StaticClass(), spawnTransform, spawnParams);
 }
 
-bool APlayerCharacter::NewTryAutoTargeting()
+bool APlayerCharacter::TryAutoTargeting()
 {
 	// 거리 + 각도 숫자가 가장 가까운 Pawn을 EnemyTarget으로 지정
 	if (SearchEnemies() == true)

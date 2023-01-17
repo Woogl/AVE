@@ -78,18 +78,20 @@ public:
 
 	// 적을 향해 부드럽게 회전
 	void RotateToTarget(AActor* Target, float DeltaTime, float InterpSpeed);
+	// 회전 속도 ( 회전 완료까지 1/x 초. 0이면 즉시 회전 완료 )
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RInterpSpeed = 0.f;
 
 	// 각도 계산
 	float CalculateDirection(const FVector& Velocity, const FRotator& BaseRotation);
 
-	// 오토 타게팅 
-	bool TryAutoTargeting();
-	AActor* GetNearestEnemy();
-
 	// 공격
-	//void PerformLightAttack(int Combo);
+	//void PerformLightAttack(int Combo); 추가 예정 코드
 	void PerformLightAttack();
 	void PerformJumpAttack();
+
+	// 회피
+	void PerformDodge();
 
 	// 마무리 공격
 	UFUNCTION(BlueprintCallable)
@@ -134,27 +136,17 @@ public:
 	int AttackCount = 0;
 	int MaxAttackCount;
 
-	// 적을 향한 부드러운 회전 속도 ( 회전 완료까지 1/x 초. 0이면 즉시 회전 완료 )
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float RInterpSpeed = 0.f;
-
-	/* 오토 타게팅 개선 예정*/
-	UFUNCTION(BlueprintCallable)
-	bool NewTryAutoTargeting();
-	UFUNCTION(BlueprintCallable)
+	// 오토 타게팅
+	bool TryAutoTargeting();
 	bool SearchEnemies();
-	UFUNCTION(BlueprintCallable)
 	void ScoreEnemies();
-	UFUNCTION(BlueprintCallable)
 	void SetEnemyTarget();
-	UFUNCTION(BlueprintCallable)
 	void ClearScores();
 	TArray<FHitResult> SearchHits;
 	TArray<AActor*> SearchedEnemies;
 	TArray<float> DistanceScores;
 	TArray<float> AngleScores;
 	TArray<float> TotalScores;
-	
 
 public:
 	/** Returns CameraBoom subobject **/

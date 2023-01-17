@@ -97,7 +97,7 @@ void UCombatComponent::SetDamageInfo(float InBaseDamage, EDamageType InDamageTyp
 void UCombatComponent::DealDamage(AActor* Target)
 {
 	// 디버그
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("DealDamage"));
+	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("DealDamage"));
 
 	// 때린 곳
 	FVector hitFromLocation = Target->GetActorLocation();
