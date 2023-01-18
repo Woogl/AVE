@@ -44,23 +44,23 @@ public:
 	// 상태 변수
 	bool bIsAttacking = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
-		bool bIsBlocking = false;
+	bool bIsBlocking = false;
 	bool bIsDashing = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool bIsTargeting = false;
+	bool bIsTargeting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
-		bool bIsParrying = false;
+	bool bIsParrying = false;
 	FTimerHandle ParryingTimer;
 
 	// 체력
 	float MaxHealth = 100.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
-		float CurHealth;
+	float CurHealth;
 
 	// 체간
 	float MaxPosture = 100.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
-		float CurPosture;
+	float CurPosture;
 
 	// 애니메이션 몽타주
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
@@ -74,7 +74,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Finishers")
 	TArray<class UAnimMontage*> FinisherMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
-	class UAnimMontage* GuardHitMontage;
+	TArray<class UAnimMontage*> GuardHitMontages;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
+	class UAnimMontage* ParryingMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
 	class UAnimMontage* GuardBreakMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Dodges")
@@ -91,7 +93,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 
 	// 축 입력
 	void MoveForward(float Value);
