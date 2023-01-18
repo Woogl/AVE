@@ -14,4 +14,10 @@ class AVE_API AAVEGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
+public:
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void StartSlowMotion();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void EndSlowMotion();
 };
