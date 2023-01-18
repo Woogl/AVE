@@ -381,7 +381,7 @@ void APlayerCharacter::PerformDodge()
 	else // 비조준 상태 회피
 	{
 		FRotator newRotation = FRotationMatrix::MakeFromX(GetLastMovementInputVector()).Rotator();
-		SetActorRotation(newRotation);	// 방향 전환
+		SetActorRotation(newRotation);			// 방향 전환
 		PlayAnimMontage(DodgeMontages[0]);		// 앞으로
 	}
 }
@@ -422,95 +422,35 @@ void APlayerCharacter::SpawnMeshSlicer()
 
 bool APlayerCharacter::TryAutoTargeting()
 {
-	// 거리 + 각도 숫자가 가장 가까운 Pawn을 EnemyTarget으로 지정
-	if (SearchEnemies() == true)
-	{
-		ScoreEnemies();
-		SetEnemyTarget();
-		ClearScores();
-		bIsTargeting = true;
-		return true;
-	}
-
-	// 찾은 적이 없으면 false
-	bIsTargeting = false;
-	return false;
-}
-
-bool APlayerCharacter::SearchEnemies()
-{
-	// "Targeting" 채널로 트레이스
+	// "Targeting" 채널로 트레이스 (1차, 제자리에서 크게)
 	TArray<AActor*> actorToIgnore;
-	bool outValue = UKismetSystemLibrary::SphereTraceMulti(this, GetActorLocation(), GetActorLocation(), 300.f, TraceTypeQuery3, false, actorToIgnore, 
-		EDrawDebugTrace::ForDuration, SearchHits, true, FColor::Red, FColor::Green, 1.f);
-
+	FHitResult hit;
+	bool outValue = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), GetActorLocation(), 300.f, TraceTypeQuery3, false, actorToIgnore,
+		EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f);
+	
 	// 범위 내 적을 못찾으면 false 반환
 	if (outValue == false)
 		return false;
-	
-	// 범위 내 모든 적을 찾아 배열에 추가하고 true 반환
-	for (int i = 0; i < SearchHits.Num(); i++)
+
+	// 적을 찾으면 타겟으로 지정
+	EnemyTarget = hit.GetActor();
+	bIsTargeting = true;
+
+	// 인풋 방향이 있으면 한번 더 트레이스 (2차, 인풋 방향으로 작게)
+	if (GetLastMovementInputVector().Size() > 0.f)
 	{
-		SearchedEnemies.Add(SearchHits[i].GetActor());
-	}
-	return true;
-}
+		FVector start = GetActorLocation() + GetLastMovementInputVector() * 200.f;
+		FVector end = GetActorLocation() + GetLastMovementInputVector() * 200.f;
+		bool outValue2 = UKismetSystemLibrary::SphereTraceSingle(this, start, end, 100.f, TraceTypeQuery3, false, actorToIgnore,
+			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f);
 
-void APlayerCharacter::ScoreEnemies()
-{
-	for (int i = 0; i < SearchHits.Num(); i++)
-	{
-		// 거리 점수 기록하기
-		float dist = FVector::Distance(SearchedEnemies[i]->GetActorLocation(), GetActorLocation());
-		DistanceScores.Add(dist);
-
-		// 각도 점수 기록하기
-		FVector inputVector = GetLastMovementInputVector();
-		FVector direction = SearchedEnemies[i]->GetActorLocation() - GetActorLocation();
-		direction.Normalize();
-		float deltaRadian = FMath::Acos(FVector::DotProduct(inputVector, direction));
-		float deltaDegree = FMath::RadiansToDegrees(deltaRadian);
-		AngleScores.Add(deltaDegree);
-
-		// 합계 점수 기록하기
-		TotalScores.Add(DistanceScores[i] + AngleScores[i] * 4);
-
-		// 디버그
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Cyan, FString::Printf(TEXT("Name:%s,    Dist:%f,    Angle:%f,    Total:%f"), 
-			*SearchHits[i].GetActor()->GetName(), DistanceScores[i], AngleScores[i], TotalScores[i]));
-	}
-}
-
-void APlayerCharacter::SetEnemyTarget()
-{
-	// 최저점 찾기
-	float minScore = 5000.f;
-	int index = 0;
-	int outIndex = 0;
-	for (index; index < SearchHits.Num(); index++)
-	{
-		if (TotalScores[index] < minScore)
+		// 범위 내 적을 찾으면 찾은 적을 갱신
+		if (outValue2 == true)
 		{
-			minScore = TotalScores[index];
-			outIndex = index;
+			EnemyTarget = hit.GetActor();
 		}
 	}
-
-	// 최저점 나온 에너미를 타겟으로 지정
-	EnemyTarget = SearchedEnemies[outIndex];
-
-	// 디버그
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("%s"), *EnemyTarget->GetName()));
-}
-
-void APlayerCharacter::ClearScores()
-{
-	// 사용한 배열 초기화
-	SearchHits.Empty();
-	SearchedEnemies.Empty();
-	DistanceScores.Empty();
-	AngleScores.Empty();
-	TotalScores.Empty();
+	return true;
 }
 
 void APlayerCharacter::WInput() {

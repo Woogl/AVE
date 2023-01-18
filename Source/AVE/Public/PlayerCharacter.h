@@ -149,15 +149,6 @@ public:
 
 	// 오토 타게팅
 	bool TryAutoTargeting();
-	bool SearchEnemies();
-	void ScoreEnemies();
-	void SetEnemyTarget();
-	void ClearScores();
-	TArray<FHitResult> SearchHits;
-	TArray<AActor*> SearchedEnemies;
-	TArray<float> DistanceScores;
-	TArray<float> AngleScores;
-	TArray<float> TotalScores;
 
 public:
 	// 커맨드 어레이
