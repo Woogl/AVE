@@ -22,6 +22,10 @@
 			]
 		},
 		{
+			"Name": "MassAI",
+			"Enabled": true
+		},
+		{
 			"Name": "MassCrowd",
 			"Enabled": true
 		}
