@@ -26,8 +26,11 @@
 			"Enabled": true
 		},
 		{
-			"Name": "MassCrowd",
 			"Name": "MotionWarping",
+			"Enabled": true
+		},
+		{
+			"Name": "MassCrowd",
 			"Enabled": true
 		}
 	]
