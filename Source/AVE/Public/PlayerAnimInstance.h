@@ -20,22 +20,22 @@ public:
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Reference")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	ACharacter* Character;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector Velocity;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float GroundSpeed;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float Direction;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsFalling;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "My Instance")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsBlocking;
 
 	// È¸ÇÇ ¸ùÅ¸ÁÖ

@@ -31,5 +31,5 @@ public:
 	void SliceMesh(UPrimitiveComponent* TargetMesh);
 
 	// 단면에 씌울 머터리얼
-	UMaterial* MatForSlicedSection = nullptr;
+	UMaterialInterface* MatForSlicedSection = nullptr;
 };
