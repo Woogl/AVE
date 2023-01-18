@@ -12,26 +12,77 @@ class AVE_API APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* DefaultCameraBoom;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
-	USpringArmComponent* LeftCameraBoom;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
-	USpringArmComponent* RightCameraBoom;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* FollowCamera;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* Weapon;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* Scabbard;
-
 public:
 	APlayerCharacter();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* DefaultCameraBoom;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	USpringArmComponent* LeftCameraBoom;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	USpringArmComponent* RightCameraBoom;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* FollowCamera;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* Weapon;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* Scabbard;
+	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input")
+	float TurnRateGamepad;
+	// 공격 판정을 관리하는 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	class UCombatComponent* CombatComp;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UCharacterMovementComponent* MoveComp;
+	// 타게팅 대상
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
+	AActor* EnemyTarget = nullptr;
+	// 타게팅 대상으로의 회전 속도 ( 회전 완료까지 1/x 초. 0이면 즉시 회전 완료 )
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RInterpSpeed = 0.f;
+
+	// 상태 변수
+	bool bIsAttacking = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
+		bool bIsBlocking = false;
+	bool bIsDashing = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bIsTargeting = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
+		bool bIsParrying = false;
+	FTimerHandle ParryingTimer;
+
+	// 체력
+	float MaxHealth = 100.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
+		float CurHealth;
+
+	// 체간
+	float MaxPosture = 100.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
+		float CurPosture;
+
+	// 애니메이션 몽타주
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
+	TArray<class UAnimMontage*> ComboAttackMontages;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
+	TArray<class UAnimMontage*> SpecialAttackMontages;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
+	class UAnimMontage* JumpAttackMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
+	class UAnimMontage* DashAttackMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Finishers")
+	TArray<class UAnimMontage*> FinisherMontages;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
+	class UAnimMontage* GuardHitMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
+	class UAnimMontage* GuardBreakMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Dodges")
+	TArray<class UAnimMontage*> DodgeMontages;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
+	TArray<class UAnimMontage*> InteractionMontages;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
+	TArray<class UAnimMontage*> HitReactionMontages;
 
 protected:
 	virtual void BeginPlay() override;
@@ -41,17 +92,6 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input")
-	float TurnRateGamepad;
-
-	// 공격 판정을 관리하는 컴포넌트
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
-	class UCombatComponent* CombatComp;
-
-	// 타게팅 대상
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
-	AActor* EnemyTarget = nullptr;
 
 	// 축 입력
 	void MoveForward(float Value);
@@ -59,9 +99,13 @@ public:
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
 
+	// 입력 커맨드 처리
+	void CreateMove(const char NewInput);
+	void CreateAttack(FString InputCommands);
+	void CreateDash();
+
 	// 액션 입력
 	void Jump();
-	void Attack();
 	void Guard();
 	void StopGuard();
 	void Interact();
@@ -78,17 +122,9 @@ public:
 
 	// 적을 향해 부드럽게 회전
 	void RotateToTarget(AActor* Target, float DeltaTime, float InterpSpeed);
-	// 회전 속도 ( 회전 완료까지 1/x 초. 0이면 즉시 회전 완료 )
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float RInterpSpeed = 0.f;
 
 	// 각도 계산
 	float CalculateDirection(const FVector& Velocity, const FRotator& BaseRotation);
-
-	// 공격
-	//void PerformLightAttack(int Combo); 추가 예정 코드
-	void PerformLightAttack();
-	void PerformJumpAttack();
 
 	// 방어
 	void OnParryEnd();
@@ -110,51 +146,6 @@ public:
 	// 메시 자르는 액터 스폰
 	void SpawnMeshSlicer();
 
-	// 무브셋
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
-	TArray<class UAnimMontage*> Attacks;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
-	TArray<class UAnimMontage*> JumpAttacks;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Finishers")
-	TArray<UAnimMontage*> Finishers;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
-	TArray<UAnimMontage*> GuardHits;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
-	TArray<UAnimMontage*> Parryings;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
-	TArray<UAnimMontage*> GuardBreaks;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Dodges")
-	TArray<class UAnimMontage*> Dodges;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
-	TArray<UAnimMontage*> Interactions;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
-	TArray<UAnimMontage*> HitReactions;
-
-	// 체력
-	float MaxHealth = 100.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
-	float CurHealth;
-
-	// 체간
-	float MaxPosture = 100.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
-	float CurPosture;
-	
-	// 상태 변수
-	bool bIsAttacking = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
-	bool bIsBlocking = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
-	bool bIsParrying = false;
-	bool bIsDashing = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsTargeting = false;
-	FTimerHandle ParryingTimer;
-
-	// 공격 콤보 카운트
-	int AttackCount = 0;
-	int MaxAttackCount;
-
 	// 오토 타게팅
 	bool TryAutoTargeting();
 	bool SearchEnemies();
@@ -168,8 +159,34 @@ public:
 	TArray<float> TotalScores;
 
 public:
-	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return DefaultCameraBoom; }
-	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	// 커맨드 어레이
+	TArray<FVector2D> MoveCommands;
+	int Tail = -1;
+	// 커맨드 리셋 타이머
+	float LastMoveTime;
+	float MoveResetLimit = 0.4f;
+
+	// 현재 콤보
+	int Combo = -1;
+	// 콤보 리셋 타이머
+	float LastAttackTime;
+	float ComboResetLimit = 0.6f;
+
+	// 현재 특수공격 인덱스
+	int SpecialAttackIndex = 0;
+
+	void WInput();
+	void SInput();
+	void DInput();
+	void AInput();
+
+	void CreateMoveCommand(FVector2D InputDirection);
+
+	void Attack();
+
+	void JumpAttack();
+	void SpecialAttack();
+	void DashAttack();
+	void ComboAttack();
+
 };
