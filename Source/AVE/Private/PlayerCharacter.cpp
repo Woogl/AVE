@@ -248,8 +248,8 @@ void APlayerCharacter::Dash()
 	if (CanDash() == false) return;
 
 	// 상태 변경
+	InitState();
 	bIsDashing = true;
-	bIsAttacking = false;
 
 	// 4방향 회피
 	PerformDodge();
