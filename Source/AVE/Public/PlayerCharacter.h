@@ -42,29 +42,25 @@ public:
 	float RInterpSpeed = 0.f;
 
 	// 상태 변수
-	bool bIsAttacking;
+	bool bIsAttacking = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
-	bool bIsBlocking;
-	bool bIsDashing;
+	bool bIsBlocking = false;
+	bool bIsDashing = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsTargeting;
+	bool bIsTargeting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
-	bool bIsParrying;
-	bool bGuardBroken;
-	bool bIsDead;
+	bool bIsParrying = false;
 	FTimerHandle ParryingTimer;
 
 	// 체력
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxHealth = 100.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float CurHealth = MaxHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
+	float CurHealth;
 
 	// 체간
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxPosture = 100.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float CurPosture = MaxPosture;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
+	float CurPosture;
 
 	// 애니메이션 몽타주
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
@@ -78,19 +74,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Finishers")
 	TArray<class UAnimMontage*> FinisherMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
-	TArray<class UAnimMontage*> ParryHitMontages;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
 	TArray<class UAnimMontage*> GuardHitMontages;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
-	TArray<class UAnimMontage*> HitReactionMontages;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
+	class UAnimMontage* ParryingMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
 	class UAnimMontage* GuardBreakMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Dodges")
 	TArray<class UAnimMontage*> DodgeMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
 	TArray<class UAnimMontage*> InteractionMontages;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Die");
-	class UAnimMontage* DieMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
+	TArray<class UAnimMontage*> HitReactionMontages;
 
 protected:
 	virtual void BeginPlay() override;
@@ -170,7 +164,7 @@ public:
 	int Combo = -1;
 	// 콤보 리셋 타이머
 	float LastAttackTime;
-	float ComboResetLimit = 1.0f;
+	float ComboResetLimit = 1.f;
 
 	// 현재 특수공격 인덱스
 	int SpecialAttackIndex = 0;
@@ -189,12 +183,4 @@ public:
 	void DashAttack();
 	void ComboAttack();
 
-	void InitState();
-
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-	void ParryHit(float Damage, int DamageType);
-	void GuardHit(float Damage, int DamageType);
-	void Hit(float Damage, int DamageType);
-	void GuardBreak();
-	void Die();
 };
