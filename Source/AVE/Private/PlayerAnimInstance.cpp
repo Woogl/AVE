@@ -40,3 +40,8 @@ void UPlayerAnimInstance::AnimNotify_EndiFrame()
 {
 	Character->SetCanBeDamaged(true);
 }
+
+void UPlayerAnimInstance::AnimNotify_EndAttack()
+{
+	Cast<APlayerCharacter>(Character)->bIsAttacking = false;
+}

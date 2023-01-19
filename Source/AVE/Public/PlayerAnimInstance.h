@@ -43,4 +43,8 @@ public:
 	void AnimNotify_StartiFrame();
 	UFUNCTION()
 	void AnimNotify_EndiFrame();
+
+	// 공격 몽타주
+	UFUNCTION()
+	void AnimNotify_EndAttack();
 };
