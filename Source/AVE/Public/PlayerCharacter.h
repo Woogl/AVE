@@ -42,25 +42,27 @@ public:
 	float RInterpSpeed = 0.f;
 
 	// 상태 변수
-	bool bIsAttacking = false;
+	bool bIsAttacking;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
-	bool bIsBlocking = false;
-	bool bIsDashing = false;
+	bool bIsBlocking;
+	bool bIsDashing;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsTargeting = false;
+	bool bIsTargeting;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
-	bool bIsParrying = false;
+	bool bIsParrying;
+	bool bGuardBroken;
+	bool bIsDead;
 	FTimerHandle ParryingTimer;
 
 	// 체력
 	float MaxHealth = 100.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
-	float CurHealth;
+	float CurHealth = MaxHealth;
 
 	// 체간
 	float MaxPosture = 100.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
-	float CurPosture;
+	float CurPosture = MaxPosture;
 
 	// 애니메이션 몽타주
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
@@ -74,17 +76,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Finishers")
 	TArray<class UAnimMontage*> FinisherMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
-	TArray<class UAnimMontage*> GuardHitMontages;
+	TArray<class UAnimMontage*> ParryHitMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
-	class UAnimMontage* ParryingMontage;
+	TArray<class UAnimMontage*> GuardHitMontages;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
+	TArray<class UAnimMontage*> HitReactionMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
 	class UAnimMontage* GuardBreakMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Dodges")
 	TArray<class UAnimMontage*> DodgeMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
 	TArray<class UAnimMontage*> InteractionMontages;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
-	TArray<class UAnimMontage*> HitReactionMontages;
 
 protected:
 	virtual void BeginPlay() override;
@@ -183,4 +185,12 @@ public:
 	void DashAttack();
 	void ComboAttack();
 
+	void InitState();
+
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	void ParryHit(float Damage, int DamageType);
+	void GuardHit(float Damage, int DamageType);
+	void Hit(float Damage, int DamageType);
+	void GuardBreak();
+	void Die();
 };

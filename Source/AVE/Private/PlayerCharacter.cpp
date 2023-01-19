@@ -88,7 +88,6 @@ void APlayerCharacter::BeginPlay()
 	
 	// 컴뱃 컴포넌트에 무기 설정
 	CombatComp->SetupWeapon(Weapon, 5.0f);
-
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -565,4 +564,58 @@ void APlayerCharacter::ComboAttack() {
 		Combo = 0;
 	}
 	PlayAnimMontage(ComboAttackMontages[Combo]);
+}
+
+float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
+	
+	FHitResult outHit;
+	FVector outImpulse;
+	DamageEvent.GetBestHitInfo(this,DamageCauser,outHit,outImpulse);
+	// 적 방향으로 회전
+	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), DamageCauser->GetActorLocation()));
+	if (bIsParrying) {
+		ParryHit(DamageAmount,outHit.Item);
+	}
+	else if (bIsBlocking) {
+		GuardHit(DamageAmount, outHit.Item);
+	}
+	else {
+		Hit(DamageAmount, outHit.Item);
+	}
+	return DamageAmount;
+}
+
+void APlayerCharacter::ParryHit(float Damage, int DamageType) {
+	Damage *= 0.2f;
+	CurPosture -= Damage;
+	PlayAnimMontage(ParryHitMontages[DamageType]);
+}
+
+void APlayerCharacter::GuardHit(float Damage, int DamageType) {
+	Damage *= 1.2f;
+	CurPosture -= Damage;
+	if (CurPosture <= 0) {
+		GuardBreak();
+		return;
+	}
+	PlayAnimMontage(GuardHitMontages[DamageType]);
+}
+
+void APlayerCharacter::Hit(float Damage, int DamageType) {
+	CurPosture -= Damage * 0.4f;
+	CurHealth -= Damage;
+	if (CurHealth <= 0) {
+		Die();
+		return;
+	}
+	PlayAnimMontage(HitReactionMontages[DamageType]);
+}
+
+void APlayerCharacter::GuardBreak() {
+	bGuardBroken = true;
+	PlayAnimMontage(GuardBreakMontage);
+}
+
+void APlayerCharacter::Die() {
+	bIsDead = true;
 }
