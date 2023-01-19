@@ -71,13 +71,12 @@ APlayerCharacter::APlayerCharacter()
 	// 이동 설정
 	MoveComp = GetCharacterMovement();
 	MoveComp->bOrientRotationToMovement = true;
-	MoveComp->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
+	MoveComp->RotationRate = FRotator(0.0f, 350.0f, 0.0f);
 	MoveComp->JumpZVelocity = 400.f;
 	MoveComp->AirControl = 0.35f;
 	MoveComp->MaxWalkSpeed = 300.f;
 	MoveComp->MinAnalogWalkSpeed = 20.f;
 	MoveComp->BrakingDecelerationWalking = 500.f;
-	MoveComp->RotationRate = FRotator(0.f, 350.f, 0.f);
 
 	// 공격 판정을 관리하는 컴포넌트
 	CombatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp"));
@@ -96,17 +95,23 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 타겟팅한 적 있으면 Yaw 회전
+	// 타게팅한 적 있으면 Yaw 회전
 	if (bIsTargeting == true)
 	{
 		RotateToTarget(EnemyTarget, DeltaTime, RInterpSpeed);
-		// 거리가 멀어지면 타겟 해제
+		// 거리가 멀어지면 타게팅 해제
 		if (GetDistanceTo(EnemyTarget) > 800.f)
 		{
-			EnemyTarget = nullptr;
 			bIsTargeting = false;
+			EnemyTarget = nullptr;
 		}
 	}
+	else if (bIsAttacking == true)
+	{
+		// 방향키 방향으로 부드럽게 회전
+		RotateToInputDirection(DeltaTime, 5.0f);
+	}
+
 	LastMoveTime += DeltaTime;
 	LastAttackTime += DeltaTime;
 	// 마지막 방향키 인풋이 0.4초를 지났으면
@@ -219,7 +224,7 @@ void APlayerCharacter::StopGuard()
 {
 	bIsBlocking = false;
 
-	// 패링 판정 끝
+	// 패링 판정 종료
 	bIsParrying = false;
 	GetWorldTimerManager().ClearTimer(ParryingTimer);
 
@@ -240,10 +245,12 @@ void APlayerCharacter::Interact()
 
 void APlayerCharacter::Dash()
 {
-	// TODO: 대시 가능한 상태인지 체크
+	// 대시 가능한 상태인지 체크
+	if (CanDash() == false) return;
 
 	// 상태 변경
 	bIsDashing = true;
+	bIsAttacking = false;
 
 	// 4방향 회피
 	PerformDodge();
@@ -281,7 +288,9 @@ bool APlayerCharacter::CanJump()
 
 bool APlayerCharacter::CanAttack()
 {
-	// TODO : 상태 체크
+	if (bIsAttacking == true) return false;
+	if (bIsBlocking == true) return false;
+
 	return true;
 }
 
@@ -299,7 +308,8 @@ bool APlayerCharacter::CanInteract()
 
 bool APlayerCharacter::CanDash()
 {
-	// TODO : 상태 체크
+	if (MoveComp->IsFalling() == true) false;
+
 	return true;
 }
 
@@ -308,7 +318,22 @@ void APlayerCharacter::RotateToTarget(AActor* Target, float DeltaTime, float Int
 	// 타겟팅한 적이 있는 경우
 	if (Target)
 	{
-		auto temp = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Target->GetActorLocation());
+		FRotator temp = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Target->GetActorLocation());
+
+		FRotator newRotation;
+		newRotation.Pitch = GetActorRotation().Pitch;
+		newRotation.Yaw = FMath::RInterpTo(GetActorRotation(), temp, DeltaTime, InterpSpeed).Yaw;
+		newRotation.Roll = GetActorRotation().Roll;
+		SetActorRotation(newRotation);
+	}
+}
+
+void APlayerCharacter::RotateToInputDirection(float DeltaTime, float InterpSpeed)
+{
+	FVector inputVector = GetLastMovementInputVector();
+	if (inputVector.IsNearlyZero() == false)
+	{
+		FRotator temp = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), GetActorLocation() + inputVector);
 
 		FRotator newRotation;
 		newRotation.Pitch = GetActorRotation().Pitch;
@@ -388,8 +413,6 @@ void APlayerCharacter::PerformDodge()
 
 void APlayerCharacter::FinishEnemy()
 {
-	if (CanAttack() == false) return;
-
 	PlayAnimMontage(FinisherMontages[0]);
 }
 
@@ -487,7 +510,7 @@ void APlayerCharacter::Attack() {
 	// 공격 중이 아니면
 	if (CanAttack()) {
 		// 공격 중으로 전환
-//		bIsAttacking = true;
+		bIsAttacking = true;
 		// 오토 타겟팅으로 타겟 지정
 		TryAutoTargeting();
 

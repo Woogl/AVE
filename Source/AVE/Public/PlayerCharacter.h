@@ -123,6 +123,8 @@ public:
 
 	// 적을 향해 부드럽게 회전
 	void RotateToTarget(AActor* Target, float DeltaTime, float InterpSpeed);
+	// 입력 방향을 향해 부드럽게 회전
+	void RotateToInputDirection(float DeltaTime, float InterpSpeed);
 
 	// 각도 계산
 	float CalculateDirection(const FVector& Velocity, const FRotator& BaseRotation);
