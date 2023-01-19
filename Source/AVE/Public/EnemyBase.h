@@ -55,5 +55,4 @@ public:
 		virtual void onHit(int characterDamage);
 	virtual void onHitCrushed();
 	virtual void onDie();
-	virtual void onCalling();
 };

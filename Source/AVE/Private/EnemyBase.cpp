@@ -68,8 +68,3 @@ void AEnemyBase::onDie()
 {
 	Destroy();
 }
-
-void AEnemyBase::onCalling()
-{
-}
-
