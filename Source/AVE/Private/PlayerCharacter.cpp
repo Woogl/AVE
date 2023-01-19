@@ -543,6 +543,14 @@ void APlayerCharacter::Attack() {
 	}
 }
 
+void APlayerCharacter::InitState() {
+	StopAnimMontage();
+	bIsAttacking = false;
+	bIsBlocking = false;
+	bIsDashing = false;
+	bIsParrying = false;
+}
+
 void APlayerCharacter::JumpAttack() {
 	PlayAnimMontage(JumpAttackMontage);
 	Combo = -1;

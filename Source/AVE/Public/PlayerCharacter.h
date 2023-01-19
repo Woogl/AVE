@@ -55,13 +55,15 @@ public:
 	FTimerHandle ParryingTimer;
 
 	// 체력
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxHealth = 100.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CurHealth = MaxHealth;
 
 	// 체간
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxPosture = 100.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CurPosture = MaxPosture;
 
 	// 애니메이션 몽타주
@@ -166,7 +168,7 @@ public:
 	int Combo = -1;
 	// 콤보 리셋 타이머
 	float LastAttackTime;
-	float ComboResetLimit = 0.6f;
+	float ComboResetLimit = 1.0f;
 
 	// 현재 특수공격 인덱스
 	int SpecialAttackIndex = 0;
