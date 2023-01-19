@@ -109,7 +109,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	else if (bIsAttacking == true)
 	{
 		// 방향키 방향으로 부드럽게 회전
-		RotateToInputDirection(DeltaTime, 5.0f);
+		RotateToInputDirection(DeltaTime, 4.0f);
 	}
 
 	LastMoveTime += DeltaTime;
@@ -405,8 +405,11 @@ void APlayerCharacter::PerformDodge()
 	}
 	else // 비조준 상태 회피
 	{
-		FRotator newRotation = FRotationMatrix::MakeFromX(GetLastMovementInputVector()).Rotator();
-		SetActorRotation(newRotation);			// 방향 전환
+		if (GetLastMovementInputVector().IsNearlyZero() == false)
+		{
+			FRotator newRotation = FRotationMatrix::MakeFromX(GetLastMovementInputVector()).Rotator();
+			SetActorRotation(newRotation);			// 방향 전환}
+		}
 		PlayAnimMontage(DodgeMontages[0]);		// 앞으로
 	}
 }

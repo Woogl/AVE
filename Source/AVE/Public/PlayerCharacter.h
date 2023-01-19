@@ -164,7 +164,7 @@ public:
 	int Combo = -1;
 	// 콤보 리셋 타이머
 	float LastAttackTime;
-	float ComboResetLimit = 0.6f;
+	float ComboResetLimit = 1.f;
 
 	// 현재 특수공격 인덱스
 	int SpecialAttackIndex = 0;
