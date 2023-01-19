@@ -89,6 +89,8 @@ public:
 	TArray<class UAnimMontage*> DodgeMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
 	TArray<class UAnimMontage*> InteractionMontages;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Die");
+	class UAnimMontage* DieMontage;
 
 protected:
 	virtual void BeginPlay() override;

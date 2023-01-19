@@ -626,4 +626,5 @@ void APlayerCharacter::GuardBreak() {
 
 void APlayerCharacter::Die() {
 	bIsDead = true;
+	PlayAnimMontage(DieMontage);
 }
