@@ -37,15 +37,15 @@ public:
 	void SetDamageInfo(float InBaseDamage, EDamageType InDamageType);
 
 	// 가할 대미지
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Custom")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	float BaseDamage;
 
 	// 역경직 시간
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Custom")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	float HitstopTime;
 
 	// 대미지 피격 시 반응 (ex : 경직, 다운, 넉백, 공중에 뜸 등 )
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Custom")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	EDamageType DamageType;
 
 	// 자르기 가능하게 할지
@@ -60,15 +60,15 @@ public:
 	void EndHitStop();
 
 	// 무기 두께
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Please")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	float WeaponThickness = 5.0f;
 
 	// 무기 공격 판정 시작 지점
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Please")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	FName StartPoint = FName("WeaponStart");
 
 	// 무기 공격 판정 끝 지점
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Please")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	FName EndPoint = FName("WeaponEnd");
 
 	// 공격 판정을 계산할 무기
@@ -76,4 +76,11 @@ public:
 
 	// 중복 공격 방지하기 위한 변수
 	TArray<AActor*> AlreadyHitActors;
+
+	// 타격 VFX, SFX
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
+	class UNiagaraSystem* HitNiagara;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
+	class USoundWave* HitSound;
+	void SpawnHitFX(FHitResult HitInfo);
 };

@@ -5,10 +5,12 @@
 #include <Kismet/KismetSystemLibrary.h>
 #include "PlayerCharacter.h"
 #include <Kismet/GameplayStatics.h>
+#include <Particles/ParticleSystem.h>
+#include <../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h>
 
 UCombatComponent::UCombatComponent()
 {
-
+	
 }
 
 void UCombatComponent::BeginPlay()
@@ -37,12 +39,16 @@ void UCombatComponent::AttackCheckTick()
 	FVector start = MainWeapon->GetSocketLocation(StartPoint);
 	FVector end = MainWeapon->GetSocketLocation(EndPoint);
 
-	// 찾을 오브젝트 타입 = Pawn, Destructible
+	// 찾을 오브젝트 타입 = Pawn, Destructible, WorldStatic, WorldDynamic
 	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
 	TEnumAsByte<EObjectTypeQuery> pawn = UEngineTypes::ConvertToObjectType(ECC_Pawn);
 	TEnumAsByte<EObjectTypeQuery> destructible = UEngineTypes::ConvertToObjectType(ECC_Destructible);
+	TEnumAsByte<EObjectTypeQuery> worldStatic = UEngineTypes::ConvertToObjectType(ECC_WorldStatic);
+	TEnumAsByte<EObjectTypeQuery> worldDynamic = UEngineTypes::ConvertToObjectType(ECC_WorldDynamic);
 	objectTypes.Add(pawn);
 	objectTypes.Add(destructible);
+	objectTypes.Add(worldStatic);
+	objectTypes.Add(worldDynamic);
 	// 무시할 오브젝트 타입 = 없음
 	TArray< AActor* > actorsToIgnore;
 
@@ -58,6 +64,9 @@ void UCombatComponent::AttackCheckTick()
 		{
 			// 새로 때린 액터만 추가
 			AlreadyHitActors.Add(hitActor);
+
+			// 타격 VFX 발생
+			SpawnHitFX(hit);
 
 			// 역경직 발생
 			if (HitstopTime > 0.f)
@@ -103,7 +112,7 @@ void UCombatComponent::DealDamage(AActor* Target)
 	FVector hitFromLocation = GetOwner()->GetActorLocation();
 	// 추가 정보
 	FHitResult hitinfo;
-	hitinfo.Item = (int32)DamageType;	// 0=Standard, 1=KnockDown, 2=KnockDown, 3=KnockUp, 4=NoReaction
+	hitinfo.Item = (int32)DamageType;	// 0=Standard, 1=KnockBack, 2=KnockDown, 3=KnockUp, 4=NoReaction
 	// 가해자 컨트롤러
 	AController* instigator = GetOwner()->GetInstigatorController();
 	// 유발자
@@ -123,5 +132,19 @@ void UCombatComponent::EndHitStop()
 	GetOwner()->CustomTimeDilation = 1.f;
 }
 
+void UCombatComponent::SpawnHitFX(FHitResult HitInfo)
+{
+	// 타격 VFX
+	if (HitNiagara)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitNiagara, HitInfo.Location, HitInfo.ImpactNormal.Rotation());
+	}
+
+	// 타격 SFX
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, HitSound, HitInfo.ImpactPoint);
+	}
+}
 
 
