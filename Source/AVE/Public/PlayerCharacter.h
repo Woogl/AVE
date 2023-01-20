@@ -82,6 +82,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
 	TArray<class UAnimMontage*> GuardHitMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
+	class UAnimMontage* ParryingMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
 	class UAnimMontage* GuardBreakMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Dodges")
 	TArray<class UAnimMontage*> DodgeMontages;
