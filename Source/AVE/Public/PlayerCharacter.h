@@ -37,7 +37,7 @@ public:
 	// 타게팅 대상
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	AActor* EnemyTarget = nullptr;
-	// 타게팅 대상으로의 회전 속도 ( 회전 완료까지 1/x 초. 0이면 즉시 회전 완료 )
+	// 회전 속도 ( 회전 완료까지 1/x 초. 0이면 즉시 회전 완료 )
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RInterpSpeed = 0.f;
 
@@ -53,6 +53,7 @@ public:
 	bool bGuardBroken;
 	bool bIsDead;
 	FTimerHandle ParryingTimer;
+	bool bIsGrabbing = false;
 
 	// 체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -91,6 +92,10 @@ public:
 	TArray<class UAnimMontage*> HitReactionMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
 	class UAnimMontage* DieMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
+	class UAnimMontage* GrabMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
+	class UAnimMontage* ThrowMontage;
 
 protected:
 	virtual void BeginPlay() override;
@@ -127,10 +132,8 @@ public:
 	bool CanInteract();
 	bool CanDash();
 
-	// 적을 향해 부드럽게 회전
-	void RotateToTarget(AActor* Target, float DeltaTime, float InterpSpeed);
-	// 입력 방향을 향해 부드럽게 회전
-	void RotateToInputDirection(float DeltaTime, float InterpSpeed);
+	// 부드럽게 회전
+	void RotateToDirection(FVector Direction, float DeltaTime, float InterpSpeed);
 
 	// 각도 계산
 	float CalculateDirection(const FVector& Velocity, const FRotator& BaseRotation);
@@ -145,6 +148,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FinishEnemy();
 
+	// 물건 줍기, 던지기
+	void Grab();
+	void Throw();
+	class AGrabbableActorBase* GrabbedObject;
+
 	// 모션 워핑 (BP에서 이벤트 구현)
 	UFUNCTION(BlueprintImplementableEvent)
 	void MotionMorph();
@@ -156,7 +164,12 @@ public:
 	void SpawnMeshSlicer();
 
 	// 오토 타게팅
-	bool TryAutoTargeting();
+	UFUNCTION(BlueprintCallable)	// 연구 중
+	bool TryAutoTargeting(float SearchRadius = 300.f);
+
+	// 잔상 생성
+	UFUNCTION(BlueprintImplementableEvent)
+	void SpawnGhostTrail();
 
 public:
 	// 커맨드 어레이

@@ -19,59 +19,95 @@ void UCombatComponent::BeginPlay()
 	
 }
 
-void UCombatComponent::SetupWeapon(UStaticMeshComponent* WeaponMesh, float InWeaponThickness)
+void UCombatComponent::SetupWeapon(UStaticMeshComponent* WeaponMesh)
 {
 	MainWeapon = WeaponMesh;
-	WeaponThickness = InWeaponThickness;
+	SocketNames = MainWeapon->GetAllSocketNames();
 }
 
 void UCombatComponent::AttackCheckBegin()
 {
 	// 때린 적 목록 초기화
-	AlreadyHitActors.Empty();
+	AlreadyHitActors.Reset();
+	CurSocketLocations.Reset();
+	LastSocketLocations.Reset();
+
+	// 소켓 초기 위치 설정
+	for (int i = 0; i < SocketNames.Num(); i++)
+	{
+		LastSocketLocations.Emplace(MainWeapon->GetSocketLocation(SocketNames[i]));
+		CurSocketLocations.SetNum(SocketNames.Num());
+	}
 }
 
 void UCombatComponent::AttackCheckTick()
 {
 	// 트레이스 결과를 저장
 	TArray<FHitResult> hits;
-	// 트레이스 범위
-	FVector start = MainWeapon->GetSocketLocation(StartPoint);
-	FVector end = MainWeapon->GetSocketLocation(EndPoint);
-
 	// 찾을 오브젝트 타입 = Pawn, Destructible, WorldStatic, WorldDynamic
 	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
 	TEnumAsByte<EObjectTypeQuery> pawn = UEngineTypes::ConvertToObjectType(ECC_Pawn);
 	TEnumAsByte<EObjectTypeQuery> destructible = UEngineTypes::ConvertToObjectType(ECC_Destructible);
 	TEnumAsByte<EObjectTypeQuery> worldStatic = UEngineTypes::ConvertToObjectType(ECC_WorldStatic);
 	TEnumAsByte<EObjectTypeQuery> worldDynamic = UEngineTypes::ConvertToObjectType(ECC_WorldDynamic);
-	objectTypes.Add(pawn);
-	objectTypes.Add(destructible);
-	objectTypes.Add(worldStatic);
-	objectTypes.Add(worldDynamic);
+	objectTypes.Emplace(pawn);
+	objectTypes.Emplace(destructible);
+	objectTypes.Emplace(worldStatic);
+	objectTypes.Emplace(worldDynamic);
 	// 무시할 오브젝트 타입 = 없음
 	TArray< AActor* > actorsToIgnore;
 
-	UKismetSystemLibrary::SphereTraceMultiForObjects(this, start, end, WeaponThickness, objectTypes, false, actorsToIgnore,
-		EDrawDebugTrace::ForDuration, hits, true, FLinearColor::Red, FLinearColor::Green, 0.5f);
+	// 무기의 모든 소켓에서 트레이스
+	for (int i = 0; i < SocketNames.Num(); i++)
+	{
+		CurSocketLocations[i] = MainWeapon->GetSocketLocation(SocketNames[i]);
+		// 지난 프레임부터 현재까지 트레이스 (소켓 위치)
+		bool bSuccess = UKismetSystemLibrary::LineTraceMultiForObjects(this, LastSocketLocations[i], CurSocketLocations[i], objectTypes, false, actorsToIgnore,
+			EDrawDebugTrace::ForDuration, hits, true, FLinearColor::Red, FLinearColor::Green, 0.5f);
 
+		if (bSuccess == true)
+		{
+			OnAttackSucceed(hits);
+		}
+	}
+
+	// 다음 Tick에서는 현재의 end에서 이어서 트레이스하도록
+	for (int i = 0; i < SocketNames.Num(); i++)
+	{
+		LastSocketLocations[i] = CurSocketLocations[i];
+	}
+}
+
+void UCombatComponent::AttackCheckEnd()
+{
+	// 초기화
+	AlreadyHitActors.Reset();
+	CurSocketLocations.Reset();
+	LastSocketLocations.Reset();
+}
+
+void UCombatComponent::SetDamageInfo(float InBaseDamage, EDamageType InDamageType)
+{
+	BaseDamage = InBaseDamage;
+	DamageType = InDamageType;
+}
+
+void UCombatComponent::OnAttackSucceed(TArray<FHitResult> Hits)
+{
 	// 중복 타격 방지
-	for (auto hit : hits)
+	for (FHitResult hit : Hits)
 	{
 		AActor* hitActor = hit.GetActor();
 		// 이미 때린 액터인지 체크
-		if (!AlreadyHitActors.Contains(hitActor))
+		if (AlreadyHitActors.Contains(hitActor) == false)
 		{
 			// 새로 때린 액터만 추가
-			AlreadyHitActors.Add(hitActor);
+			AlreadyHitActors.Emplace(hitActor);
 
-			// 타격 VFX 발생
-			SpawnHitFX(hit);
-
-			// 역경직 발생
-			if (HitstopTime > 0.f)
+			// 캐릭터에게 대미지 가하기
+			if (hitActor->IsA(ACharacter::StaticClass()))
 			{
-				StartHitstop(HitstopTime);
+				DealDamage(hitActor);
 			}
 
 			// ECC_Destructible이면 Mesh Slicer 스폰
@@ -82,25 +118,18 @@ void UCombatComponent::AttackCheckTick()
 				{
 					player->SpawnMeshSlicer();
 				}
-				continue;
 			}
 
-			// 대미지 가하기
-			DealDamage(hitActor);
+			// 역경직 발생
+			if (HitstopTime > 0.f)
+			{
+				StartHitstop(HitstopTime);
+			}
+			
+			// 타격 VFX 발생
+			PlayHitFX(hit);
 		}
 	}
-}
-
-void UCombatComponent::AttackCheckEnd()
-{
-	// 때린 적 목록 초기화
-	AlreadyHitActors.Empty();
-}
-
-void UCombatComponent::SetDamageInfo(float InBaseDamage, EDamageType InDamageType)
-{
-	BaseDamage = InBaseDamage;
-	DamageType = InDamageType;
 }
 
 void UCombatComponent::DealDamage(AActor* Target)
@@ -123,7 +152,7 @@ void UCombatComponent::DealDamage(AActor* Target)
 
 void UCombatComponent::StartHitstop(float Time)
 {
-	GetOwner()->CustomTimeDilation = 0.1f;
+	GetOwner()->CustomTimeDilation = 0.0625f;
 	GetOwner()->GetWorldTimerManager().SetTimer(HitstopTimer, this, &UCombatComponent::EndHitStop, Time, false);
 }
 
@@ -132,7 +161,7 @@ void UCombatComponent::EndHitStop()
 	GetOwner()->CustomTimeDilation = 1.f;
 }
 
-void UCombatComponent::SpawnHitFX(FHitResult HitInfo)
+void UCombatComponent::PlayHitFX(FHitResult HitInfo)
 {
 	// 타격 VFX
 	if (HitNiagara)

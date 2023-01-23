@@ -13,6 +13,9 @@ UPlayerAnimInstance::UPlayerAnimInstance()
 	Velocity = FVector(0.f);
 	GroundSpeed = 0.f;
 	bIsFalling = false;
+
+	// TODO : InitState »£√‚
+	//OnMontageBlendingOut.AddDynamic()
 }
 
 void UPlayerAnimInstance::NativeBeginPlay()

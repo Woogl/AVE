@@ -11,6 +11,7 @@
 #include <Kismet/KismetSystemLibrary.h>
 #include "MeshSlicer.h"
 #include "PlayerAnimInstance.h"
+#include "GrabbableActorBase.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -87,17 +88,18 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	// 컴뱃 컴포넌트에 무기 설정
-	CombatComp->SetupWeapon(Weapon, 5.0f);
+	CombatComp->SetupWeapon(Weapon);
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 타게팅한 적 있으면 Yaw 회전
-	if (bIsTargeting == true)
+	// 타게팅한 적을 향해 회전
+	if (bIsTargeting == true && EnemyTarget)
 	{
-		RotateToTarget(EnemyTarget, DeltaTime, RInterpSpeed);
+		FVector direction = EnemyTarget->GetActorLocation() - GetActorLocation();
+		RotateToDirection(direction, DeltaTime, RInterpSpeed);
 		// 거리가 멀어지면 타게팅 해제
 		if (GetDistanceTo(EnemyTarget) > 800.f)
 		{
@@ -105,10 +107,14 @@ void APlayerCharacter::Tick(float DeltaTime)
 			EnemyTarget = nullptr;
 		}
 	}
+	// 방향키 방향으로 회전
 	else if (bIsAttacking == true)
 	{
-		// 방향키 방향으로 부드럽게 회전
-		RotateToInputDirection(DeltaTime, 4.0f);
+		FVector inputVector = GetLastMovementInputVector();
+		if (inputVector.IsNearlyZero() == false)
+		{
+			RotateToDirection(inputVector, DeltaTime, 4.f);
+		}
 	}
 
 	LastMoveTime += DeltaTime;
@@ -239,7 +245,19 @@ void APlayerCharacter::StopGuard()
 
 void APlayerCharacter::Interact()
 {
-	// TODO: 물건 줍기 등
+	if (CanInteract() == false) return;
+
+	if (bIsGrabbing == false)
+	{
+		Grab();
+	}
+	else
+	{
+		if (GrabbedObject)
+		{
+			Throw();
+		}
+	}
 }
 
 void APlayerCharacter::Dash()
@@ -312,34 +330,16 @@ bool APlayerCharacter::CanDash()
 	return true;
 }
 
-void APlayerCharacter::RotateToTarget(AActor* Target, float DeltaTime, float InterpSpeed)
+void APlayerCharacter::RotateToDirection(FVector Direction, float DeltaTime, float InterpSpeed)
 {
-	// 타겟팅한 적이 있는 경우
-	if (Target)
-	{
-		FRotator temp = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Target->GetActorLocation());
+	FRotator temp = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), GetActorLocation() + Direction);
 
-		FRotator newRotation;
-		newRotation.Pitch = GetActorRotation().Pitch;
-		newRotation.Yaw = FMath::RInterpTo(GetActorRotation(), temp, DeltaTime, InterpSpeed).Yaw;
-		newRotation.Roll = GetActorRotation().Roll;
-		SetActorRotation(newRotation);
-	}
-}
+	FRotator newRotation;
+	newRotation.Pitch = GetActorRotation().Pitch;
+	newRotation.Yaw = FMath::RInterpTo(GetActorRotation(), temp, DeltaTime, InterpSpeed).Yaw;
+	newRotation.Roll = GetActorRotation().Roll;
 
-void APlayerCharacter::RotateToInputDirection(float DeltaTime, float InterpSpeed)
-{
-	FVector inputVector = GetLastMovementInputVector();
-	if (inputVector.IsNearlyZero() == false)
-	{
-		FRotator temp = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), GetActorLocation() + inputVector);
-
-		FRotator newRotation;
-		newRotation.Pitch = GetActorRotation().Pitch;
-		newRotation.Yaw = FMath::RInterpTo(GetActorRotation(), temp, DeltaTime, InterpSpeed).Yaw;
-		newRotation.Roll = GetActorRotation().Roll;
-		SetActorRotation(newRotation);
-	}
+	SetActorRotation(newRotation);
 }
 
 float APlayerCharacter::CalculateDirection(const FVector& Velocity, const FRotator& BaseRotation)
@@ -377,6 +377,9 @@ void APlayerCharacter::OnParryEnd()
 
 void APlayerCharacter::PerformDodge()
 {
+	// 잔상 생성
+	SpawnGhostTrail();
+
 	// 회피 방향 계산
 	FVector inputVector = GetLastMovementInputVector();
 	FRotator baseRotation = GetActorRotation();
@@ -418,6 +421,46 @@ void APlayerCharacter::FinishEnemy()
 	PlayAnimMontage(FinisherMontages[0]);
 }
 
+void APlayerCharacter::Grab()
+{
+	// 애니메이션 재생 중이면 탈출
+	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying()) return;
+	
+	FHitResult hit;
+	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
+	objectTypes.Emplace(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
+	TArray<AActor*> actorToIgnores;
+	if (UKismetSystemLibrary::SphereTraceSingleForObjects(this, GetActorLocation(), GetActorLocation(), 150.f, objectTypes, false, actorToIgnores,
+			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f))
+	{
+		GrabbedObject = Cast<AGrabbableActorBase>(hit.GetActor());
+		GrabbedObject->OnGrabbed(this);
+
+		PlayAnimMontage(GrabMontage);
+	}
+	bIsGrabbing = true;
+}
+
+void APlayerCharacter::Throw()
+{
+	if (GrabbedObject)
+	{
+		// 적에게 물건 던지기
+		if (TryAutoTargeting(800.f) == true)
+		{
+			PlayAnimMontage(ThrowMontage);
+			GrabbedObject->OnThrown(EnemyTarget->GetActorLocation());
+		}
+		// 물건 버리기
+		else
+		{
+			GrabbedObject->OnDiscard();
+		}
+
+		bIsGrabbing = false;
+	}
+}
+
 void APlayerCharacter::MoveCamera(ECameraPosition CameraPosition)
 {
 	if (CameraPosition == ECameraPosition::ECP_Default)
@@ -445,37 +488,61 @@ void APlayerCharacter::SpawnMeshSlicer()
 	GetWorld()->SpawnActor<AMeshSlicer>(AMeshSlicer::StaticClass(), spawnTransform, spawnParams);
 }
 
-bool APlayerCharacter::TryAutoTargeting()
+bool APlayerCharacter::TryAutoTargeting(float SearchRadius)
 {
-	// "Targeting" 채널로 트레이스 (1차, 제자리에서 크게)
+	// 스피어 트레이스 준비
 	TArray<AActor*> actorToIgnore;
 	FHitResult hit;
-	bool outValue = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), GetActorLocation(), 300.f, TraceTypeQuery3, false, actorToIgnore,
-		EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f);
-	
-	// 범위 내 적을 못찾으면 false 반환
-	if (outValue == false)
-		return false;
+	bool bSuccess = false;
 
-	// 적을 찾으면 타겟으로 지정
-	EnemyTarget = hit.GetActor();
-	bIsTargeting = true;
-
-	// 인풋 방향이 있으면 한번 더 트레이스 (2차, 인풋 방향으로 작게)
+	// 방향키 입력이 있을 경우
 	if (GetLastMovementInputVector().Size() > 0.f)
 	{
-		FVector start = GetActorLocation() + GetLastMovementInputVector() * 200.f;
-		FVector end = GetActorLocation() + GetLastMovementInputVector() * 200.f;
-		bool outValue2 = UKismetSystemLibrary::SphereTraceSingle(this, start, end, 100.f, TraceTypeQuery3, false, actorToIgnore,
+		// 방향키 방향에서 좁게 스피어 트레이스
+		FVector loc = GetActorLocation() + GetLastMovementInputVector() * 200.f;
+		bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, loc, loc, SearchRadius * 0.5f, TraceTypeQuery3, false, actorToIgnore,
 			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f);
 
-		// 범위 내 적을 찾으면 찾은 적을 갱신
-		if (outValue2 == true)
+		// 적을 찾으면 타겟으로 지정하고 true 반환
+		if (bSuccess == true)
 		{
 			EnemyTarget = hit.GetActor();
+			bIsTargeting = true;
+			return true;
+		}
+		else // 방향키 방향에서 적을 못찾았을 경우
+		{
+			// 제자리에서 넓게 스피어 트레이스
+			bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), GetActorLocation(), SearchRadius, TraceTypeQuery3, false, actorToIgnore,
+				EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f);
+
+			// 적을 찾으면 타겟으로 지정하고 true 반환
+			if (bSuccess == true)
+			{
+				EnemyTarget = hit.GetActor();
+				bIsTargeting = true;
+				return true;
+			}
 		}
 	}
-	return true;
+	// 방향키 입력 없을 경우
+	else
+	{
+		// 제자리에서 넓게 스피어 트레이스
+		bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), GetActorLocation(), SearchRadius, TraceTypeQuery3, false, actorToIgnore,
+			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f);
+
+		// 적을 찾으면 타겟으로 지정하고 true 반환
+		if (bSuccess == true)
+		{
+			EnemyTarget = hit.GetActor();
+			bIsTargeting = true;
+			return true;
+		}
+	}
+
+	// 적을 못찾으면 false 반환
+	return false;
 }
 
 void APlayerCharacter::WInput() {
@@ -579,11 +646,13 @@ void APlayerCharacter::ComboAttack() {
 
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
 	
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
 	FHitResult outHit;
 	FVector outImpulse;
 	DamageEvent.GetBestHitInfo(this,DamageCauser,outHit,outImpulse);
 	// 적 방향으로 회전
-	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), DamageCauser->GetActorLocation()));
+	RotateToDirection(DamageCauser->GetActorLocation(), 0.f, 0.f);
 	if (bIsParrying) {
 		ParryHit(DamageAmount,outHit.Item);
 	}
