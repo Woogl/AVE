@@ -249,13 +249,13 @@ void APlayerCharacter::Interact()
 
 	if (bIsGrabbing == false)
 	{
-		Grab();
+		TryGrab();
 	}
 	else
 	{
 		if (GrabbedObject)
 		{
-			Throw();
+			TryThrow();
 		}
 	}
 }
@@ -421,7 +421,7 @@ void APlayerCharacter::FinishEnemy()
 	PlayAnimMontage(FinisherMontages[0]);
 }
 
-void APlayerCharacter::Grab()
+void APlayerCharacter::TryGrab()
 {
 	// 애니메이션 재생 중이면 탈출
 	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying()) return;
@@ -441,24 +441,31 @@ void APlayerCharacter::Grab()
 	bIsGrabbing = true;
 }
 
-void APlayerCharacter::Throw()
+void APlayerCharacter::TryThrow()
 {
-	if (GrabbedObject)
+	if (bIsGrabbing == true && GrabbedObject)
 	{
 		// 적에게 물건 던지기
 		if (TryAutoTargeting(800.f) == true)
 		{
 			PlayAnimMontage(ThrowMontage);
-			GrabbedObject->OnThrown(EnemyTarget->GetActorLocation());
 		}
 		// 물건 버리기
 		else
 		{
 			GrabbedObject->OnDiscard();
+			bIsGrabbing = false;
 		}
-
-		bIsGrabbing = false;
 	}
+}
+
+void APlayerCharacter::PerformThrow()
+{
+	if (bIsGrabbing == true && GrabbedObject)
+	{
+		GrabbedObject->OnThrown(EnemyTarget->GetActorLocation());
+	}
+	bIsGrabbing = false;
 }
 
 void APlayerCharacter::MoveCamera(ECameraPosition CameraPosition)
@@ -501,7 +508,7 @@ bool APlayerCharacter::TryAutoTargeting(float SearchRadius)
 		// 방향키 방향에서 좁게 스피어 트레이스
 		FVector loc = GetActorLocation() + GetLastMovementInputVector() * 200.f;
 		bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, loc, loc, SearchRadius * 0.5f, TraceTypeQuery3, false, actorToIgnore,
-			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f);
+			EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f);
 
 		// 적을 찾으면 타겟으로 지정하고 true 반환
 		if (bSuccess == true)
@@ -514,7 +521,7 @@ bool APlayerCharacter::TryAutoTargeting(float SearchRadius)
 		{
 			// 제자리에서 넓게 스피어 트레이스
 			bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), GetActorLocation(), SearchRadius, TraceTypeQuery3, false, actorToIgnore,
-				EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f);
+				EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f);
 
 			// 적을 찾으면 타겟으로 지정하고 true 반환
 			if (bSuccess == true)

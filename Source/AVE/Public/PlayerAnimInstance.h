@@ -24,6 +24,9 @@ public:
 	ACharacter* Character;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class APlayerCharacter* PlayerCharacter;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector Velocity;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -38,6 +41,25 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsBlocking;
 
+	// Foot IK
+	void FootIK(float DeltaTime);
+	TTuple<bool, float> CapsuleDistance(FName SocketName, ACharacter* Char);
+	TTuple<bool, float, FVector> FootLineTrace(FName SocketName, ACharacter* Char);
+	UPROPERTY()
+	TArray<AActor*> IgnoreActors;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = (AllowPrivateAccess = "true"))
+	float Displacement;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IK", meta = (AllowPrivateAccess = "true"))
+	float IKInterpSpeed;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = (AllowPrivateAccess = "true"))
+	FRotator RRot;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = (AllowPrivateAccess = "true"))
+	FRotator LRot;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = (AllowPrivateAccess = "true"))
+	float RIK;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = (AllowPrivateAccess = "true"))
+	float LIK;
+
 	// 雀乔 根鸥林
 	UFUNCTION()
 	void AnimNotify_StartiFrame();
@@ -47,4 +69,8 @@ public:
 	// 傍拜 根鸥林
 	UFUNCTION()
 	void AnimNotify_EndAttack();
+
+	// 捧么 根鸥林
+	UFUNCTION()
+	void AnimNotify_PerformThrow();
 };

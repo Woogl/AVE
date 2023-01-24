@@ -104,20 +104,20 @@ void UCombatComponent::OnAttackSucceed(TArray<FHitResult> Hits)
 			// 새로 때린 액터만 추가
 			AlreadyHitActors.Emplace(hitActor);
 
-			// 캐릭터에게 대미지 가하기
-			if (hitActor->IsA(ACharacter::StaticClass()))
-			{
-				DealDamage(hitActor);
-			}
-
 			// ECC_Destructible이면 Mesh Slicer 스폰
 			if (bEnableSlice == true && hit.Component->GetCollisionObjectType() == ECC_Destructible)
 			{
-				auto player = Cast<APlayerCharacter>(GetOwner());
+				APlayerCharacter* player = Cast<APlayerCharacter>(GetOwner());
 				if (player)
 				{
 					player->SpawnMeshSlicer();
 				}
+			}
+
+			// 캐릭터에게 대미지 가하기
+			if (hitActor->IsA(ACharacter::StaticClass()))
+			{
+				DealDamage(hitActor);
 			}
 
 			// 역경직 발생

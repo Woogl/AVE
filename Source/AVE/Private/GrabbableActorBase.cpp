@@ -74,15 +74,15 @@ void AGrabbableActorBase::OnThrown(FVector ThrowingLoc)
 
 	// 발사 속도 계산
 	FVector OutLaunchVelocity;
-	UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, OutLaunchVelocity, GetActorLocation(), ThrowingLoc, 0.f, 0.8f);
+	UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, OutLaunchVelocity, GetActorLocation(), FVector(ThrowingLoc.X, ThrowingLoc.Y, ThrowingLoc.Z + 15.f), 0.f, 0.8f);
 	auto temp = Box->GetComponentLocation();
 
 	// 발사하기
 	Box->AddImpulse(OutLaunchVelocity, NAME_None, true);
 	ShouldAttack = true;
 
-	// 던져지고 0.05초 후 콜리전 변경
-	GetWorldTimerManager().SetTimer(ThrowTimer, this, &AGrabbableActorBase::ResetCollisionChannel, 0.05f, false);
+	// 콜리전 변경
+	GetWorldTimerManager().SetTimer(ThrowTimer, this, &AGrabbableActorBase::ResetCollisionChannel, 0.15f, false);
 }
 
 void AGrabbableActorBase::ResetCollisionChannel()
@@ -120,8 +120,9 @@ void AGrabbableActorBase::OnBoxHit(UPrimitiveComponent* HitComponent, AActor* Ot
 			UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
 		}
 	}
-	else if (OtherComponent->GetCollisionObjectType() == ECC_WorldStatic)
+	else if (OtherComponent->GetCollisionObjectType() == ECC_WorldStatic && Box->GetCollisionResponseToChannel(ECC_Pawn) != ECR_Ignore)
 	{
+		Box->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 		ShouldAttack = false;
 	}
 }

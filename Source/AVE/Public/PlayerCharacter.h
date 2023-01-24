@@ -149,8 +149,9 @@ public:
 	void FinishEnemy();
 
 	// 물건 줍기, 던지기
-	void Grab();
-	void Throw();
+	void TryGrab();
+	void TryThrow();
+	void PerformThrow();
 	class AGrabbableActorBase* GrabbedObject;
 
 	// 모션 워핑 (BP에서 이벤트 구현)
