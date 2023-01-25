@@ -430,15 +430,18 @@ void APlayerCharacter::TryGrab()
 	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
 	objectTypes.Emplace(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
 	TArray<AActor*> actorToIgnores;
+
+	// 범위 내에 주울 물건 찾기
 	if (UKismetSystemLibrary::SphereTraceSingleForObjects(this, GetActorLocation(), GetActorLocation(), 150.f, objectTypes, false, actorToIgnores,
 			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f))
 	{
+		// 찾기 성공하면 주움
 		GrabbedObject = Cast<AGrabbableActorBase>(hit.GetActor());
 		GrabbedObject->OnGrabbed(this);
 
 		PlayAnimMontage(GrabMontage);
+		bIsGrabbing = true;
 	}
-	bIsGrabbing = true;
 }
 
 void APlayerCharacter::TryThrow()
@@ -453,8 +456,7 @@ void APlayerCharacter::TryThrow()
 		// 물건 버리기
 		else
 		{
-			GrabbedObject->OnDiscard();
-			bIsGrabbing = false;
+			PerformDiscard();
 		}
 	}
 }
@@ -466,6 +468,14 @@ void APlayerCharacter::PerformThrow()
 		GrabbedObject->OnThrown(EnemyTarget->GetActorLocation());
 	}
 	bIsGrabbing = false;
+	GrabbedObject = nullptr;
+}
+
+void APlayerCharacter::PerformDiscard()
+{
+	GrabbedObject->OnDiscard();
+	bIsGrabbing = false;
+	GrabbedObject = nullptr;
 }
 
 void APlayerCharacter::MoveCamera(ECameraPosition CameraPosition)
@@ -668,6 +678,11 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	}
 	else {
 		Hit(DamageAmount, outHit.Item);
+		// 물건 주운 상태에서 피격 시 물건 떨굼
+		if (bIsGrabbing == true && GrabbedObject)
+		{
+			PerformDiscard();
+		}
 	}
 	return DamageAmount;
 }

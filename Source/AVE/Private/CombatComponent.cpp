@@ -10,7 +10,14 @@
 
 UCombatComponent::UCombatComponent()
 {
-	
+	TEnumAsByte<EObjectTypeQuery> pawn = UEngineTypes::ConvertToObjectType(ECC_Pawn);
+	TEnumAsByte<EObjectTypeQuery> destructible = UEngineTypes::ConvertToObjectType(ECC_Destructible);
+	TEnumAsByte<EObjectTypeQuery> worldStatic = UEngineTypes::ConvertToObjectType(ECC_WorldStatic);
+	TEnumAsByte<EObjectTypeQuery> worldDynamic = UEngineTypes::ConvertToObjectType(ECC_WorldDynamic);
+	ObjectTypes.Emplace(pawn);
+	ObjectTypes.Emplace(destructible);
+	ObjectTypes.Emplace(worldStatic);
+	ObjectTypes.Emplace(worldDynamic);
 }
 
 void UCombatComponent::BeginPlay()
@@ -44,25 +51,13 @@ void UCombatComponent::AttackCheckTick()
 {
 	// 트레이스 결과를 저장
 	TArray<FHitResult> hits;
-	// 찾을 오브젝트 타입 = Pawn, Destructible, WorldStatic, WorldDynamic
-	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
-	TEnumAsByte<EObjectTypeQuery> pawn = UEngineTypes::ConvertToObjectType(ECC_Pawn);
-	TEnumAsByte<EObjectTypeQuery> destructible = UEngineTypes::ConvertToObjectType(ECC_Destructible);
-	TEnumAsByte<EObjectTypeQuery> worldStatic = UEngineTypes::ConvertToObjectType(ECC_WorldStatic);
-	TEnumAsByte<EObjectTypeQuery> worldDynamic = UEngineTypes::ConvertToObjectType(ECC_WorldDynamic);
-	objectTypes.Emplace(pawn);
-	objectTypes.Emplace(destructible);
-	objectTypes.Emplace(worldStatic);
-	objectTypes.Emplace(worldDynamic);
-	// 무시할 오브젝트 타입 = 없음
-	TArray< AActor* > actorsToIgnore;
 
 	// 무기의 모든 소켓에서 트레이스
 	for (int i = 0; i < SocketNames.Num(); i++)
 	{
 		CurSocketLocations[i] = MainWeapon->GetSocketLocation(SocketNames[i]);
 		// 지난 프레임부터 현재까지 트레이스 (소켓 위치)
-		bool bSuccess = UKismetSystemLibrary::LineTraceMultiForObjects(this, LastSocketLocations[i], CurSocketLocations[i], objectTypes, false, actorsToIgnore,
+		bool bSuccess = UKismetSystemLibrary::LineTraceMultiForObjects(this, LastSocketLocations[i], CurSocketLocations[i], ObjectTypes, false, ActorsToIgnore,
 			EDrawDebugTrace::ForDuration, hits, true, FLinearColor::Red, FLinearColor::Green, 0.5f);
 
 		if (bSuccess == true)
@@ -134,9 +129,6 @@ void UCombatComponent::OnAttackSucceed(TArray<FHitResult> Hits)
 
 void UCombatComponent::DealDamage(AActor* Target)
 {
-	// 디버그
-	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("DealDamage"));
-
 	// 때린 곳
 	FVector hitFromLocation = GetOwner()->GetActorLocation();
 	// 추가 정보

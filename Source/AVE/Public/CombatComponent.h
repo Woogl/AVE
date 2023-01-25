@@ -60,7 +60,9 @@ public:
 	TArray<FName> SocketNames;
 	TArray<FVector> CurSocketLocations;
 	TArray<FVector> LastSocketLocations;
-	
+	TArray< AActor* > ActorsToIgnore;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+
 	// Å¸°Ý VFX, SFX
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
 	class UNiagaraSystem* HitNiagara;

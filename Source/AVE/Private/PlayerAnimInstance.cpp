@@ -89,7 +89,7 @@ TTuple<bool, float> UPlayerAnimInstance::CapsuleDistance(FName SocketName, AChar
 
 	const FVector SocketLocation{ Char->GetMesh()->GetSocketLocation(SocketName) };
 
-	const FVector Start{ SocketLocation.X,SocketLocation.Y,BreakVector.Z };
+	const FVector Start{ SocketLocation.X, SocketLocation.Y, BreakVector.Z };
 	const FVector End{ Start - FVector(0.f, 0.f, 150.f) };
 
 	FHitResult HitResult;
@@ -106,7 +106,7 @@ TTuple<bool, float> UPlayerAnimInstance::CapsuleDistance(FName SocketName, AChar
 		true,
 		FColor::Red,
 		FColor::Green,
-		0.5f);
+		0.1f);
 
 	const bool Result(HitResult.bBlockingHit);
 
@@ -132,9 +132,9 @@ TTuple<bool, float, FVector> UPlayerAnimInstance::FootLineTrace(FName SocketName
 		EDrawDebugTrace::None,
 		HitResult,
 		true,
-		FColor::Red,
-		FColor::Green,
-		0.5f);
+		FColor::Yellow,
+		FColor::Blue,
+		0.1f);
 
 	const bool Result(HitResult.bBlockingHit);
 

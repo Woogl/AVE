@@ -74,7 +74,7 @@ void AGrabbableActorBase::OnThrown(FVector ThrowingLoc)
 
 	// 발사 속도 계산
 	FVector OutLaunchVelocity;
-	UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, OutLaunchVelocity, GetActorLocation(), FVector(ThrowingLoc.X, ThrowingLoc.Y, ThrowingLoc.Z + 15.f), 0.f, 0.8f);
+	UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, OutLaunchVelocity, GetActorLocation(), ThrowingLoc, 0.f, 0.8f);
 	auto temp = Box->GetComponentLocation();
 
 	// 발사하기
