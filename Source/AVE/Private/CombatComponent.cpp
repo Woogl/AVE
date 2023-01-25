@@ -58,7 +58,7 @@ void UCombatComponent::AttackCheckTick()
 		CurSocketLocations[i] = MainWeapon->GetSocketLocation(SocketNames[i]);
 		// 지난 프레임부터 현재까지 트레이스 (소켓 위치)
 		bool bSuccess = UKismetSystemLibrary::LineTraceMultiForObjects(this, LastSocketLocations[i], CurSocketLocations[i], ObjectTypes, false, ActorsToIgnore,
-			EDrawDebugTrace::ForDuration, hits, true, FLinearColor::Red, FLinearColor::Green, 0.5f);
+			EDrawDebugTrace::None, hits, true, FLinearColor::Red, FLinearColor::Green, 0.5f);
 
 		if (bSuccess == true)
 		{

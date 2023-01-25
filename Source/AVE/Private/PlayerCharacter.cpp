@@ -20,7 +20,7 @@ APlayerCharacter::APlayerCharacter()
 	// 캡슐
 	GetCapsuleComponent()->InitCapsuleSize(40.f, 90.0f);
 
-	// 스켈레탈 메쉬 블루프린트에서 설정 되나 테스트 예정
+	// 스켈레탈 메쉬
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> meshAsset(TEXT("SkeletalMesh'/Game/ThirdPerson/Characters/Mannequin_UE4/Meshes/SK_Mannequin.SK_Mannequin'"));
 	if (meshAsset.Succeeded())
 	{
@@ -547,7 +547,7 @@ bool APlayerCharacter::TryAutoTargeting(float SearchRadius)
 	{
 		// 제자리에서 넓게 스피어 트레이스
 		bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), GetActorLocation(), SearchRadius, TraceTypeQuery3, false, actorToIgnore,
-			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f);
+			EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f);
 
 		// 적을 찾으면 타겟으로 지정하고 true 반환
 		if (bSuccess == true)
