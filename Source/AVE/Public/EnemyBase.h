@@ -37,9 +37,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float hp;			//체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float hpMax;		//최대체력
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float damage;		//공격력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float posture;		//체간
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float postureMax;	//최대체간
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class USkeletalMeshComponent* bodyMeshComp;
