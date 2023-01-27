@@ -21,7 +21,7 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	ACharacter* Character;
+	class APlayerCharacter* Player;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class APlayerCharacter* PlayerCharacter;
@@ -41,6 +41,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsBlocking;
 
+<<<<<<< HEAD
 	// Foot IK
 	void FootIK(float DeltaTime);
 	TTuple<bool, float> CapsuleDistance(FName SocketName, ACharacter* Char);
@@ -61,16 +62,19 @@ public:
 	float LIK;
 
 	// 雀乔 根鸥林
+=======
+>>>>>>> Mun
 	UFUNCTION()
-	void AnimNotify_StartiFrame();
-	UFUNCTION()
-	void AnimNotify_EndiFrame();
+	void AnimNotify_InitState();
 
-	// 傍拜 根鸥林
 	UFUNCTION()
+<<<<<<< HEAD
 	void AnimNotify_EndAttack();
 
 	// 捧么 根鸥林
 	UFUNCTION()
 	void AnimNotify_PerformThrow();
+=======
+	void AnimNotify_EndInvincible();
+>>>>>>> Mun
 };

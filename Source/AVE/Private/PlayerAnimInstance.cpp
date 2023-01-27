@@ -21,16 +21,22 @@ UPlayerAnimInstance::UPlayerAnimInstance()
 
 void UPlayerAnimInstance::NativeBeginPlay()
 {
+<<<<<<< HEAD
 	Character = Cast<ACharacter>(TryGetPawnOwner());
 	PlayerCharacter = Cast<APlayerCharacter>(Character);
+=======
+	Player = Cast<APlayerCharacter>(TryGetPawnOwner());
+//	OnMontageBlendingOut.AddDynamic(this,&UPlayerAnimInstance::InitPlayerState);
+>>>>>>> Mun
 }
 
 void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
-	if (Character)
+	if (Player)
 	{
-		Velocity = Character->GetVelocity();
+		Velocity = Player->GetVelocity();
 		GroundSpeed = UKismetMathLibrary::VSizeXY(Velocity);
+<<<<<<< HEAD
 		Direction = CalculateDirection(Velocity, Character->GetActorRotation());	// UKismetAnimationLibrary::CalculateDirection ¾²´Â°Ô ³´³ª?
 		bIsFalling = Character->GetCharacterMovement()->IsFalling();
 		// Foot IK
@@ -145,14 +151,18 @@ TTuple<bool, float, FVector> UPlayerAnimInstance::FootLineTrace(FName SocketName
 	else
 	{
 		return MakeTuple(Result, 999.f, FVector::ZeroVector);
+=======
+		Direction = CalculateDirection(Velocity, Player->GetActorRotation());	// UKismetAnimationLibrary::CalculateDirection ¾²´Â°Ô ³´³ª?
+		bIsFalling = Player->GetCharacterMovement()->IsFalling();
+>>>>>>> Mun
 	}
 }
 
-void UPlayerAnimInstance::AnimNotify_StartiFrame()
-{
-	Character->SetCanBeDamaged(false);
+void UPlayerAnimInstance::AnimNotify_InitState() {
+	Player->InitState();
 }
 
+<<<<<<< HEAD
 void UPlayerAnimInstance::AnimNotify_EndiFrame()
 {
 	Character->SetCanBeDamaged(true);
@@ -166,4 +176,8 @@ void UPlayerAnimInstance::AnimNotify_EndAttack()
 void UPlayerAnimInstance::AnimNotify_PerformThrow()
 {
 	PlayerCharacter->PerformThrow();
+=======
+void UPlayerAnimInstance::AnimNotify_EndInvincible() {
+	Player->InitInvincibility();
+>>>>>>> Mun
 }

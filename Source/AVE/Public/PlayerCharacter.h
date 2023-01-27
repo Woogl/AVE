@@ -42,6 +42,7 @@ public:
 	float RInterpSpeed = 0.f;
 
 	// 상태 변수
+<<<<<<< HEAD
 	bool bIsAttacking = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsBlocking = false;
@@ -51,6 +52,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsParrying = false;
 	bool bGuardBroken;
+=======
+	bool bIsAttacking;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
+	bool bIsBlocking;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsTargeting;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
+	bool bIsParrying;
+	// 가드브레이크 상태
+	bool bIsGuardBroken;
+	// 스킬 시전 중 무적 상태
+	bool bIsInvincible;
+	// 피격 상태(패링히트, 가드히트, 노말히트 구분 X), 공격을 받은 상태
+	bool bIsDamaged;
+>>>>>>> Mun
 	bool bIsDead;
 	FTimerHandle ParryingTimer;
 	bool bIsGrabbing = false;
@@ -72,6 +88,8 @@ public:
 	TArray<class UAnimMontage*> ComboAttackMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
 	TArray<class UAnimMontage*> SpecialAttackMontages;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
+	TArray<class UAnimMontage*> SkillMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
 	class UAnimMontage* JumpAttackMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
@@ -188,8 +206,8 @@ public:
 	float ComboResetLimit = 1.f;
 
 	// 현재 특수공격 인덱스
-	int SpecialAttackIndex = 0;
-
+	int CurSpecialAttack;
+	int CurSkill;
 	void WInput();
 	void SInput();
 	void DInput();
@@ -198,13 +216,13 @@ public:
 	void CreateMoveCommand(FVector2D InputDirection);
 
 	void Attack();
-
 	void JumpAttack();
 	void SpecialAttack();
 	void DashAttack();
 	void ComboAttack();
 
 	void InitState();
+	void InitInvincibility();
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	void ParryHit(float Damage, int DamageType);
@@ -212,4 +230,12 @@ public:
 	void Hit(float Damage, int DamageType);
 	void GuardBreak();
 	void Die();
+
+	void Skill();
+	UFUNCTION(BlueprintCallable)
+	void MoveWeaponLeft();
+	UFUNCTION(BlueprintCallable)
+	void MoveWeaponRight();
+
+	void RegeneratePosture();
 };
