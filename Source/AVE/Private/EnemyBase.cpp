@@ -20,7 +20,7 @@ void AEnemyBase::BeginPlay()
 	Super::BeginPlay();
 
 }
-
+ 
 // Called every frame
 void AEnemyBase::Tick(float DeltaTime)
 {
