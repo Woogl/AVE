@@ -14,17 +14,17 @@ class AVE_API APlayerCharacter : public ACharacter
 
 public:
 	APlayerCharacter();
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class USpringArmComponent* DefaultCameraBoom;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
 	USpringArmComponent* LeftCameraBoom;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
 	USpringArmComponent* RightCameraBoom;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* FollowCamera;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	UStaticMeshComponent* Weapon;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	UStaticMeshComponent* Scabbard;
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input")
@@ -37,22 +37,29 @@ public:
 	// 타게팅 대상
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	AActor* EnemyTarget = nullptr;
-	// 타게팅 대상으로의 회전 속도 ( 회전 완료까지 1/x 초. 0이면 즉시 회전 완료 )
+	// 회전 속도 ( 회전 완료까지 1/x 초. 0이면 즉시 회전 완료 )
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RInterpSpeed = 0.f;
 
 	// 상태 변수
-	bool bIsAttacking = false;
+	bool bIsAttacking;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
+	bool bIsBlocking;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsBlocking = false;
-	bool bIsDashing = false;
+	bool bIsTargeting;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
+	bool bIsParrying;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsTargeting = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsParrying = false;
-	bool bGuardBroken;
+	bool bIsDashing;
+	// 가드브레이크 상태
+	bool bIsGuardBroken;
+	// 스킬 시전 중 무적 상태
+	bool bIsInvincible;
+	// 피격 상태(패링히트, 가드히트, 노말히트 구분 X), 공격을 받은 상태
+	bool bIsHit;
 	bool bIsDead;
 	FTimerHandle ParryingTimer;
+	bool bIsGrabbing = false;
 
 	// 체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -72,6 +79,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
 	TArray<class UAnimMontage*> SpecialAttackMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
+	TArray<class UAnimMontage*> SkillMontages;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
 	class UAnimMontage* JumpAttackMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
 	class UAnimMontage* DashAttackMontage;
@@ -82,8 +91,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
 	TArray<class UAnimMontage*> GuardHitMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
-	class UAnimMontage* ParryingMontage;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Guards")
 	class UAnimMontage* GuardBreakMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Dodges")
 	TArray<class UAnimMontage*> DodgeMontages;
@@ -93,6 +100,10 @@ public:
 	TArray<class UAnimMontage*> HitReactionMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
 	class UAnimMontage* DieMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
+	class UAnimMontage* GrabMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
+	class UAnimMontage* ThrowMontage;
 
 protected:
 	virtual void BeginPlay() override;
@@ -129,10 +140,8 @@ public:
 	bool CanInteract();
 	bool CanDash();
 
-	// 적을 향해 부드럽게 회전
-	void RotateToTarget(AActor* Target, float DeltaTime, float InterpSpeed);
-	// 입력 방향을 향해 부드럽게 회전
-	void RotateToInputDirection(float DeltaTime, float InterpSpeed);
+	// 부드럽게 회전
+	void RotateToDirection(FVector Direction, float DeltaTime, float InterpSpeed);
 
 	// 각도 계산
 	float CalculateDirection(const FVector& Velocity, const FRotator& BaseRotation);
@@ -147,6 +156,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FinishEnemy();
 
+	// 물건 줍기, 던지기
+	void TryGrab();
+	void TryThrow();
+	void PerformThrow();
+	void PerformDiscard();
+	class AGrabbableActorBase* GrabbedObject;
+
 	// 모션 워핑 (BP에서 이벤트 구현)
 	UFUNCTION(BlueprintImplementableEvent)
 	void MotionMorph();
@@ -158,7 +174,12 @@ public:
 	void SpawnMeshSlicer();
 
 	// 오토 타게팅
-	bool TryAutoTargeting();
+	UFUNCTION(BlueprintCallable)	// 연구 중
+	bool TryAutoTargeting(float SearchRadius = 300.f);
+
+	// 잔상 생성
+	UFUNCTION(BlueprintImplementableEvent)
+	void SpawnGhostTrail();
 
 public:
 	// 커맨드 어레이
@@ -175,8 +196,8 @@ public:
 	float ComboResetLimit = 1.f;
 
 	// 현재 특수공격 인덱스
-	int SpecialAttackIndex = 0;
-
+	int CurSpecialAttack;
+	int CurSkill;
 	void WInput();
 	void SInput();
 	void DInput();
@@ -185,13 +206,13 @@ public:
 	void CreateMoveCommand(FVector2D InputDirection);
 
 	void Attack();
-
 	void JumpAttack();
 	void SpecialAttack();
 	void DashAttack();
 	void ComboAttack();
 
 	void InitState();
+	void InitInvincibility();
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	void ParryHit(float Damage, int DamageType);
@@ -199,4 +220,12 @@ public:
 	void Hit(float Damage, int DamageType);
 	void GuardBreak();
 	void Die();
+
+	void Skill();
+	UFUNCTION(BlueprintCallable)
+	void MoveWeaponLeft();
+	UFUNCTION(BlueprintCallable)
+	void MoveWeaponRight();
+
+	void RegeneratePosture();
 };
