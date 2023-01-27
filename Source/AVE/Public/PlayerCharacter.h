@@ -51,6 +51,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
 	bool bIsParrying;
 	bool bGuardBroken;
+	bool bIsInvincible;
 	bool bIsDead;
 	FTimerHandle ParryingTimer;
 
@@ -71,6 +72,8 @@ public:
 	TArray<class UAnimMontage*> ComboAttackMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
 	TArray<class UAnimMontage*> SpecialAttackMontages;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
+	TArray<class UAnimMontage*> SkillMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
 	class UAnimMontage* JumpAttackMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
@@ -173,8 +176,8 @@ public:
 	float ComboResetLimit = 1.0f;
 
 	// 현재 특수공격 인덱스
-	int SpecialAttackIndex = 0;
-
+	int CurSpecialAttack;
+	int CurSkill;
 	void WInput();
 	void SInput();
 	void DInput();
@@ -183,7 +186,7 @@ public:
 	void CreateMoveCommand(FVector2D InputDirection);
 
 	void Attack();
-
+	void EndAttack();
 	void JumpAttack();
 	void SpecialAttack();
 	void DashAttack();
@@ -197,4 +200,12 @@ public:
 	void Hit(float Damage, int DamageType);
 	void GuardBreak();
 	void Die();
+
+	void Skill();
+	UFUNCTION(BlueprintCallable)
+	void MoveWeaponLeft();
+	UFUNCTION(BlueprintCallable)
+	void MoveWeaponRight();
+
+	void EndSkill();
 };

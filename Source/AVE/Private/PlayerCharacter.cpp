@@ -147,6 +147,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &APlayerCharacter::Dash);
 	PlayerInputComponent->BindAction("Dash", IE_Released, this, &APlayerCharacter::StopDash);
 	PlayerInputComponent->BindAction("Finisher", IE_Pressed, this, &APlayerCharacter::Finisher);
+	PlayerInputComponent->BindAction("Skill",IE_Pressed,this,&APlayerCharacter::Skill);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &APlayerCharacter::MoveRight);
@@ -543,6 +544,10 @@ void APlayerCharacter::Attack() {
 	}
 }
 
+void APlayerCharacter::EndAttack() {
+	bIsAttacking = false;
+}
+
 void APlayerCharacter::InitState() {
 	StopAnimMontage();
 	bIsAttacking = false;
@@ -557,7 +562,7 @@ void APlayerCharacter::JumpAttack() {
 }
 
 void APlayerCharacter::SpecialAttack() {
-	PlayAnimMontage(SpecialAttackMontages[SpecialAttackIndex]);
+	PlayAnimMontage(SpecialAttackMontages[CurSpecialAttack]);
 	Combo = -1;
 }
 
@@ -627,4 +632,27 @@ void APlayerCharacter::GuardBreak() {
 void APlayerCharacter::Die() {
 	bIsDead = true;
 	PlayAnimMontage(DieMontage);
+}
+
+void APlayerCharacter::Skill() {
+	if (CanAttack()) {
+		bIsAttacking = false;
+		bIsInvincible = true;
+		PlayAnimMontage(SkillMontages[CurSkill]);
+	}
+}
+
+void APlayerCharacter::MoveWeaponLeft() {
+	Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("katana2"));
+	Scabbard->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("katana2"));
+}
+
+void APlayerCharacter::MoveWeaponRight() {
+	Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("katana3"));
+	Scabbard->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("katana1"));
+}
+
+void APlayerCharacter::EndSkill() {
+	bIsAttacking = false;
+	bIsInvincible = false;
 }

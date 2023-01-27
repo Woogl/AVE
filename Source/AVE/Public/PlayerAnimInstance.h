@@ -21,7 +21,7 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	ACharacter* Character;
+	class APlayerCharacter* Player;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector Velocity;
@@ -47,4 +47,10 @@ public:
 	// 공격 몽타주
 	UFUNCTION()
 	void AnimNotify_EndAttack();
+
+	UFUNCTION()
+	void AnimNotify_EndSkill();
+
+	UFUNCTION()
+	void InitPlayerState();
 };

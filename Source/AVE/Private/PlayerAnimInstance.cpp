@@ -17,31 +17,41 @@ UPlayerAnimInstance::UPlayerAnimInstance()
 
 void UPlayerAnimInstance::NativeBeginPlay()
 {
-	Character = Cast<ACharacter>(TryGetPawnOwner());
+	Player = Cast<APlayerCharacter>(TryGetPawnOwner());
+//	OnMontageBlendingOut.AddDynamic(this,&UPlayerAnimInstance::InitPlayerState);
 }
 
 void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
-	if (Character)
+	if (Player)
 	{
-		Velocity = Character->GetVelocity();
+		Velocity = Player->GetVelocity();
 		GroundSpeed = UKismetMathLibrary::VSizeXY(Velocity);
-		Direction = CalculateDirection(Velocity, Character->GetActorRotation());	// UKismetAnimationLibrary::CalculateDirection ¾²´Â°Ô ³´³ª?
-		bIsFalling = Character->GetCharacterMovement()->IsFalling();
+		Direction = CalculateDirection(Velocity, Player->GetActorRotation());	// UKismetAnimationLibrary::CalculateDirection ¾²´Â°Ô ³´³ª?
+		bIsFalling = Player->GetCharacterMovement()->IsFalling();
 	}
 }
 
 void UPlayerAnimInstance::AnimNotify_StartiFrame()
 {
-	Character->SetCanBeDamaged(false);
+	Player->SetCanBeDamaged(false);
 }
 
 void UPlayerAnimInstance::AnimNotify_EndiFrame()
 {
-	Character->SetCanBeDamaged(true);
+	Player->SetCanBeDamaged(true);
 }
 
 void UPlayerAnimInstance::AnimNotify_EndAttack()
 {
-	Cast<APlayerCharacter>(Character)->bIsAttacking = false;
+	Player->EndAttack();
+}	
+
+void UPlayerAnimInstance::AnimNotify_EndSkill()
+{
+	Player->EndSkill();
+}
+
+void UPlayerAnimInstance::InitPlayerState() {
+	Player->InitState();
 }
