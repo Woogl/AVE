@@ -634,7 +634,6 @@ void APlayerCharacter::InitState() {
 	bIsGuardBroken = false;
 	bIsDashing = false;
 	bIsHit = false;
-	RInterpSpeed = 0.f;
 }
 
 void APlayerCharacter::InitInvincibility() {
