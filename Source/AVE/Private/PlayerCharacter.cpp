@@ -81,6 +81,7 @@ APlayerCharacter::APlayerCharacter()
 
 	// 공격 판정을 관리하는 컴포넌트
 	CombatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp"));
+	
 }
 
 void APlayerCharacter::BeginPlay()
@@ -96,7 +97,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// 타게팅한 적을 향해 회전
-	if (bIsTargeting == true && EnemyTarget)
+	if (bIsTargeting && EnemyTarget)
 	{
 		FVector direction = EnemyTarget->GetActorLocation() - GetActorLocation();
 		RotateToDirection(direction, DeltaTime, RInterpSpeed);
@@ -108,10 +109,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 		}
 	}
 	// 방향키 방향으로 회전
-	else if (bIsAttacking == true)
+	else if (bIsAttacking)
 	{
 		FVector inputVector = GetLastMovementInputVector();
-		if (inputVector.IsNearlyZero() == false)
+		if (!inputVector.IsNearlyZero())
 		{
 			RotateToDirection(inputVector, DeltaTime, 4.f);
 		}
@@ -264,24 +265,13 @@ void APlayerCharacter::Interact()
 void APlayerCharacter::Dash()
 {
 	if (CanDash()) {
+		bIsDashing = true;
 		// 4방향 회피
 		PerformDodge();
 
-<<<<<<< HEAD
-	// 상태 변경
-	InitState();
-	bIsDashing = true;
-
-	// 4방향 회피
-	PerformDodge();
-
-	// 이동속도 증가
-	MoveComp->MaxWalkSpeed = 500.f;
-=======
 		// 이동속도 증가
 		MoveComp->MaxWalkSpeed = 500.f;
 	}
->>>>>>> Mun
 }
 
 void APlayerCharacter::StopDash()
@@ -328,8 +318,8 @@ bool APlayerCharacter::CanInteract()
 
 bool APlayerCharacter::CanDash()
 {
-	// 회피 중이거나 낙하 중이 아니면 true 리턴
-	return !(MoveComp->IsFalling() || bIsInvincible);
+	// 회피 중이거나 낙하 중, 대쉬 중, 가드브레이크 상태가 아니면 true 리턴
+	return !(MoveComp->IsFalling() || bIsInvincible || bIsDashing || bIsGuardBroken);
 }
 
 void APlayerCharacter::RotateToDirection(FVector Direction, float DeltaTime, float InterpSpeed)
@@ -597,6 +587,7 @@ void APlayerCharacter::CreateMoveCommand(FVector2D InputDirection) {
 void APlayerCharacter::Attack() {
 	// 공격 중이 아니면
 	if (CanAttack()) {
+		UKismetSystemLibrary::PrintString(GetWorld(),TEXT("Attacking == false"));
 		// 공격 중으로 전환
 		bIsAttacking = true;
 		// 오토 타겟팅으로 타겟 지정
@@ -625,11 +616,15 @@ void APlayerCharacter::Attack() {
 			}
 		}
 		else {
+			UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ComboAttack"));
 			ComboAttack();
 		}
 		Tail = -1;
 		LastAttackTime = 0.f;
 	}
+	else
+		UKismetSystemLibrary::PrintString(GetWorld(), TEXT("Attacking == true"));
+
 }
 
 void APlayerCharacter::InitState() {
@@ -637,7 +632,9 @@ void APlayerCharacter::InitState() {
 	bIsBlocking = false;
 	bIsParrying = false;
 	bIsGuardBroken = false;
-	bIsDamaged = false;
+	bIsDashing = false;
+	bIsHit = false;
+	RInterpSpeed = 0.f;
 }
 
 void APlayerCharacter::InitInvincibility() {
@@ -674,7 +671,7 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	FHitResult outHit;
 	FVector outImpulse;
 	DamageEvent.GetBestHitInfo(this,DamageCauser,outHit,outImpulse);
-	bIsDamaged = true;
+	bIsHit = true;
 	// 적 방향으로 회전
 	RotateToDirection(DamageCauser->GetActorLocation(), 0.f, 0.f);
 	if (bIsParrying) {
@@ -729,8 +726,6 @@ void APlayerCharacter::Die() {
 	bIsDead = true;
 	PlayAnimMontage(DieMontage);
 }
-<<<<<<< HEAD
-=======
 
 void APlayerCharacter::Skill() {
 	if (CanAttack()) {
@@ -751,8 +746,7 @@ void APlayerCharacter::MoveWeaponRight() {
 }
 
 void APlayerCharacter::RegeneratePosture() {
-	if (!(bIsDamaged || bIsGuardBroken) && CurPosture < 100.f) {		
+	if (!(bIsHit || bIsGuardBroken) && CurPosture < 100.f) {		
 		CurPosture += 0.2f;
 	}
 }
->>>>>>> Mun

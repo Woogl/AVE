@@ -42,31 +42,21 @@ public:
 	float RInterpSpeed = 0.f;
 
 	// 상태 변수
-<<<<<<< HEAD
-	bool bIsAttacking = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsBlocking = false;
-	bool bIsDashing = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsTargeting = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsParrying = false;
-	bool bGuardBroken;
-=======
 	bool bIsAttacking;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
 	bool bIsBlocking;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsTargeting;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)	
 	bool bIsParrying;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsDashing;
 	// 가드브레이크 상태
 	bool bIsGuardBroken;
 	// 스킬 시전 중 무적 상태
 	bool bIsInvincible;
 	// 피격 상태(패링히트, 가드히트, 노말히트 구분 X), 공격을 받은 상태
-	bool bIsDamaged;
->>>>>>> Mun
+	bool bIsHit;
 	bool bIsDead;
 	FTimerHandle ParryingTimer;
 	bool bIsGrabbing = false;

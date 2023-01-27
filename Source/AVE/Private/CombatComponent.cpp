@@ -110,7 +110,7 @@ void UCombatComponent::OnAttackSucceed(TArray<FHitResult> Hits)
 			}
 
 			// 캐릭터에게 대미지 가하기
-			if (hitActor->IsA(ACharacter::StaticClass()))
+			if (hitActor && hitActor->IsA(ACharacter::StaticClass()))
 			{
 				DealDamage(hitActor);
 			}

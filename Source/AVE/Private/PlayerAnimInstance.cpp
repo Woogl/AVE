@@ -14,20 +14,12 @@ UPlayerAnimInstance::UPlayerAnimInstance()
 	Velocity = FVector(0.f);
 	GroundSpeed = 0.f;
 	bIsFalling = false;
-
-	// TODO : InitState 호출
-	//OnMontageBlendingOut.AddDynamic()
 }
 
 void UPlayerAnimInstance::NativeBeginPlay()
 {
-<<<<<<< HEAD
-	Character = Cast<ACharacter>(TryGetPawnOwner());
-	PlayerCharacter = Cast<APlayerCharacter>(Character);
-=======
 	Player = Cast<APlayerCharacter>(TryGetPawnOwner());
-//	OnMontageBlendingOut.AddDynamic(this,&UPlayerAnimInstance::InitPlayerState);
->>>>>>> Mun
+	OnMontageBlendingOut.AddDynamic(this, &UPlayerAnimInstance::InitPlayerState);
 }
 
 void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -36,9 +28,8 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		Velocity = Player->GetVelocity();
 		GroundSpeed = UKismetMathLibrary::VSizeXY(Velocity);
-<<<<<<< HEAD
-		Direction = CalculateDirection(Velocity, Character->GetActorRotation());	// UKismetAnimationLibrary::CalculateDirection 쓰는게 낫나?
-		bIsFalling = Character->GetCharacterMovement()->IsFalling();
+		Direction = CalculateDirection(Velocity, Player->GetActorRotation());	// UKismetAnimationLibrary::CalculateDirection 쓰는게 낫나?
+		bIsFalling = Player->GetCharacterMovement()->IsFalling();
 		// Foot IK
 		FootIK(DeltaSeconds);
 	}
@@ -46,22 +37,20 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 void UPlayerAnimInstance::FootIK(float DeltaTime)
 {
-	Character = Cast<ACharacter>(TryGetPawnOwner());
-
-	if (Character && !Character->GetCharacterMovement()->IsFalling()) // No Falling
+	if (Player && !Player->GetCharacterMovement()->IsFalling()) // No Falling
 	{
-		IgnoreActors.Emplace(Character);
+		IgnoreActors.Emplace(Player);
 
-		TTuple<bool, float> Foot_R = CapsuleDistance("ik_foot_r", Character);
-		TTuple<bool, float> Foot_L = CapsuleDistance("ik_foot_l", Character);
+		TTuple<bool, float> Foot_R = CapsuleDistance("ik_foot_r", Player);
+		TTuple<bool, float> Foot_L = CapsuleDistance("ik_foot_l", Player);
 
 		if (Foot_L.Get<0>() || Foot_R.Get<0>())
 		{
 			const float Selectfloat = UKismetMathLibrary::SelectFloat(Foot_L.Get<1>(), Foot_R.Get<1>(), Foot_L.Get<1>() >= Foot_R.Get<1>());
 			Displacement = FMath::FInterpTo(Displacement, (Selectfloat - 90.f) * -1.f, DeltaTime, IKInterpSpeed);
 
-			TTuple<bool, float, FVector> FootTrace_R = FootLineTrace("ik_foot_r", Character);
-			TTuple<bool, float, FVector> FootTrace_L = FootLineTrace("ik_foot_l", Character);
+			TTuple<bool, float, FVector> FootTrace_R = FootLineTrace("ik_foot_r", Player);
+			TTuple<bool, float, FVector> FootTrace_L = FootLineTrace("ik_foot_l", Player);
 
 			const float Distance_R = FootTrace_R.Get<1>();
 			const FVector FootRVector(FootTrace_R.Get<2>());
@@ -151,33 +140,23 @@ TTuple<bool, float, FVector> UPlayerAnimInstance::FootLineTrace(FName SocketName
 	else
 	{
 		return MakeTuple(Result, 999.f, FVector::ZeroVector);
-=======
-		Direction = CalculateDirection(Velocity, Player->GetActorRotation());	// UKismetAnimationLibrary::CalculateDirection 쓰는게 낫나?
-		bIsFalling = Player->GetCharacterMovement()->IsFalling();
->>>>>>> Mun
 	}
 }
 
 void UPlayerAnimInstance::AnimNotify_InitState() {
-	Player->InitState();
+	if(Player)
+		Player->InitState();
 }
 
-<<<<<<< HEAD
-void UPlayerAnimInstance::AnimNotify_EndiFrame()
-{
-	Character->SetCanBeDamaged(true);
-}
-
-void UPlayerAnimInstance::AnimNotify_EndAttack()
-{
-	PlayerCharacter->bIsAttacking = false;
-}
-
-void UPlayerAnimInstance::AnimNotify_PerformThrow()
-{
-	PlayerCharacter->PerformThrow();
-=======
 void UPlayerAnimInstance::AnimNotify_EndInvincible() {
-	Player->InitInvincibility();
->>>>>>> Mun
+	if (Player)
+		Player->InitInvincibility();
+}
+
+void UPlayerAnimInstance::InitPlayerState(UAnimMontage* Montage, bool bInterrupted) {
+	if (Player) {
+		Player->InitState();
+		UKismetSystemLibrary::PrintString(GetWorld(),TEXT("InitState"));
+		Player->InitInvincibility();
+	}
 }
