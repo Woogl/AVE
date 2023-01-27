@@ -45,13 +45,16 @@ public:
 	bool bIsAttacking;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
 	bool bIsBlocking;
-	bool bIsDashing;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsTargeting;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)	// 연구 중
 	bool bIsParrying;
-	bool bGuardBroken;
+	// 가드브레이크 상태
+	bool bIsGuardBroken;
+	// 스킬 시전 중 무적 상태
 	bool bIsInvincible;
+	// 피격 상태(패링히트, 가드히트, 노말히트 구분 X), 공격을 받은 상태
+	bool bIsDamaged;
 	bool bIsDead;
 	FTimerHandle ParryingTimer;
 
@@ -186,13 +189,13 @@ public:
 	void CreateMoveCommand(FVector2D InputDirection);
 
 	void Attack();
-	void EndAttack();
 	void JumpAttack();
 	void SpecialAttack();
 	void DashAttack();
 	void ComboAttack();
 
 	void InitState();
+	void InitInvincibility();
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	void ParryHit(float Damage, int DamageType);
@@ -207,5 +210,5 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void MoveWeaponRight();
 
-	void EndSkill();
+	void RegeneratePosture();
 };

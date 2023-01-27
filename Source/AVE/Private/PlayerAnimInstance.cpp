@@ -32,26 +32,10 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 }
 
-void UPlayerAnimInstance::AnimNotify_StartiFrame()
-{
-	Player->SetCanBeDamaged(false);
-}
-
-void UPlayerAnimInstance::AnimNotify_EndiFrame()
-{
-	Player->SetCanBeDamaged(true);
-}
-
-void UPlayerAnimInstance::AnimNotify_EndAttack()
-{
-	Player->EndAttack();
-}	
-
-void UPlayerAnimInstance::AnimNotify_EndSkill()
-{
-	Player->EndSkill();
-}
-
-void UPlayerAnimInstance::InitPlayerState() {
+void UPlayerAnimInstance::AnimNotify_InitState() {
 	Player->InitState();
+}
+
+void UPlayerAnimInstance::AnimNotify_EndInvincible() {
+	Player->InitInvincibility();
 }

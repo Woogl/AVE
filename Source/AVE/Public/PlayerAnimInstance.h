@@ -38,19 +38,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsBlocking;
 
-	// 雀乔 根鸥林
 	UFUNCTION()
-	void AnimNotify_StartiFrame();
-	UFUNCTION()
-	void AnimNotify_EndiFrame();
-
-	// 傍拜 根鸥林
-	UFUNCTION()
-	void AnimNotify_EndAttack();
+	void AnimNotify_InitState();
 
 	UFUNCTION()
-	void AnimNotify_EndSkill();
-
-	UFUNCTION()
-	void InitPlayerState();
+	void AnimNotify_EndInvincible();
 };
