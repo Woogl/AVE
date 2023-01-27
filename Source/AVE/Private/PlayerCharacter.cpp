@@ -81,7 +81,6 @@ APlayerCharacter::APlayerCharacter()
 
 	// 공격 판정을 관리하는 컴포넌트
 	CombatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp"));
-	
 }
 
 void APlayerCharacter::BeginPlay()
