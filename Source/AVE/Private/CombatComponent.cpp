@@ -42,8 +42,8 @@ void UCombatComponent::AttackCheckBegin()
 	// 소켓 초기 위치 설정
 	for (int i = 0; i < SocketNames.Num(); i++)
 	{
+		CurSocketLocations.Emplace(FVector(0.f));
 		LastSocketLocations.Emplace(MainWeapon->GetSocketLocation(SocketNames[i]));
-		CurSocketLocations.SetNum(SocketNames.Num());
 	}
 }
 
