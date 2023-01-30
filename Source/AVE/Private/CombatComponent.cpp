@@ -73,7 +73,7 @@ void UCombatComponent::AttackCheckTick()
 	}
 }
 
-void UCombatComponent::SetDamageInfo(float InBaseDamage, EDamageType InDamageType)
+void UCombatComponent::SetDamageInfo(float InBaseDamage, TSubclassOf<UDamageType> InDamageType)
 {
 	BaseDamage = InBaseDamage;
 	DamageType = InDamageType;
