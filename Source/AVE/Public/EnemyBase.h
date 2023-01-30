@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/Pawn.h"
+#include "AVEEnums.h"
 #include "EnemyBase.generated.h"
 
 //추상 클래스에 구현할 공통 요소 
@@ -32,14 +33,34 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// 플레이어 쳐다보기
+	void LookAtPlayer();
+
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float hp;			//체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float hpMax;		//최대체력
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float damage;		//공격력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float posture;		//체간
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float postureMax;	//최대체간
+
+	// 마무리 공격 당할 때
+	UFUNCTION(BlueprintCallable)
+		void OnFinishered();
+	// 신체 절단
+	UFUNCTION(BlueprintCallable)
+		void SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float RagdollDelay);
+	// 래그돌 활성화
+	UFUNCTION(BlueprintCallable)
+		void ActivateRagdoll();
+
+	// 래그돌 활성화 타이머
+	FTimerHandle RagdollTimer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class USkeletalMeshComponent* bodyMeshComp;
@@ -55,5 +76,4 @@ public:
 		virtual void onHit(int characterDamage);
 	virtual void onHitCrushed();
 	virtual void onDie();
-	virtual void onCalling();
 };

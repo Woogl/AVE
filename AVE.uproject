@@ -22,15 +22,11 @@
 			]
 		},
 		{
-			"Name": "MassAI",
+			"Name": "GameplayBehaviors",
 			"Enabled": true
 		},
 		{
 			"Name": "MotionWarping",
-			"Enabled": true
-		},
-		{
-			"Name": "MassCrowd",
 			"Enabled": true
 		}
 	]
