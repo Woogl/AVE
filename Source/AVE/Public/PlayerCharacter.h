@@ -198,6 +198,11 @@ public:
 	// 현재 특수공격 인덱스
 	int CurSpecialAttack;
 	int CurSkill;
+
+	// 물리 내성
+	float Defense;
+	// 전기 내성
+	float ElecDefense;
 	void WInput();
 	void SInput();
 	void DInput();
@@ -215,9 +220,9 @@ public:
 	void InitInvincibility();
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-	void ParryHit(float Damage, int DamageType);
-	void GuardHit(float Damage, int DamageType);
-	void Hit(float Damage, int DamageType);
+	void ParryHit(float Damage, TSubclassOf<UDamageType> DamageType);
+	void GuardHit(float Damage, TSubclassOf<UDamageType> DamageType);
+	void Hit(float Damage, TSubclassOf<UDamageType> DamageType);
 	void GuardBreak();
 	void Die();
 

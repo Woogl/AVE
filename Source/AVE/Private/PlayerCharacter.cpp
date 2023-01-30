@@ -13,6 +13,7 @@
 #include "PlayerAnimInstance.h"
 #include "GrabbableActorBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "AllAVEDamageTypes.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -669,19 +670,16 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	FHitResult outHit;
-	FVector outImpulse;
-	DamageEvent.GetBestHitInfo(this,DamageCauser,outHit,outImpulse);
 	// 적 방향으로 회전
 	RotateToDirection(DamageCauser->GetActorLocation(), 0.f, 0.f);
 	if (bIsParrying) {
-		ParryHit(DamageAmount,outHit.Item);
+		ParryHit(DamageAmount,DamageEvent.DamageTypeClass);
 	}
 	else if (bIsBlocking) {
-		GuardHit(DamageAmount, outHit.Item);
+		GuardHit(DamageAmount, DamageEvent.DamageTypeClass);
 	}
 	else {
-		Hit(DamageAmount, outHit.Item);
+		Hit(DamageAmount, DamageEvent.DamageTypeClass);
 		// 물건 주운 상태에서 피격 시 물건 떨굼
 		if (bIsGrabbing == true && GrabbedObject)
 		{
@@ -692,40 +690,85 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	return DamageAmount;
 }
 
-void APlayerCharacter::ParryHit(float Damage, int DamageType) {
-	Damage *= 0.2f;
+void APlayerCharacter::ParryHit(float Damage, TSubclassOf<UDamageType> DamageType) {
+	if (DamageType == UStandardDamageType::StaticClass()) {
+		Damage = UAVEDamageType::CalculateDamage(Damage,Defense);
+		PlayAnimMontage(ParryHitMontages[0]);
+	}
+	else if (DamageType == UKnockBackDamageType::StaticClass()) {
+		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
+		PlayAnimMontage(ParryHitMontages[1]);
+	}
+	else if (DamageType == UKnockDownDamageType::StaticClass()) {
+		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
+		PlayAnimMontage(ParryHitMontages[2]);
+	}
+	else if (DamageType == UKnockUpDamageType::StaticClass()) {
+		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
+		PlayAnimMontage(ParryHitMontages[3]);
+	}
 	CurPosture -= Damage;
-	PlayAnimMontage(ParryHitMontages[DamageType]);
 }
 
-void APlayerCharacter::GuardHit(float Damage, int DamageType) {
-	Damage *= 1.2f;
+void APlayerCharacter::GuardHit(float Damage, TSubclassOf<UDamageType> DamageType) {
+	if (DamageType == UStandardDamageType::StaticClass()) {
+		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
+		PlayAnimMontage(GuardHitMontages[0]);
+	}
+	else if (DamageType == UKnockBackDamageType::StaticClass()) {
+		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
+		PlayAnimMontage(GuardHitMontages[1]);
+	}
+	else if (DamageType == UKnockDownDamageType::StaticClass()) {
+		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
+		PlayAnimMontage(GuardHitMontages[2]);
+	}
+	else if (DamageType == UKnockUpDamageType::StaticClass()) {
+		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
+		PlayAnimMontage(GuardHitMontages[3]);
+	}
 	CurPosture -= Damage;
 	if (CurPosture <= 0) {
 		GuardBreak();
 		return;
 	}
-	PlayAnimMontage(GuardHitMontages[DamageType]);
 }
 
-void APlayerCharacter::Hit(float Damage, int DamageType) {
+void APlayerCharacter::Hit(float Damage, TSubclassOf<UDamageType> DamageType) {
+	if (DamageType == UStandardDamageType::StaticClass()) {
+		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
+		PlayAnimMontage(HitReactionMontages[0]);
+	}
+	else if (DamageType == UKnockBackDamageType::StaticClass()) {
+		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
+		PlayAnimMontage(HitReactionMontages[1]);
+	}
+	else if (DamageType == UKnockDownDamageType::StaticClass()) {
+		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
+		PlayAnimMontage(HitReactionMontages[2]);
+	}
+	else if (DamageType == UKnockUpDamageType::StaticClass()) {
+		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
+		PlayAnimMontage(HitReactionMontages[3]);
+	}	
 	CurPosture -= Damage * 0.4f;
 	CurHealth -= Damage;
 	if (CurHealth <= 0) {
 		Die();
 		return;
 	}
-	PlayAnimMontage(HitReactionMontages[DamageType]);
 }
 
 void APlayerCharacter::GuardBreak() {
+	StopAnimMontage();
 	PlayAnimMontage(GuardBreakMontage);
 	bIsGuardBroken = true;
 }
 
 void APlayerCharacter::Die() {
-	bIsDead = true;
+	StopAnimMontage();
 	PlayAnimMontage(DieMontage);
+	bIsDead = true;
 }
 
 void APlayerCharacter::Skill() {
@@ -754,5 +797,6 @@ void APlayerCharacter::RegeneratePosture() {
 
 void APlayerCharacter::SpreadAoEDamage() {
 	TArray<AActor*> IgnoreList;
-	UGameplayStatics::ApplyRadialDamage(GetWorld(),50,GetActorLocation(),1000.f,UDamageType::StaticClass(),IgnoreList);
+	IgnoreList.Add(this);
+	UGameplayStatics::ApplyRadialDamage(GetWorld(),50,GetActorLocation(),1000.f,UKnockBackDamageType::StaticClass(),IgnoreList);
 }

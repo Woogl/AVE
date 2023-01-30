@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
 #include "AVEEnums.h"
+#include "AllAVEDamageTypes.h"
 #include "CheckAttack.generated.h"
 
 /**
@@ -28,7 +29,7 @@ public:
 
 	// 공격 타입 (ex: 경직, 넉백, 다운 등)
 	UPROPERTY(EditAnywhere, Category = "Custom")
-	EDamageType DamageType;
+	TSubclassOf<UDamageType> DamageType;
 
 	// 역경직 시간
 	UPROPERTY(EditAnywhere, Category = "Custom", meta = (ClampMin = 0.f, ClampMax = 1.f))
