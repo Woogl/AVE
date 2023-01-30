@@ -70,9 +70,6 @@ public:
 	/*UPROPERTY(EditAnywhere)
 		class AAIControlManager* AIManager;*/
 
-	UPROPERTY(EditAnywhere)
-		class UBaseBital bital;
-
 	virtual void onActionAttack();
 	virtual void onActionEvade();
 	virtual void onActionGuard();
