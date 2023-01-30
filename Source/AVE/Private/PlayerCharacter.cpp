@@ -12,6 +12,7 @@
 #include "MeshSlicer.h"
 #include "PlayerAnimInstance.h"
 #include "GrabbableActorBase.h"
+#include <Kismet/GameplayStatics.h>
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -63,6 +64,10 @@ APlayerCharacter::APlayerCharacter()
 	FollowCamera->SetupAttachment(DefaultCameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
+	// 물건 들기
+	GrabPoint = CreateDefaultSubobject<USceneComponent>(TEXT("GrabPoint"));
+	GrabPoint->SetupAttachment(RootComponent);
+
 	// 회전 설정
 	TurnRateGamepad = 50.f;
 	bUseControllerRotationPitch = false;
@@ -81,7 +86,6 @@ APlayerCharacter::APlayerCharacter()
 
 	// 공격 판정을 관리하는 컴포넌트
 	CombatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp"));
-	
 }
 
 void APlayerCharacter::BeginPlay()
@@ -114,6 +118,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		FVector inputVector = GetLastMovementInputVector();
 		if (!inputVector.IsNearlyZero())
 		{
+
 			RotateToDirection(inputVector, DeltaTime, 4.f);
 		}
 	}
@@ -251,13 +256,15 @@ void APlayerCharacter::Interact()
 
 	if (bIsGrabbing == false)
 	{
-		TryGrab();
+		PullProp();
+		bIsGrabbing = true;
 	}
 	else
 	{
-		if (GrabbedObject)
+		if (GrabbedMesh)
 		{
-			TryThrow();
+			PushProp();
+			bIsGrabbing = false;
 		}
 	}
 }
@@ -413,7 +420,7 @@ void APlayerCharacter::FinishEnemy()
 	PlayAnimMontage(FinisherMontages[0]);
 }
 
-void APlayerCharacter::TryGrab()
+void APlayerCharacter::PullProp()
 {
 	// 애니메이션 재생 중이면 탈출
 	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying()) return;
@@ -427,47 +434,67 @@ void APlayerCharacter::TryGrab()
 	if (UKismetSystemLibrary::SphereTraceSingleForObjects(this, GetActorLocation(), GetActorLocation(), 150.f, objectTypes, false, actorToIgnores,
 			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f))
 	{
+		AActor* hitActor = hit.GetActor();
 		// 찾기 성공하면 주움
-		GrabbedObject = Cast<AGrabbableActorBase>(hit.GetActor());
-		GrabbedObject->OnGrabbed(this);
+		if (hitActor->IsA(AGrabbableActorBase::StaticClass()))
+		{
+			GrabbedMesh = Cast<AGrabbableActorBase>(hit.GetActor())->GetMesh();
+			GrabbedMesh->SetSimulatePhysics(false);
 
-		PlayAnimMontage(GrabMontage);
-		bIsGrabbing = true;
+			// 컴포넌트 이동시키기
+			FLatentActionInfo info;
+			info.CallbackTarget = this;
+			info.Linkage = 0;
+			info.ExecutionFunction = FName("AttachProp");	// MoveComponentTo()가 끝나면 호출되는 함수
+			GrabbedMesh->AttachToComponent(GrabPoint, FAttachmentTransformRules::KeepWorldTransform);
+			UKismetSystemLibrary::MoveComponentTo(GrabbedMesh, GrabPoint->GetRelativeLocation(), GetActorRotation(), false, true, 0.2f, true, EMoveComponentAction::Move, info);
+
+			PlayAnimMontage(InteractionMontages[0]);
+		}
 	}
 }
 
-void APlayerCharacter::TryThrow()
+void APlayerCharacter::AttachProp()
 {
-	if (bIsGrabbing == true && GrabbedObject)
+	GrabbedMesh->AttachToComponent(GrabPoint, FAttachmentTransformRules::KeepWorldTransform);
+}
+
+void APlayerCharacter::PushProp()
+{
+	if (GrabbedMesh)
 	{
 		// 적에게 물건 던지기
 		if (TryAutoTargeting(800.f) == true)
 		{
-			PlayAnimMontage(ThrowMontage);
+			GrabbedMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+			GrabbedMesh->SetSimulatePhysics(true);
+
+			// 발사 속도 계산
+			FVector OutLaunchVelocity;
+			UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, OutLaunchVelocity, GrabbedMesh->GetComponentLocation(), EnemyTarget->GetActorLocation(), 0.f, 0.9f);
+
+			// 발사하기
+			GrabbedMesh->AddImpulse(OutLaunchVelocity * 16);
+
+			PlayAnimMontage(InteractionMontages[1]);
 		}
 		// 물건 버리기
 		else
 		{
-			PerformDiscard();
+			DropProp();
 		}
 	}
+	GrabbedMesh = nullptr;
 }
 
-void APlayerCharacter::PerformThrow()
-{
-	if (bIsGrabbing == true && GrabbedObject)
+void APlayerCharacter::DropProp()
+{	
+	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(InteractionMontages[1]))
 	{
-		GrabbedObject->OnThrown(EnemyTarget->GetActorLocation());
+		GetMesh()->GetAnimInstance()->Montage_Stop(0.25f, InteractionMontages[1]);
 	}
-	bIsGrabbing = false;
-	GrabbedObject = nullptr;
-}
-
-void APlayerCharacter::PerformDiscard()
-{
-	GrabbedObject->OnDiscard();
-	bIsGrabbing = false;
-	GrabbedObject = nullptr;
+	GrabbedMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	GrabbedMesh->SetSimulatePhysics(true);
 }
 
 void APlayerCharacter::MoveCamera(ECameraPosition CameraPosition)
@@ -588,8 +615,7 @@ void APlayerCharacter::Attack() {
 	// 공격 중이 아니면
 	if (CanAttack()) {
 		UKismetSystemLibrary::PrintString(GetWorld(),TEXT("Attacking == false"));
-		// 공격 중으로 전환
-		bIsAttacking = true;
+		
 		// 오토 타겟팅으로 타겟 지정
 		TryAutoTargeting();
 
@@ -619,8 +645,12 @@ void APlayerCharacter::Attack() {
 			UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ComboAttack"));
 			ComboAttack();
 		}
+		
 		Tail = -1;
 		LastAttackTime = 0.f;
+
+		// 공격 중으로 전환
+		bIsAttacking = true;
 	}
 	else
 		UKismetSystemLibrary::PrintString(GetWorld(), TEXT("Attacking == true"));
@@ -682,9 +712,9 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	else {
 		Hit(DamageAmount, outHit.Item);
 		// 물건 주운 상태에서 피격 시 물건 떨굼
-		if (bIsGrabbing == true && GrabbedObject)
+		if (bIsGrabbing == true && GrabbedMesh)
 		{
-			PerformDiscard();
+			DropProp();
 		}
 	}
 	return DamageAmount;

@@ -23,6 +23,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* FollowCamera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	class USceneComponent* GrabPoint;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	UStaticMeshComponent* Weapon;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	UStaticMeshComponent* Scabbard;
@@ -100,10 +102,6 @@ public:
 	TArray<class UAnimMontage*> HitReactionMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
 	class UAnimMontage* DieMontage;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
-	class UAnimMontage* GrabMontage;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
-	class UAnimMontage* ThrowMontage;
 
 protected:
 	virtual void BeginPlay() override;
@@ -157,11 +155,11 @@ public:
 	void FinishEnemy();
 
 	// 물건 줍기, 던지기
-	void TryGrab();
-	void TryThrow();
-	void PerformThrow();
-	void PerformDiscard();
-	class AGrabbableActorBase* GrabbedObject;
+	void PullProp();
+	void AttachProp();
+	void PushProp();
+	void DropProp();
+	UStaticMeshComponent* GrabbedMesh;
 
 	// 모션 워핑 (BP에서 이벤트 구현)
 	UFUNCTION(BlueprintImplementableEvent)

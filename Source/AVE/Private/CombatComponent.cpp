@@ -73,14 +73,6 @@ void UCombatComponent::AttackCheckTick()
 	}
 }
 
-void UCombatComponent::AttackCheckEnd()
-{
-	// √ ±‚»≠
-	AlreadyHitActors.Reset();
-	CurSocketLocations.Reset();
-	LastSocketLocations.Reset();
-}
-
 void UCombatComponent::SetDamageInfo(float InBaseDamage, EDamageType InDamageType)
 {
 	BaseDamage = InBaseDamage;
