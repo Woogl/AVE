@@ -66,7 +66,4 @@ public:
 
 	UFUNCTION()
 	void InitPlayerState(UAnimMontage* Montage, bool bInterrupted);
-
-	UFUNCTION()
-	void AnimNotify_AoEDamage();
 };

@@ -125,12 +125,13 @@ void UCombatComponent::DealDamage(AActor* Target)
 	FVector hitFromLocation = GetOwner()->GetActorLocation();
 	// 추가 정보
 	FHitResult hitinfo;
+	hitinfo.Item = (int32)DamageType;	// 0=Standard, 1=KnockBack, 2=KnockDown, 3=KnockUp, 4=NoReaction
 	// 가해자 컨트롤러
 	AController* instigator = GetOwner()->GetInstigatorController();
 	// 유발자
 	AActor* causer = GetOwner();
 
-	UGameplayStatics::ApplyPointDamage(Target, BaseDamage, hitFromLocation, hitinfo, instigator, causer, DamageType);
+	UGameplayStatics::ApplyPointDamage(Target, BaseDamage, hitFromLocation, hitinfo, instigator, causer, UDamageType::StaticClass());
 }
 
 void UCombatComponent::StartHitstop(float Time)

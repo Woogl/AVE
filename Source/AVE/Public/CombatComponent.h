@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "AVEEnums.h"
-#include "AllAVEDamageTypes.h"
 #include "CombatComponent.generated.h"
 
 /**
@@ -37,9 +36,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	float BaseDamage;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
-	TSubclassOf<UAVEDamageType> DamageType;
+	EDamageType DamageType;
 	UFUNCTION(BlueprintCallable)
-	void SetDamageInfo(float InBaseDamage, TSubclassOf<UDamageType> InDamageType);
+	void SetDamageInfo(float InBaseDamage, EDamageType InDamageType);
 	void OnAttackSucceed(TArray<FHitResult> Hits);
 	void DealDamage(AActor* Target);
 
