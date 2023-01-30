@@ -23,11 +23,3 @@ void UCheckAttack::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBas
 		CombatComp->AttackCheckTick();
 	}
 }
-
-void UCheckAttack::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
-{
-	if (CombatComp)
-	{
-		CombatComp->AttackCheckEnd();
-	}
-}
