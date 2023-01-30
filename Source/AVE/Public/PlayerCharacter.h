@@ -226,6 +226,8 @@ public:
 	void MoveWeaponLeft();
 	UFUNCTION(BlueprintCallable)
 	void MoveWeaponRight();
+	UFUNCTION(BlueprintCallable)
+	void SpreadAoEDamage();
 
 	void RegeneratePosture();
 };

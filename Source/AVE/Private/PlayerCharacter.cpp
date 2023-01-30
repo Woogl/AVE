@@ -12,6 +12,7 @@
 #include "MeshSlicer.h"
 #include "PlayerAnimInstance.h"
 #include "GrabbableActorBase.h"
+#include "Kismet/GameplayStatics.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -588,8 +589,6 @@ void APlayerCharacter::Attack() {
 	// 공격 중이 아니면
 	if (CanAttack()) {
 		UKismetSystemLibrary::PrintString(GetWorld(),TEXT("Attacking == false"));
-		// 공격 중으로 전환
-		bIsAttacking = true;
 		// 오토 타겟팅으로 타겟 지정
 		TryAutoTargeting();
 
@@ -621,6 +620,9 @@ void APlayerCharacter::Attack() {
 		}
 		Tail = -1;
 		LastAttackTime = 0.f;
+
+		// 공격 중으로 전환
+		bIsAttacking = true;
 	}
 	else
 		UKismetSystemLibrary::PrintString(GetWorld(), TEXT("Attacking == true"));
@@ -671,7 +673,6 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	FHitResult outHit;
 	FVector outImpulse;
 	DamageEvent.GetBestHitInfo(this,DamageCauser,outHit,outImpulse);
-	bIsHit = true;
 	// 적 방향으로 회전
 	RotateToDirection(DamageCauser->GetActorLocation(), 0.f, 0.f);
 	if (bIsParrying) {
@@ -688,6 +689,7 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 			PerformDiscard();
 		}
 	}
+	bIsHit = true;
 	return DamageAmount;
 }
 
@@ -718,8 +720,8 @@ void APlayerCharacter::Hit(float Damage, int DamageType) {
 }
 
 void APlayerCharacter::GuardBreak() {
-	bIsGuardBroken = true;
 	PlayAnimMontage(GuardBreakMontage);
+	bIsGuardBroken = true;
 }
 
 void APlayerCharacter::Die() {
@@ -729,9 +731,9 @@ void APlayerCharacter::Die() {
 
 void APlayerCharacter::Skill() {
 	if (CanAttack()) {
+		PlayAnimMontage(SkillMontages[CurSkill]);
 		bIsAttacking = true;
 		bIsInvincible = true;
-		PlayAnimMontage(SkillMontages[CurSkill]);
 	}
 }
 
@@ -749,4 +751,9 @@ void APlayerCharacter::RegeneratePosture() {
 	if (!(bIsHit || bIsGuardBroken) && CurPosture < 100.f) {		
 		CurPosture += 0.2f;
 	}
+}
+
+void APlayerCharacter::SpreadAoEDamage() {
+	TArray<AActor*> IgnoreList;
+	UGameplayStatics::ApplyRadialDamage(GetWorld(),50,GetActorLocation(),1000.f,UDamageType::StaticClass(),IgnoreList);
 }
