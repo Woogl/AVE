@@ -44,9 +44,6 @@ void ADummy::LookAtPlayer()
 
 void ADummy::OnFinishered()
 {
-	//디버그
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("OnFinishered"));
-
 	// 플레이어 쳐다보기
 	LookAtPlayer();
 

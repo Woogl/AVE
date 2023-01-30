@@ -21,7 +21,7 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	ACharacter* Character;
+	class APlayerCharacter* Player;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector Velocity;
@@ -38,13 +38,32 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsBlocking;
 
+	// Foot IK
+	void FootIK(float DeltaTime);
+	TTuple<bool, float> CapsuleDistance(FName SocketName, ACharacter* Char);
+	TTuple<bool, float, FVector> FootLineTrace(FName SocketName, ACharacter* Char);
+	UPROPERTY()
+	TArray<AActor*> IgnoreActors;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = (AllowPrivateAccess = "true"))
+	float Displacement;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IK", meta = (AllowPrivateAccess = "true"))
+	float IKInterpSpeed;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = (AllowPrivateAccess = "true"))
+	FRotator RRot;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = (AllowPrivateAccess = "true"))
+	FRotator LRot;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = (AllowPrivateAccess = "true"))
+	float RIK;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "IK", meta = (AllowPrivateAccess = "true"))
+	float LIK;
+
 	// 雀乔 根鸥林
 	UFUNCTION()
-	void AnimNotify_StartiFrame();
-	UFUNCTION()
-	void AnimNotify_EndiFrame();
+	void AnimNotify_InitState();
 
-	// 傍拜 根鸥林
 	UFUNCTION()
-	void AnimNotify_EndAttack();
+	void AnimNotify_EndInvincible();
+
+	UFUNCTION()
+	void InitPlayerState(UAnimMontage* Montage, bool bInterrupted);
 };
