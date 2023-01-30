@@ -31,7 +31,6 @@ public:
 	// 공격 판정 계산
 	void AttackCheckBegin();
 	void AttackCheckTick();
-	void AttackCheckEnd();
 
 	// 대미지
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
