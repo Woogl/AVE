@@ -48,18 +48,6 @@ APlayerCharacter::APlayerCharacter()
 	DefaultCameraBoom->bEnableCameraLag = true;	// 카메라 랙 활성화
 	DefaultCameraBoom->CameraLagSpeed = 4.f;
 
-	// 좌측 사이드뷰 스프링암
-	LeftCameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("LeftCameraBoom"));
-	LeftCameraBoom->SetupAttachment(RootComponent);
-	LeftCameraBoom->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
-	LeftCameraBoom->TargetArmLength = 225.f;
-
-	// 우측 사이드뷰 스프링암
-	RightCameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("RightCameraBoom"));
-	RightCameraBoom->SetupAttachment(RootComponent);
-	RightCameraBoom->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
-	RightCameraBoom->TargetArmLength = 225.f;
-
 	// 카메라
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(DefaultCameraBoom, USpringArmComponent::SocketName);
@@ -296,6 +284,7 @@ void APlayerCharacter::Finisher()
 		if (TryAutoTargeting() == true)
 		{
 			MotionMorph();
+			PlayExecuteSequence();
 		}
 	}
 }
@@ -496,26 +485,6 @@ void APlayerCharacter::DropProp()
 	}
 	GrabbedMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	GrabbedMesh->SetSimulatePhysics(true);
-}
-
-void APlayerCharacter::MoveCamera(ECameraPosition CameraPosition)
-{
-	if (CameraPosition == ECameraPosition::ECP_Default)
-	{
-		FollowCamera->AttachToComponent(DefaultCameraBoom, FAttachmentTransformRules::KeepWorldTransform);
-	}
-	else if (CameraPosition == ECameraPosition::ECP_LeftSideView)
-	{
-		FollowCamera->AttachToComponent(LeftCameraBoom, FAttachmentTransformRules::KeepWorldTransform);
-	}
-	else if (CameraPosition == ECameraPosition::ECP_RightSideView)
-	{
-		FollowCamera->AttachToComponent(RightCameraBoom, FAttachmentTransformRules::KeepWorldTransform);
-	}
-
-	FLatentActionInfo info;
-	info.CallbackTarget = this;
-	UKismetSystemLibrary::MoveComponentTo(FollowCamera, FVector(0.f), FRotator(0.f), false, false, 0.4f, true, EMoveComponentAction::Move, info);
 }
 
 void APlayerCharacter::SpawnMeshSlicer()

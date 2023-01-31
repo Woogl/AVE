@@ -156,7 +156,6 @@ void UPlayerAnimInstance::AnimNotify_EndInvincible() {
 void UPlayerAnimInstance::InitPlayerState(UAnimMontage* Montage, bool bInterrupted) {
 	if (Player) {
 		Player->InitState();
-		UKismetSystemLibrary::PrintString(GetWorld(),TEXT("InitState"));
 		Player->InitInvincibility();
 	}
 }
@@ -164,5 +163,23 @@ void UPlayerAnimInstance::InitPlayerState(UAnimMontage* Montage, bool bInterrupt
 void UPlayerAnimInstance::AnimNotify_AoEDamage() {
 	if (Player) {
 		Player->SpreadAoEDamage();
+	}
+}
+
+void UPlayerAnimInstance::AnimNotify_PlaySequence() {
+	if (Player) {
+		switch (Player->CurSkill) {
+			case 0:
+			Player->PlaySlashSequence();
+			break;
+
+			case 1:
+			Player->PlayLightningShockSequence();
+			break;
+
+			case 2:
+			Player->PlayMissileSequence();
+			break;
+		}
 	}
 }
