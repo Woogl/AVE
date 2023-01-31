@@ -156,7 +156,6 @@ void UPlayerAnimInstance::AnimNotify_EndInvincible() {
 void UPlayerAnimInstance::InitPlayerState(UAnimMontage* Montage, bool bInterrupted) {
 	if (Player) {
 		Player->InitState();
-		UKismetSystemLibrary::PrintString(GetWorld(),TEXT("InitState"));
 		Player->InitInvincibility();
 	}
 }

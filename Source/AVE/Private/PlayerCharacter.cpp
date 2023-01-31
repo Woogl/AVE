@@ -9,7 +9,6 @@
 #include "CombatComponent.h"
 #include <Kismet/KismetMathLibrary.h>
 #include <Kismet/KismetSystemLibrary.h>	
-#include "MeshSlicer.h"
 #include "PlayerAnimInstance.h"
 #include "GrabbableActorBase.h"
 #include "Kismet/GameplayStatics.h"
@@ -44,9 +43,10 @@ APlayerCharacter::APlayerCharacter()
 	DefaultCameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("DefaultCameraBoom"));
 	DefaultCameraBoom->SetupAttachment(RootComponent);
 	DefaultCameraBoom->TargetArmLength = 300.0f;
+	DefaultCameraBoom->SocketOffset = FVector(0.f, 0.f, 25.f);
 	DefaultCameraBoom->bUsePawnControlRotation = true;
 	DefaultCameraBoom->bEnableCameraLag = true;	// 카메라 랙 활성화
-	DefaultCameraBoom->CameraLagSpeed = 4.f;
+	DefaultCameraBoom->CameraLagSpeed = 8.f;
 
 	// 좌측 사이드뷰 스프링암
 	LeftCameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("LeftCameraBoom"));
@@ -68,6 +68,7 @@ APlayerCharacter::APlayerCharacter()
 	// 물건 들기
 	GrabPoint = CreateDefaultSubobject<USceneComponent>(TEXT("GrabPoint"));
 	GrabPoint->SetupAttachment(RootComponent);
+	GrabPoint->SetRelativeLocation(FVector(0.f, 50.f, 50.f));
 
 	// 회전 설정
 	TurnRateGamepad = 50.f;
@@ -92,7 +93,7 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	// 컴뱃 컴포넌트에 무기 설정
 	CombatComp->SetupWeapon(Weapon);
 }
@@ -224,7 +225,7 @@ void APlayerCharacter::Guard()
 	GetWorldTimerManager().SetTimer(ParryingTimer, this, &APlayerCharacter::OnParryEnd, 0.3f, false);
 
 	// ABP의 스테이트 변경
-	auto animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	UPlayerAnimInstance* animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	animIns->bIsBlocking = true;
 
 	// 이동속도 감소
@@ -242,7 +243,7 @@ void APlayerCharacter::StopGuard()
 	GetWorldTimerManager().ClearTimer(ParryingTimer);
 
 	// ABP의 스테이트 변경
-	auto animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	UPlayerAnimInstance* animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	animIns->bIsBlocking = false;
 
 	// 이동속도 초기화
@@ -258,14 +259,19 @@ void APlayerCharacter::Interact()
 	if (bIsGrabbing == false)
 	{
 		PullProp();
-		bIsGrabbing = true;
 	}
 	else
 	{
-		if (GrabbedMesh)
+		if (GrabbedActor)
 		{
-			PushProp();
-			bIsGrabbing = false;
+			if (TryAutoTargeting(800.f) == true)
+			{
+				PushProp();
+			}
+			else
+			{
+				DropProp();
+			}
 		}
 	}
 }
@@ -295,6 +301,7 @@ void APlayerCharacter::Finisher()
 	// TODO: 체간 수치 체크
 		if (TryAutoTargeting() == true)
 		{
+			bIsInvincible = true;
 			MotionMorph();
 		}
 	}
@@ -435,11 +442,11 @@ void APlayerCharacter::PullProp()
 	if (UKismetSystemLibrary::SphereTraceSingleForObjects(this, GetActorLocation(), GetActorLocation(), 150.f, objectTypes, false, actorToIgnores,
 			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f))
 	{
-		AActor* hitActor = hit.GetActor();
 		// 찾기 성공하면 주움
-		if (hitActor->IsA(AGrabbableActorBase::StaticClass()))
+		if (hit.GetActor()->IsA(AGrabbableActorBase::StaticClass()))
 		{
-			GrabbedMesh = Cast<AGrabbableActorBase>(hit.GetActor())->GetMesh();
+			GrabbedActor = Cast<AGrabbableActorBase>(hit.GetActor());
+			GrabbedMesh = GrabbedActor->GetMesh();
 			GrabbedMesh->SetSimulatePhysics(false);
 
 			// 컴포넌트 이동시키기
@@ -451,6 +458,8 @@ void APlayerCharacter::PullProp()
 			UKismetSystemLibrary::MoveComponentTo(GrabbedMesh, GrabPoint->GetRelativeLocation(), GetActorRotation(), false, true, 0.2f, true, EMoveComponentAction::Move, info);
 
 			PlayAnimMontage(InteractionMontages[0]);
+
+			bIsGrabbing = true;
 		}
 	}
 }
@@ -462,40 +471,35 @@ void APlayerCharacter::AttachProp()
 
 void APlayerCharacter::PushProp()
 {
-	if (GrabbedMesh)
-	{
-		// 적에게 물건 던지기
-		if (TryAutoTargeting(800.f) == true)
-		{
-			GrabbedMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-			GrabbedMesh->SetSimulatePhysics(true);
+	// 분리하기
+	GrabbedMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	GrabbedMesh->SetSimulatePhysics(true);
 
-			// 발사 속도 계산
-			FVector OutLaunchVelocity;
-			UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, OutLaunchVelocity, GrabbedMesh->GetComponentLocation(), EnemyTarget->GetActorLocation(), 0.f, 0.9f);
+	// 발사하기
+	FVector OutLaunchVelocity;
+	UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, OutLaunchVelocity, GrabbedMesh->GetComponentLocation(), EnemyTarget->GetActorLocation(), 0.f, 0.9f);
+	GrabbedMesh->AddImpulse(OutLaunchVelocity * 64);
+	GrabbedMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	GrabbedActor->bShouldAttack = true;
 
-			// 발사하기
-			GrabbedMesh->AddImpulse(OutLaunchVelocity * 16);
+	PlayAnimMontage(InteractionMontages[1]);
 
-			PlayAnimMontage(InteractionMontages[1]);
-		}
-		// 물건 버리기
-		else
-		{
-			DropProp();
-		}
-	}
+	bIsGrabbing = false;
 	GrabbedMesh = nullptr;
+	GrabbedActor = nullptr;
 }
 
 void APlayerCharacter::DropProp()
 {	
-	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(InteractionMontages[1]))
+	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(InteractionMontages[0]))
 	{
-		GetMesh()->GetAnimInstance()->Montage_Stop(0.25f, InteractionMontages[1]);
+		GetMesh()->GetAnimInstance()->Montage_Stop(0.25f, InteractionMontages[0]);
 	}
 	GrabbedMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	GrabbedMesh->SetSimulatePhysics(true);
+
+	bIsGrabbing = false;
+	GrabbedMesh = nullptr;
 }
 
 void APlayerCharacter::MoveCamera(ECameraPosition CameraPosition)
@@ -518,57 +522,30 @@ void APlayerCharacter::MoveCamera(ECameraPosition CameraPosition)
 	UKismetSystemLibrary::MoveComponentTo(FollowCamera, FVector(0.f), FRotator(0.f), false, false, 0.4f, true, EMoveComponentAction::Move, info);
 }
 
-void APlayerCharacter::SpawnMeshSlicer()
-{
-	FActorSpawnParameters spawnParams;
-	FTransform spawnTransform = Weapon->GetComponentTransform();
-	GetWorld()->SpawnActor<AMeshSlicer>(AMeshSlicer::StaticClass(), spawnTransform, spawnParams);
-}
-
 bool APlayerCharacter::TryAutoTargeting(float SearchRadius)
 {
 	// 스피어 트레이스 준비
 	TArray<AActor*> actorToIgnore;
 	FHitResult hit;
-	bool bSuccess = false;
+	bool bSuccess;
+
+	// 제자리에서 트레이스
+	bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), GetActorLocation(), SearchRadius, TraceTypeQuery3, false, actorToIgnore,
+		EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f);
+	// 적을 찾으면 타겟으로 지정
+	if (bSuccess == true)
+	{
+		EnemyTarget = hit.GetActor();
+		bIsTargeting = true;
+	}
 
 	// 방향키 입력이 있을 경우
 	if (GetLastMovementInputVector().Size() > 0.f)
 	{
-		// 방향키 방향에서 좁게 스피어 트레이스
+		// 방향키 방향으로 다시 트레이스
 		FVector loc = GetActorLocation() + GetLastMovementInputVector() * 200.f;
-		bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, loc, loc, SearchRadius * 0.5f, TraceTypeQuery3, false, actorToIgnore,
+		bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), loc, SearchRadius * 0.5f, TraceTypeQuery3, false, actorToIgnore,
 			EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f);
-
-		// 적을 찾으면 타겟으로 지정하고 true 반환
-		if (bSuccess == true)
-		{
-			EnemyTarget = hit.GetActor();
-			bIsTargeting = true;
-			return true;
-		}
-		else // 방향키 방향에서 적을 못찾았을 경우
-		{
-			// 제자리에서 넓게 스피어 트레이스
-			bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), GetActorLocation(), SearchRadius, TraceTypeQuery3, false, actorToIgnore,
-				EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f);
-
-			// 적을 찾으면 타겟으로 지정하고 true 반환
-			if (bSuccess == true)
-			{
-				EnemyTarget = hit.GetActor();
-				bIsTargeting = true;
-				return true;
-			}
-		}
-	}
-	// 방향키 입력 없을 경우
-	else
-	{
-		// 제자리에서 넓게 스피어 트레이스
-		bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), GetActorLocation(), SearchRadius, TraceTypeQuery3, false, actorToIgnore,
-			EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f);
-
 		// 적을 찾으면 타겟으로 지정하고 true 반환
 		if (bSuccess == true)
 		{
@@ -578,8 +555,8 @@ bool APlayerCharacter::TryAutoTargeting(float SearchRadius)
 		}
 	}
 
-	// 적을 못찾으면 false 반환
-	return false;
+	// 적을 못찾으면 true, 못찾으면 false 반환
+	return bSuccess;
 }
 
 void APlayerCharacter::WInput() {
@@ -615,7 +592,6 @@ void APlayerCharacter::CreateMoveCommand(FVector2D InputDirection) {
 void APlayerCharacter::Attack() {
 	// 공격 중이 아니면
 	if (CanAttack()) {
-		UKismetSystemLibrary::PrintString(GetWorld(),TEXT("Attacking == false"));
 		// 오토 타겟팅으로 타겟 지정
 		TryAutoTargeting();
 
@@ -642,7 +618,6 @@ void APlayerCharacter::Attack() {
 			}
 		}
 		else {
-			UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ComboAttack"));
 			ComboAttack();
 		}
 		
@@ -652,9 +627,6 @@ void APlayerCharacter::Attack() {
 		// 공격 중으로 전환
 		bIsAttacking = true;
 	}
-	else
-		UKismetSystemLibrary::PrintString(GetWorld(), TEXT("Attacking == true"));
-
 }
 
 void APlayerCharacter::InitState() {
