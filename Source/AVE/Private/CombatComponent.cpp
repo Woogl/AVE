@@ -3,10 +3,11 @@
 
 #include "CombatComponent.h"
 #include <Kismet/KismetSystemLibrary.h>
-#include "PlayerCharacter.h"
 #include <Kismet/GameplayStatics.h>
 #include <Particles/ParticleSystem.h>
 #include <../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h>
+#include "MeshSlicer.h"
+#include <GameFramework/Character.h>
 
 UCombatComponent::UCombatComponent()
 {
@@ -94,11 +95,7 @@ void UCombatComponent::OnAttackSucceed(TArray<FHitResult> Hits)
 			// ECC_Destructible이면 Mesh Slicer 스폰
 			if (bEnableSlice == true && hit.Component->GetCollisionObjectType() == ECC_Destructible)
 			{
-				APlayerCharacter* player = Cast<APlayerCharacter>(GetOwner());
-				if (player)
-				{
-					player->SpawnMeshSlicer();
-				}
+				SpawnMeshSlicer(hit);
 			}
 
 			// 캐릭터에게 대미지 가하기
@@ -159,4 +156,11 @@ void UCombatComponent::PlayHitFX(FHitResult HitInfo)
 	}
 }
 
+void UCombatComponent::SpawnMeshSlicer(FHitResult HitInfo)
+{
+	FActorSpawnParameters spawnParams;
+	FVector spawnLoc = HitInfo.ImpactPoint;
+	FRotator spawnRot = MainWeapon->GetComponentRotation();
+	GetWorld()->SpawnActor<AMeshSlicer>(AMeshSlicer::StaticClass(), spawnLoc, spawnRot,	spawnParams);
+}
 

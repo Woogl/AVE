@@ -155,14 +155,20 @@ public:
 	void AttachProp();
 	void PushProp();
 	void DropProp();
+	class AGrabbableActorBase* GrabbedActor;
 	UStaticMeshComponent* GrabbedMesh;
 
 	// 모션 워핑 (BP에서 이벤트 구현)
 	UFUNCTION(BlueprintImplementableEvent)
 	void MotionMorph();
 
+<<<<<<< HEAD
 	// 메시 자르는 액터 스폰
 	void SpawnMeshSlicer();
+=======
+	// 카메라 전환
+	void MoveCamera(ECameraPosition CameraPosition);
+>>>>>>> Woogle
 
 	// 오토 타게팅
 	UFUNCTION(BlueprintCallable)	// 연구 중
