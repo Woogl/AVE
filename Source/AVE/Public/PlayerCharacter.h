@@ -23,6 +23,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* FollowCamera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	class USceneComponent* GrabPoint;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	UStaticMeshComponent* Weapon;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	UStaticMeshComponent* Scabbard;
@@ -100,10 +102,6 @@ public:
 	TArray<class UAnimMontage*> HitReactionMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
 	class UAnimMontage* DieMontage;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
-	class UAnimMontage* GrabMontage;
-	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
-	class UAnimMontage* ThrowMontage;
 
 protected:
 	virtual void BeginPlay() override;
@@ -157,11 +155,11 @@ public:
 	void FinishEnemy();
 
 	// 물건 줍기, 던지기
-	void TryGrab();
-	void TryThrow();
-	void PerformThrow();
-	void PerformDiscard();
-	class AGrabbableActorBase* GrabbedObject;
+	void PullProp();
+	void AttachProp();
+	void PushProp();
+	void DropProp();
+	UStaticMeshComponent* GrabbedMesh;
 
 	// 모션 워핑 (BP에서 이벤트 구현)
 	UFUNCTION(BlueprintImplementableEvent)
@@ -198,6 +196,11 @@ public:
 	// 현재 특수공격 인덱스
 	int CurSpecialAttack;
 	int CurSkill;
+
+	// 물리 내성
+	float Defense;
+	// 전기 내성
+	float ElecDefense;
 	void WInput();
 	void SInput();
 	void DInput();
@@ -215,9 +218,9 @@ public:
 	void InitInvincibility();
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-	void ParryHit(float Damage, int DamageType);
-	void GuardHit(float Damage, int DamageType);
-	void Hit(float Damage, int DamageType);
+	void ParryHit(float Damage, TSubclassOf<UDamageType> DamageType);
+	void GuardHit(float Damage, TSubclassOf<UDamageType> DamageType);
+	void Hit(float Damage, TSubclassOf<UDamageType> DamageType);
 	void GuardBreak();
 	void Die();
 
@@ -226,6 +229,8 @@ public:
 	void MoveWeaponLeft();
 	UFUNCTION(BlueprintCallable)
 	void MoveWeaponRight();
+	UFUNCTION(BlueprintCallable)
+	void SpreadAoEDamage();
 
 	void RegeneratePosture();
 };
