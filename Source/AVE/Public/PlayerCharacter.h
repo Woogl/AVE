@@ -162,14 +162,6 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void MotionMorph();
 
-<<<<<<< HEAD
-	// 메시 자르는 액터 스폰
-	void SpawnMeshSlicer();
-=======
-	// 카메라 전환
-	void MoveCamera(ECameraPosition CameraPosition);
->>>>>>> Woogle
-
 	// 오토 타게팅
 	UFUNCTION(BlueprintCallable)	// 연구 중
 	bool TryAutoTargeting(float SearchRadius = 300.f);
