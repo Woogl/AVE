@@ -15,11 +15,6 @@ class AVE_API AGrabbableActorBase : public AActor
 public:	
 	AGrabbableActorBase();
 
-	// 콜리전
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	class UBoxComponent* Box;
-
-	// 외형
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UStaticMeshComponent* Mesh;
 
@@ -48,6 +43,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
 	class USoundWave* HitSound;
 
+	UStaticMeshComponent* GetMesh();
+
+
+	//
+
+
 	// 주워졌을 때 호출
 	void OnGrabbed(ACharacter* InGrabber);
 	void AttachToGrabber();
@@ -63,5 +64,5 @@ public:
 
 	// 충돌 시 호출
 	UFUNCTION()
-	void OnBoxHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
+	void OnMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 };
