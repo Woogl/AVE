@@ -92,7 +92,7 @@ void AEnemyBase::OnFinishered()
 	LookAtPlayer();
 
 	// 테이크다운 애니메이션 실행
-	PlayAnimMontage(enemyAnimMontage);
+	PlayAnimMontage(enemyAnimMontage,1,TEXT("Finish"));
 }
 
 void AEnemyBase::SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float RagdollDelay)
