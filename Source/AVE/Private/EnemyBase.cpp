@@ -2,9 +2,7 @@
 
 
 #include "EnemyBase.h"
-#include "CombatComponent.h"
 #include <Components/CapsuleComponent.h>
-#include "AIManager.h"
 #include <Kismet/GameplayStatics.h>
 #include <Kismet/KismetMathLibrary.h>
 
@@ -14,11 +12,9 @@ AEnemyBase::AEnemyBase()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	hp = hpMax = 100;
+	hp = hpMax = 50;
 	posture = postureMax = 50;
 	damage = 10;
-
-	CombatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp"));
 }
 
 // Called when the game starts or when spawned
@@ -26,7 +22,6 @@ void AEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//UGameplayStatics::GetActorOfClass(const UObject * WorldContextObject, TSubclassOf<AActor> ActorClass)
 }
  
 // Called every frame
@@ -92,7 +87,7 @@ void AEnemyBase::OnFinishered()
 	LookAtPlayer();
 
 	// 테이크다운 애니메이션 실행
-	PlayAnimMontage(enemyAnimMontage,1,TEXT("Finish"));
+	//PlayAnimMontage(Finishered[0]);
 }
 
 void AEnemyBase::SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float RagdollDelay)
@@ -118,7 +113,7 @@ void AEnemyBase::SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float Ragdo
 	// 허리 자를 경우
 	else if (BodyIndex == EBodyPart::EBP_Waist)
 	{
-		GetMesh()->BreakConstraint(Impulse, GetActorLocation(), FName("spine_02"));
+		GetMesh()->BreakConstraint(Impulse, GetActorLocation(), FName("spine_01"));
 	}
 	// 왼다리 자를 경우
 	else if (BodyIndex == EBodyPart::EBP_LeftLeg)

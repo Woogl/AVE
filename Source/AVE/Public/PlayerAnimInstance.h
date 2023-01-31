@@ -69,4 +69,7 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_AoEDamage();
+
+	UFUNCTION()
+	void AnimNotify_PlaySequence();
 };
