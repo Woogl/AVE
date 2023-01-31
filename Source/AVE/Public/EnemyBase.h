@@ -65,13 +65,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class USkeletalMeshComponent* bodyMeshComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+		class UStaticMeshComponent* Weapon;
 	UPROPERTY(EditAnywhere)
 		class UAnimMontage* enemyAnimMontage;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+		class UCombatComponent* CombatComp;
+
 	/*UPROPERTY(EditAnywhere)
 		class AAIControlManager* AIManager;*/
 
 	UPROPERTY(EditAnywhere)
-		class UBaseBital bital;
+		class UBaseBital* bital;
 
 	virtual void onActionAttack();
 	virtual void onActionEvade();
