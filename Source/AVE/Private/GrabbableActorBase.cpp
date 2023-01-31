@@ -13,17 +13,13 @@ AGrabbableActorBase::AGrabbableActorBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
-	Box->SetCollisionProfileName(TEXT("BlockAllDynamic"));
-	Box->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-	Box->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
-	Box->SetSimulatePhysics(true);
-	Box->BodyInstance.bNotifyRigidBodyCollision = true;
-	RootComponent = Box;
-
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	Mesh->SetCollisionProfileName(TEXT("NoCollision"));
-	Mesh->SetupAttachment(RootComponent);
+	Mesh->SetCollisionProfileName(TEXT("WorldDynamic"));
+	Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	Mesh->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	Mesh->SetSimulatePhysics(true);
+	Mesh->BodyInstance.bNotifyRigidBodyCollision = true;
+	RootComponent = Mesh;
 }
 
 void AGrabbableActorBase::BeginPlay()
@@ -31,13 +27,18 @@ void AGrabbableActorBase::BeginPlay()
 	Super::BeginPlay();
 	
 	// 델리게이트 바인딩
-	Box->OnComponentHit.AddDynamic(this, &AGrabbableActorBase::OnBoxHit);
+	Mesh->OnComponentHit.AddDynamic(this, &AGrabbableActorBase::OnMeshHit);
 }
 
 void AGrabbableActorBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+UStaticMeshComponent* AGrabbableActorBase::GetMesh()
+{
+	return Mesh;
 }
 
 void AGrabbableActorBase::OnGrabbed(ACharacter* InGrabber)
@@ -47,7 +48,7 @@ void AGrabbableActorBase::OnGrabbed(ACharacter* InGrabber)
 	GrabberMesh = Grabber->GetMesh();
 
 	// 콜리전 변경
-	Box->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 
 	// 컴포넌트 이동시키기
 	FLatentActionInfo info;
@@ -55,7 +56,7 @@ void AGrabbableActorBase::OnGrabbed(ACharacter* InGrabber)
 	FVector targetLoc = GrabberMesh->GetSocketLocation(TEXT("hand_l"));
 	FRotator targetRot = GrabberMesh->GetSocketRotation(TEXT("hand_l"));
 	float overTime = 0.4f;
-	UKismetSystemLibrary::MoveComponentTo(Box, targetLoc, targetRot, true, true, overTime, true, EMoveComponentAction::Move, info);
+	UKismetSystemLibrary::MoveComponentTo(Mesh, targetLoc, targetRot, true, true, overTime, true, EMoveComponentAction::Move, info);
 
 	// 컴포넌트 붙이기
 	GetWorldTimerManager().SetTimer(AttachTimer, this, &AGrabbableActorBase::AttachToGrabber, overTime, false);
@@ -69,16 +70,16 @@ void AGrabbableActorBase::AttachToGrabber()
 void AGrabbableActorBase::OnThrown(FVector ThrowingLoc)
 {
 	// 컴포넌트 떼기
-	Box->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	Box->SetSimulatePhysics(true);
+	Mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	Mesh->SetSimulatePhysics(true);
 
 	// 발사 속도 계산
 	FVector OutLaunchVelocity;
 	UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, OutLaunchVelocity, GetActorLocation(), ThrowingLoc, 0.f, 0.8f);
-	auto temp = Box->GetComponentLocation();
+	auto temp = Mesh->GetComponentLocation();
 
 	// 발사하기
-	Box->AddImpulse(OutLaunchVelocity, NAME_None, true);
+	Mesh->AddImpulse(OutLaunchVelocity, NAME_None, true);
 	ShouldAttack = true;
 
 	// 콜리전 변경
@@ -87,17 +88,17 @@ void AGrabbableActorBase::OnThrown(FVector ThrowingLoc)
 
 void AGrabbableActorBase::ResetCollisionChannel()
 {
-	Box->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 }
 
 void AGrabbableActorBase::OnDiscard()
 {
 	// 컴포넌트 떼기
-	Box->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	Box->SetSimulatePhysics(true);
+	Mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	Mesh->SetSimulatePhysics(true);
 }
 
-void AGrabbableActorBase::OnBoxHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+void AGrabbableActorBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
 	// 조건 체크
 	if (ShouldAttack == false) return;
@@ -120,9 +121,9 @@ void AGrabbableActorBase::OnBoxHit(UPrimitiveComponent* HitComponent, AActor* Ot
 			UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
 		}
 	}
-	else if (OtherComponent->GetCollisionObjectType() == ECC_WorldStatic && Box->GetCollisionResponseToChannel(ECC_Pawn) != ECR_Ignore)
+	else if (OtherComponent->GetCollisionObjectType() == ECC_WorldStatic && Mesh->GetCollisionResponseToChannel(ECC_Pawn) != ECR_Ignore)
 	{
-		Box->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+		Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 		ShouldAttack = false;
 	}
 }

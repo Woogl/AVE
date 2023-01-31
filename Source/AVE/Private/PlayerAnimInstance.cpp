@@ -160,3 +160,9 @@ void UPlayerAnimInstance::InitPlayerState(UAnimMontage* Montage, bool bInterrupt
 		Player->InitInvincibility();
 	}
 }
+
+void UPlayerAnimInstance::AnimNotify_AoEDamage() {
+	if (Player) {
+		Player->SpreadAoEDamage();
+	}
+}
