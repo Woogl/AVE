@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
 #include "AVEEnums.h"
+#include "AllAVEDamageTypes.h"
 #include "CheckAttack.generated.h"
 
 /**
@@ -20,15 +21,13 @@ public:
 
 	virtual void NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime, const FAnimNotifyEventReference& EventReference) override;
 
-	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
-
 	// 가할 데미지
 	UPROPERTY(EditAnywhere, Category = "Custom", meta = (ClampMin = 0.f))
 	float BaseDamage = 10.f;
 
 	// 공격 타입 (ex: 경직, 넉백, 다운 등)
 	UPROPERTY(EditAnywhere, Category = "Custom")
-	EDamageType DamageType;
+	TSubclassOf<UDamageType> DamageType;
 
 	// 역경직 시간
 	UPROPERTY(EditAnywhere, Category = "Custom", meta = (ClampMin = 0.f, ClampMax = 1.f))

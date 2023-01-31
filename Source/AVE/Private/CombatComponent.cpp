@@ -36,7 +36,7 @@ void UCombatComponent::AttackCheckBegin()
 {
 	// 때린 적 목록 초기화
 	AlreadyHitActors.Reset();
-	CurSocketLocations.Reset();	
+	CurSocketLocations.Reset();
 	LastSocketLocations.Reset();
 
 	// 소켓 초기 위치 설정
@@ -73,12 +73,7 @@ void UCombatComponent::AttackCheckTick()
 	}
 }
 
-void UCombatComponent::AttackCheckEnd()
-{
-	// DEPRECATED
-}
-
-void UCombatComponent::SetDamageInfo(float InBaseDamage, EDamageType InDamageType)
+void UCombatComponent::SetDamageInfo(float InBaseDamage, TSubclassOf<UDamageType> InDamageType)
 {
 	BaseDamage = InBaseDamage;
 	DamageType = InDamageType;
@@ -130,13 +125,12 @@ void UCombatComponent::DealDamage(AActor* Target)
 	FVector hitFromLocation = GetOwner()->GetActorLocation();
 	// 추가 정보
 	FHitResult hitinfo;
-	hitinfo.Item = (int32)DamageType;	// 0=Standard, 1=KnockBack, 2=KnockDown, 3=KnockUp, 4=NoReaction
 	// 가해자 컨트롤러
 	AController* instigator = GetOwner()->GetInstigatorController();
 	// 유발자
 	AActor* causer = GetOwner();
 
-	UGameplayStatics::ApplyPointDamage(Target, BaseDamage, hitFromLocation, hitinfo, instigator, causer, UDamageType::StaticClass());
+	UGameplayStatics::ApplyPointDamage(Target, BaseDamage, hitFromLocation, hitinfo, instigator, causer, DamageType);
 }
 
 void UCombatComponent::StartHitstop(float Time)

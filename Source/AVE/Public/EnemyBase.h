@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/Pawn.h"
+#include "BaseBital.h"
 #include "AVEEnums.h"
 #include "EnemyBase.generated.h"
 
@@ -64,16 +65,24 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class USkeletalMeshComponent* bodyMeshComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+		class UStaticMeshComponent* Weapon;
 	UPROPERTY(EditAnywhere)
 		class UAnimMontage* enemyAnimMontage;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+		class UCombatComponent* CombatComp;
+
 	/*UPROPERTY(EditAnywhere)
 		class AAIControlManager* AIManager;*/
+
+	UPROPERTY(EditAnywhere)
+		class UBaseBital* bital;
 
 	virtual void onActionAttack();
 	virtual void onActionEvade();
 	virtual void onActionGuard();
 	UFUNCTION(BlueprintCallable)
-		virtual void onHit(int characterDamage);
+	virtual void onHit(int characterDamage);
 	virtual void onHitCrushed();
 	virtual void onDie();
 };
