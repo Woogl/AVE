@@ -5,7 +5,6 @@
 #include <Components/BoxComponent.h>
 #include <Kismet/GameplayStatics.h>
 #include <GameFramework/Character.h>
-#include "Dummy.h"
 #include <../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h>
 #include "AllAVEDamageTypes.h"
 
@@ -42,10 +41,12 @@ void AGrabbableActorBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* O
 	if (bShouldAttack == false) return;
 
 	// 캐릭터인지 체크
-	if (OtherActor->IsA(ACharacter::StaticClass()))
+	if (OtherActor && OtherActor->IsA(ACharacter::StaticClass()))
 	{
 		FHitResult outHit;
 		UGameplayStatics::ApplyPointDamage(OtherActor, BaseDamage, GetActorLocation(), outHit, nullptr, this, DamageType);
+
+		FractureMesh();
 
 		// 타격 VFX
 		if (HitNiagara)
@@ -57,9 +58,7 @@ void AGrabbableActorBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* O
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
 		}
-	}
-	else if (OtherComponent->GetCollisionObjectType() == ECC_WorldStatic)
-	{
+
 		bShouldAttack = false;
 	}
 }

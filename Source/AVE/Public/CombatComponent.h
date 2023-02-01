@@ -25,26 +25,22 @@ protected:
 
 public:	
 	// 공격 판정을 계산할 무기
-	class UStaticMeshComponent* MainWeapon;
+	class UMeshComponent* MainWeapon;
 	UFUNCTION(BlueprintCallable)
-	void SetupWeapon(UStaticMeshComponent* WeaponMesh);
+	void SetupWeapon(UMeshComponent* WeaponMesh);
 
 	// 공격 판정 계산
 	void AttackCheckBegin();
 	void AttackCheckTick();
 
 	// 대미지
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	float BaseDamage;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	TSubclassOf<UAVEDamageType> DamageType;
-	UFUNCTION(BlueprintCallable)
 	void SetDamageInfo(float InBaseDamage, TSubclassOf<UDamageType> InDamageType);
 	void OnAttackSucceed(TArray<FHitResult> Hits);
 	void DealDamage(AActor* Target);
 
 	// 역경직
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	float HitstopTime;
 	void StartHitstop(float Time);
 	void EndHitStop();

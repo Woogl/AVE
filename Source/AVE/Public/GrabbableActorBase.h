@@ -23,6 +23,7 @@ protected:
 
 public:	
 	// true일 때만 대미지 입힘
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	bool bShouldAttack = false;
 	
 	// 대미지
@@ -42,4 +43,8 @@ public:
 	// 충돌 시 호출
 	UFUNCTION()
 	void OnMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
+
+	// 카오스 발동
+	UFUNCTION(BlueprintImplementableEvent)
+	void FractureMesh();
 };

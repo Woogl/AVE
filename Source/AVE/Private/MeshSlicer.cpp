@@ -50,9 +50,6 @@ void AMeshSlicer::OnBoxOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAct
 
 void AMeshSlicer::SliceMesh(UPrimitiveComponent* TargetMesh)
 {
-	// 디버그
-	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("SliceMesh"));
-
 	// 자를 메시
 	UProceduralMeshComponent* meshToSlice = Cast<UProceduralMeshComponent>(TargetMesh);
 	FVector planePosition = Box->GetComponentLocation();
@@ -77,6 +74,7 @@ void AMeshSlicer::SliceMesh(UPrimitiveComponent* TargetMesh)
 		// 잘라진 메시 분리
 		otherHalfMesh->SetSimulatePhysics(true);
 		otherHalfMesh->AddRadialImpulse(planePosition, 1000.f, 500.f, ERadialImpulseFalloff::RIF_Constant, true);
+		otherHalfMesh->SetAngularDamping(2.f);
 		meshToSlice->AddRadialImpulse(planePosition, 1000.f, 500.f, ERadialImpulseFalloff::RIF_Constant, true);
 	}
 }

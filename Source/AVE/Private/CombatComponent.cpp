@@ -5,7 +5,7 @@
 #include <Kismet/KismetSystemLibrary.h>
 #include <Kismet/GameplayStatics.h>
 #include <Particles/ParticleSystem.h>
-#include <../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h>
+#include <NiagaraFunctionLibrary.h>
 #include "MeshSlicer.h"
 #include <GameFramework/Character.h>
 
@@ -27,7 +27,7 @@ void UCombatComponent::BeginPlay()
 	
 }
 
-void UCombatComponent::SetupWeapon(UStaticMeshComponent* WeaponMesh)
+void UCombatComponent::SetupWeapon(UMeshComponent* WeaponMesh)
 {
 	MainWeapon = WeaponMesh;
 	SocketNames = MainWeapon->GetAllSocketNames();
