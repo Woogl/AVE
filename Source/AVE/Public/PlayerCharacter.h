@@ -227,10 +227,10 @@ public:
 
 	// 처형 시퀀스 동작
 	UFUNCTION(BlueprintImplementableEvent)
-	void PlayExecuteSequence();
+	void PlayFinisherSequence();
 	// 반갈죽 시퀀스 동작
 	UFUNCTION(BlueprintImplementableEvent)
-	void PlaySlashSequence();
+	void PlayJudgementCutSequence();
 	// 뇌반 시퀀스 동작
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayLightningShockSequence();

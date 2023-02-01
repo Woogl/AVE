@@ -289,6 +289,7 @@ void APlayerCharacter::Finisher()
 		// TODO: 체간 수치 체크
 		if (TryAutoTargeting() == true)
 		{
+			PlayFinisherSequence();
 			bIsInvincible = true;
 			MotionMorph();
 		}
