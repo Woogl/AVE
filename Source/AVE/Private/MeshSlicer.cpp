@@ -8,8 +8,6 @@
 
 AMeshSlicer::AMeshSlicer()
 {
-	//PrimaryActorTick.bCanEverTick = true;
-
 	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
 	Box->SetCollisionProfileName(TEXT("SliceQuery"));
 	// 자를 크기 설정
@@ -17,7 +15,6 @@ AMeshSlicer::AMeshSlicer()
 	RootComponent = Box;
 
 	// 델리게이트 바인딩
-	//Box->OnComponentBeginOverlap.AddDynamic(this, &AMeshSlicer::OnBoxOverlapBegin);
 	Box->OnComponentEndOverlap.AddDynamic(this, &AMeshSlicer::OnBoxOverlapEnd);
 
 	// 스폰되고 0.01초 지나면 파괴
@@ -31,8 +28,6 @@ void AMeshSlicer::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//디버그
-	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("SpawnMeshSlicer"));
 }
 
 void AMeshSlicer::OnBoxOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)

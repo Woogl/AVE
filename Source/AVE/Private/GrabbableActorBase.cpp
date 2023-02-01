@@ -30,7 +30,7 @@ void AGrabbableActorBase::BeginPlay()
 	Mesh->OnComponentHit.AddDynamic(this, &AGrabbableActorBase::OnMeshHit);
 }
 
-UStaticMeshComponent* AGrabbableActorBase::GetMesh()
+UStaticMeshComponent* AGrabbableActorBase::GetMesh() const
 {
 	return Mesh;
 }
@@ -47,6 +47,8 @@ void AGrabbableActorBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* O
 		UGameplayStatics::ApplyPointDamage(OtherActor, BaseDamage, GetActorLocation(), outHit, nullptr, this, DamageType);
 
 		FractureMesh();
+
+		Mesh->SetCollisionResponseToAllChannels(ECR_Ignore);
 
 		// Å¸°Ý VFX
 		if (HitNiagara)

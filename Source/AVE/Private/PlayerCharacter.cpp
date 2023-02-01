@@ -48,18 +48,6 @@ APlayerCharacter::APlayerCharacter()
 	DefaultCameraBoom->bEnableCameraLag = true;	// 카메라 랙 활성화
 	DefaultCameraBoom->CameraLagSpeed = 8.f;
 
-	// 좌측 사이드뷰 스프링암
-	LeftCameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("LeftCameraBoom"));
-	LeftCameraBoom->SetupAttachment(RootComponent);
-	LeftCameraBoom->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
-	LeftCameraBoom->TargetArmLength = 225.f;
-
-	// 우측 사이드뷰 스프링암
-	RightCameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("RightCameraBoom"));
-	RightCameraBoom->SetupAttachment(RootComponent);
-	RightCameraBoom->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
-	RightCameraBoom->TargetArmLength = 225.f;
-
 	// 카메라
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(DefaultCameraBoom, USpringArmComponent::SocketName);
@@ -303,6 +291,7 @@ void APlayerCharacter::Finisher()
 		{
 			bIsInvincible = true;
 			MotionMorph();
+			PlayExecuteSequence();
 		}
 	}
 }
@@ -502,50 +491,33 @@ void APlayerCharacter::DropProp()
 	GrabbedMesh = nullptr;
 }
 
-void APlayerCharacter::MoveCamera(ECameraPosition CameraPosition)
-{
-	if (CameraPosition == ECameraPosition::ECP_Default)
-	{
-		FollowCamera->AttachToComponent(DefaultCameraBoom, FAttachmentTransformRules::KeepWorldTransform);
-	}
-	else if (CameraPosition == ECameraPosition::ECP_LeftSideView)
-	{
-		FollowCamera->AttachToComponent(LeftCameraBoom, FAttachmentTransformRules::KeepWorldTransform);
-	}
-	else if (CameraPosition == ECameraPosition::ECP_RightSideView)
-	{
-		FollowCamera->AttachToComponent(RightCameraBoom, FAttachmentTransformRules::KeepWorldTransform);
-	}
-
-	FLatentActionInfo info;
-	info.CallbackTarget = this;
-	UKismetSystemLibrary::MoveComponentTo(FollowCamera, FVector(0.f), FRotator(0.f), false, false, 0.4f, true, EMoveComponentAction::Move, info);
-}
-
 bool APlayerCharacter::TryAutoTargeting(float SearchRadius)
 {
-	// 스피어 트레이스 준비
 	TArray<AActor*> actorToIgnore;
 	FHitResult hit;
 	bool bSuccess;
 
-	// 제자리에서 트레이스
+	// 1차 트레이스 (제자리)
 	bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), GetActorLocation(), SearchRadius, TraceTypeQuery3, false, actorToIgnore,
-		EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f);
+		EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f);
 	// 적을 찾으면 타겟으로 지정
 	if (bSuccess == true)
 	{
 		EnemyTarget = hit.GetActor();
 		bIsTargeting = true;
 	}
+	else
+	{
+		EnemyTarget = nullptr;
+		bIsTargeting = false;
+	}
 
-	// 방향키 입력이 있을 경우
+	// 2차 트레이스 (방향키 입력 시에만)
 	if (GetLastMovementInputVector().Size() > 0.f)
 	{
-		// 방향키 방향으로 다시 트레이스
 		FVector loc = GetActorLocation() + GetLastMovementInputVector() * 200.f;
-		bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), loc, SearchRadius * 0.5f, TraceTypeQuery3, false, actorToIgnore,
-			EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f);
+		bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, loc, loc, SearchRadius * 0.5f, TraceTypeQuery3, false, actorToIgnore,
+			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f);
 		// 적을 찾으면 타겟으로 지정하고 true 반환
 		if (bSuccess == true)
 		{
@@ -555,7 +527,6 @@ bool APlayerCharacter::TryAutoTargeting(float SearchRadius)
 		}
 	}
 
-	// 적을 못찾으면 true, 못찾으면 false 반환
 	return bSuccess;
 }
 

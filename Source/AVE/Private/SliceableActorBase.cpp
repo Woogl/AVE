@@ -7,8 +7,6 @@
 
 ASliceableActorBase::ASliceableActorBase()
 {
-	PrimaryActorTick.bCanEverTick = true;
-
 	OriginalMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OriginalMesh"));
 	OriginalMesh->SetCollisionProfileName(TEXT("NoCollision"));
 	OriginalMesh->SetHiddenInGame(true);
@@ -28,10 +26,3 @@ void ASliceableActorBase::BeginPlay()
 	// OriginalMesh를 복사하여 ProceduralMesh에 보관
 	UKismetProceduralMeshLibrary::CopyProceduralMeshFromStaticMeshComponent(OriginalMesh, 0, ProceduralMesh, true);
 }
-
-void ASliceableActorBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-

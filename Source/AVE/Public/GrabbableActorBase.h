@@ -23,7 +23,6 @@ protected:
 
 public:	
 	// true일 때만 대미지 입힘
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	bool bShouldAttack = false;
 	
 	// 대미지
@@ -38,7 +37,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
 	class USoundWave* HitSound;
 
-	UStaticMeshComponent* GetMesh();
+	UStaticMeshComponent* GetMesh() const;
 
 	// 충돌 시 호출
 	UFUNCTION()
