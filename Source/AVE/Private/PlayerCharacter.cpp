@@ -150,6 +150,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Dash", IE_Released, this, &APlayerCharacter::StopDash);
 	PlayerInputComponent->BindAction("Finisher", IE_Pressed, this, &APlayerCharacter::Finisher);
 	PlayerInputComponent->BindAction("Skill", IE_Pressed, this, &APlayerCharacter::Skill);
+	PlayerInputComponent->BindAction("ChangeSkill", IE_Pressed, this, &APlayerCharacter::ChangeSkill);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &APlayerCharacter::MoveRight);
@@ -747,6 +748,11 @@ void APlayerCharacter::Skill() {
 	}
 }
 
+void APlayerCharacter::ChangeSkill() {
+	CurSkill++;
+	if (CurSkill > 1)
+		CurSkill = 0;
+}
 void APlayerCharacter::MoveWeaponLeft() {
 	Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("katana2"));
 	Scabbard->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("katana2"));

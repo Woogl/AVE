@@ -216,6 +216,7 @@ public:
 	void Die();
 
 	void Skill();
+	void ChangeSkill();
 	UFUNCTION(BlueprintCallable)
 	void MoveWeaponLeft();
 	UFUNCTION(BlueprintCallable)
