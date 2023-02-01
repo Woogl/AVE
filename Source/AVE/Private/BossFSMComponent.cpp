@@ -3,6 +3,10 @@
 
 #include "BossFSMComponent.h"
 
+#include "BehaviorTree/Blackboard/BlackboardKeyType.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Navigation/PathFollowingComponent.h"
+
 // Sets default values for this component's properties
 UBossFSMComponent::UBossFSMComponent()
 {
@@ -89,4 +93,11 @@ void UBossFSMComponent::TickBackstep()
 
 void UBossFSMComponent::TickBehindATK()
 {
+}
+
+void UBossFSMComponent::IdleFSM()
+{
+	float idleRandomDelay = UKismetMathLibrary::RandomFloatInRange(0.5f, 1.5f);
+	GetWorld()->GetTimerManager().SetTimer(idleTimer, idleRandomDelay, false);
+	EBossState::Walk();
 }

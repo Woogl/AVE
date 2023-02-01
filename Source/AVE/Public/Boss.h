@@ -36,7 +36,7 @@ public:
 	class UCombatComponent* combatComp;
 
 	UPROPERTY(EditAnywhere)
-	float currentHP = 0;
+	float currentHP;
 	UPROPERTY(EditAnywhere)
-	float maxHP = 500;
+	float maxHP = 500.f;
 };

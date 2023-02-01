@@ -54,5 +54,8 @@ public:
 	void TickJumpATK();
 	void TickBackstep();
 	void TickBehindATK();
-	
+
+	void IdleFSM();
+
+	FTimerHandle idleTimer;
 };
