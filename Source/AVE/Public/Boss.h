@@ -26,4 +26,17 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USkeletalMeshComponent* weaponMeshComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UStaticMeshComponent* weaponMeshSubComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UCombatComponent* combatComp;
+
+	UPROPERTY(EditAnywhere)
+	float currentHP = 0;
+	UPROPERTY(EditAnywhere)
+	float maxHP = 500;
 };
