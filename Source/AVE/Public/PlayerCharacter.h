@@ -16,10 +16,6 @@ public:
 	APlayerCharacter();
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class USpringArmComponent* DefaultCameraBoom;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
-	USpringArmComponent* LeftCameraBoom;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
-	USpringArmComponent* RightCameraBoom;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* FollowCamera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
@@ -159,17 +155,12 @@ public:
 	void AttachProp();
 	void PushProp();
 	void DropProp();
+	class AGrabbableActorBase* GrabbedActor;
 	UStaticMeshComponent* GrabbedMesh;
 
 	// 모션 워핑 (BP에서 이벤트 구현)
 	UFUNCTION(BlueprintImplementableEvent)
 	void MotionMorph();
-
-	// 카메라 전환
-	void MoveCamera(ECameraPosition CameraPosition);
-
-	// 메시 자르는 액터 스폰
-	void SpawnMeshSlicer();
 
 	// 오토 타게팅
 	UFUNCTION(BlueprintCallable)	// 연구 중
@@ -233,4 +224,17 @@ public:
 	void SpreadAoEDamage();
 
 	void RegeneratePosture();
+
+	// 처형 시퀀스 동작
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayExecuteSequence();
+	// 반갈죽 시퀀스 동작
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlaySlashSequence();
+	// 뇌반 시퀀스 동작
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayLightningShockSequence();
+	// 유도탄 시퀀스 동작
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayMissileSequence();
 };

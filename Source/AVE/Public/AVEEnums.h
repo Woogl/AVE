@@ -26,14 +26,6 @@ enum class EAttackType : uint8
 };
 
 UENUM(BlueprintType)
-enum class ECameraPosition : uint8 
-{
-	ECP_Default			UMETA(DisplayName = "Default View"),
-	ECP_LeftSideView	UMETA(DisplayName = "Left Side View"),
-	ECP_RightSideView	UMETA(DisplayName = "Right Side View"),
-};
-
-UENUM(BlueprintType)
 enum class EBodyPart : uint8 
 {
 	EBP_Head		UMETA(DisplayName = "Head"),

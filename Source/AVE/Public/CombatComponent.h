@@ -69,4 +69,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
 	class USoundWave* HitSound;
 	void PlayHitFX(FHitResult HitInfo);
+
+	// 메시 자르는 액터 스폰
+	void SpawnMeshSlicer(FHitResult HitInfo);
 };
