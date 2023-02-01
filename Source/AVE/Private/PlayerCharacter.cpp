@@ -63,7 +63,7 @@ APlayerCharacter::APlayerCharacter()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
-	
+
 	// 이동 설정
 	MoveComp = GetCharacterMovement();
 	MoveComp->bOrientRotationToMovement = true;
@@ -149,7 +149,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &APlayerCharacter::Dash);
 	PlayerInputComponent->BindAction("Dash", IE_Released, this, &APlayerCharacter::StopDash);
 	PlayerInputComponent->BindAction("Finisher", IE_Pressed, this, &APlayerCharacter::Finisher);
-	PlayerInputComponent->BindAction("Skill",IE_Pressed,this,&APlayerCharacter::Skill);
+	PlayerInputComponent->BindAction("Skill", IE_Pressed, this, &APlayerCharacter::Skill);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &APlayerCharacter::MoveRight);
@@ -207,7 +207,7 @@ void APlayerCharacter::Guard()
 {
 	// TODO: 가드 가능한 상태인지 체크
 	bIsBlocking = true;
-	
+
 	// 0.3초 동안 패링 판정 발동 
 	bIsParrying = true;
 	GetWorldTimerManager().SetTimer(ParryingTimer, this, &APlayerCharacter::OnParryEnd, 0.3f, false);
@@ -284,14 +284,13 @@ void APlayerCharacter::StopDash()
 
 void APlayerCharacter::Finisher()
 {
-	if (CanAttack()){	
-	// 대상 찾기
-	// TODO: 체간 수치 체크
+	if (CanAttack()) {
+		// 대상 찾기
+		// TODO: 체간 수치 체크
 		if (TryAutoTargeting() == true)
 		{
 			bIsInvincible = true;
 			MotionMorph();
-			PlayExecuteSequence();
 		}
 	}
 }
@@ -421,7 +420,7 @@ void APlayerCharacter::PullProp()
 {
 	// 애니메이션 재생 중이면 탈출
 	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying()) return;
-	
+
 	FHitResult hit;
 	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
 	objectTypes.Emplace(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
@@ -429,7 +428,7 @@ void APlayerCharacter::PullProp()
 
 	// 범위 내에 주울 물건 찾기
 	if (UKismetSystemLibrary::SphereTraceSingleForObjects(this, GetActorLocation(), GetActorLocation(), 150.f, objectTypes, false, actorToIgnores,
-			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f))
+		EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f))
 	{
 		// 찾기 성공하면 주움
 		if (hit.GetActor()->IsA(AGrabbableActorBase::StaticClass()))
@@ -480,7 +479,7 @@ void APlayerCharacter::PushProp()
 
 void APlayerCharacter::DropProp()
 {	
-	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(InteractionMontages[0]))
+	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(InteractionMontages[1]))
 	{
 		GetMesh()->GetAnimInstance()->Montage_Stop(0.25f, InteractionMontages[0]);
 	}
@@ -591,7 +590,7 @@ void APlayerCharacter::Attack() {
 		else {
 			ComboAttack();
 		}
-		
+
 		Tail = -1;
 		LastAttackTime = 0.f;
 
@@ -637,13 +636,13 @@ void APlayerCharacter::ComboAttack() {
 }
 
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
-	
+
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	// 적 방향으로 회전
 	RotateToDirection(DamageCauser->GetActorLocation(), 0.f, 0.f);
 	if (bIsParrying) {
-		ParryHit(DamageAmount,DamageEvent.DamageTypeClass);
+		ParryHit(DamageAmount, DamageEvent.DamageTypeClass);
 	}
 	else if (bIsBlocking) {
 		GuardHit(DamageAmount, DamageEvent.DamageTypeClass);
@@ -662,7 +661,7 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 
 void APlayerCharacter::ParryHit(float Damage, TSubclassOf<UDamageType> DamageType) {
 	if (DamageType == UStandardDamageType::StaticClass()) {
-		Damage = UAVEDamageType::CalculateDamage(Damage,Defense);
+		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
 		PlayAnimMontage(ParryHitMontages[0]);
 	}
 	else if (DamageType == UKnockBackDamageType::StaticClass()) {
@@ -720,7 +719,7 @@ void APlayerCharacter::Hit(float Damage, TSubclassOf<UDamageType> DamageType) {
 	else if (DamageType == UKnockUpDamageType::StaticClass()) {
 		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
 		PlayAnimMontage(HitReactionMontages[3]);
-	}	
+	}
 	CurPosture -= Damage * 0.4f;
 	CurHealth -= Damage;
 	if (CurHealth <= 0) {
@@ -760,7 +759,7 @@ void APlayerCharacter::MoveWeaponRight() {
 }
 
 void APlayerCharacter::RegeneratePosture() {
-	if (!(bIsHit || bIsGuardBroken) && CurPosture < 100.f) {		
+	if (!(bIsHit || bIsGuardBroken) && CurPosture < 100.f) {
 		CurPosture += 0.2f;
 	}
 }
@@ -768,5 +767,5 @@ void APlayerCharacter::RegeneratePosture() {
 void APlayerCharacter::SpreadAoEDamage() {
 	TArray<AActor*> IgnoreList;
 	IgnoreList.Add(this);
-	UGameplayStatics::ApplyRadialDamage(GetWorld(),50,GetActorLocation(),1000.f,UKnockBackDamageType::StaticClass(),IgnoreList);
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), 50, GetActorLocation(), 1000.f, UKnockBackDamageType::StaticClass(), IgnoreList);
 }
