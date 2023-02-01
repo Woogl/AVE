@@ -170,7 +170,7 @@ void UPlayerAnimInstance::AnimNotify_PlaySequence() {
 	if (Player) {
 		switch (Player->CurSkill) {
 			case 0:
-			Player->PlaySlashSequence();
+			Player->PlayJudgementCutSequence();
 			break;
 
 			case 1:
