@@ -55,6 +55,8 @@ public:
 	bool bIsInvincible;
 	// 피격 상태(패링히트, 가드히트, 노말히트 구분 X), 공격을 받은 상태
 	bool bIsHit;
+	// 전기 충전 상태
+	bool bIsLightningCharged;
 	bool bIsDead;
 	FTimerHandle ParryingTimer;
 	bool bIsGrabbing = false;
@@ -79,7 +81,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
 	TArray<class UAnimMontage*> SkillMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
-	class UAnimMontage* JumpAttackMontage;
+	TArray<class UAnimMontage*> JumpAttackMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Attacks")
 	class UAnimMontage* DashAttackMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Finishers")
@@ -191,7 +193,7 @@ public:
 	// 물리 내성
 	float Defense;
 	// 전기 내성
-	float ElecDefense;
+	float LightningDefense;
 	void WInput();
 	void SInput();
 	void DInput();

@@ -613,7 +613,12 @@ void APlayerCharacter::InitInvincibility() {
 }
 
 void APlayerCharacter::JumpAttack() {
-	PlayAnimMontage(JumpAttackMontage);
+	if (bIsLightningCharged) {
+		PlayAnimMontage(JumpAttackMontages[1]);
+	}
+	else {
+		PlayAnimMontage(JumpAttackMontages[0]);
+	}
 	Combo = -1;
 }
 
@@ -638,7 +643,6 @@ void APlayerCharacter::ComboAttack() {
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
 
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
 	// 적 방향으로 회전
 	RotateToDirection(DamageCauser->GetActorLocation(), 0.f, 0.f);
 	if (bIsParrying) {
