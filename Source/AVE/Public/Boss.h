@@ -35,8 +35,30 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UCombatComponent* combatComp;
 
+	UPROPERTY()
+	class APawn* playerPawn;
+	
+	UPROPERTY()
+	class UBossAnimInstance* asBossAnim;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UAnimMontage* bossTurnR180;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UAnimMontage* bossTurnR90;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UAnimMontage* bossTurnL180;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UAnimMontage* bossTurnL90;
+	
 	UPROPERTY(EditAnywhere)
 	float currentHP;
 	UPROPERTY(EditAnywhere)
 	float maxHP = 500.f;
+
+	void SetZeroSpeed();
+	void SetFocusPlayerTick();
+	void AnimTurnInPlace();
 };

@@ -2,7 +2,13 @@
 
 
 #include "Boss.h"
+
+#include "BossAnimInstance.h"
+#include "BossFSMComponent.h"
 #include "CombatComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ABoss::ABoss()
@@ -48,6 +54,10 @@ void ABoss::BeginPlay()
 	combatComp->SetupWeapon(weaponMeshSubComp);
 
 	currentHP = maxHP;
+
+	asBossAnim = Cast<UBossAnimInstance>(GetMesh()->GetAnimInstance());
+
+	playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 }
 
 // Called every frame
@@ -63,4 +73,48 @@ void ABoss::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
+
+void ABoss::SetZeroSpeed()
+{
+	float decreaseWalkSpeed = GetCharacterMovement()->GetMaxSpeed() - 10.f;
+	float walkSpeedClamp = UKismetMathLibrary::FClamp(decreaseWalkSpeed, 0.f, 500.f);
+	GetCharacterMovement()->MaxWalkSpeed = walkSpeedClamp;
+}
+
+void ABoss::AnimTurnInPlace()
+{
+	if (asBossAnim->IsAnyMontagePlaying() == false)
+	{
+		if (asBossAnim->yaw > 70)
+		{
+			if (asBossAnim->yaw > 135)
+				PlayAnimMontage(bossTurnR180);
+			else
+				PlayAnimMontage(bossTurnR90);
+		}
+		else if (asBossAnim->yaw < -70)
+		{
+			if (asBossAnim->yaw < -135)
+				PlayAnimMontage(bossTurnL180);
+			else
+				PlayAnimMontage(bossTurnL90);
+		}
+	}
+}
+
+void ABoss::SetFocusPlayerTick()
+{
+	if (asBossAnim->speed > 100)
+	{
+		FRotator bossLookAtPlayer = UKismetMathLibrary::FindLookAtRotation(
+			GetActorLocation(), playerPawn->GetActorLocation());
+		FRotator setLerp = UKismetMathLibrary::RLerp(GetActorRotation(), bossLookAtPlayer, 0.1f, true);
+		this->SetActorRotation(setLerp);
+	}
+	else
+	{
+		AnimTurnInPlace();
+	}
+}
+
 

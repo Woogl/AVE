@@ -3,6 +3,8 @@
 
 #include "BossFSMComponent.h"
 
+#include "Boss.h"
+#include "BossAnimInstance.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Navigation/PathFollowingComponent.h"
@@ -25,12 +27,14 @@ void UBossFSMComponent::BeginPlay()
 
 	// ...
 	bossStates = EBossState::Idle;
+	asBoss = Cast<ABoss>(GetOwner());
+
+	asBossAnim = Cast<UBossAnimInstance>(asBoss->GetMesh()->GetAnimInstance());
 }
 
 
 // Called every frame
-void UBossFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                      FActorComponentTickFunction* ThisTickFunction)
+void UBossFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -53,6 +57,19 @@ void UBossFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 void UBossFSMComponent::TickIdle()
 {
+	//int seqPlusValue = seqValue + 1;
+	//int clampSeqValue = UKismetMathLibrary::Clamp(seqPlusValue, 1, 2);
+	
+	//if (clampSeqValue == 1)
+	//{
+		// IdleFSM();
+	//}
+	//else if (clampSeqValue == 2)
+	//{
+		asBoss->SetZeroSpeed();
+		asBoss->SetFocusPlayerTick();
+	//}
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, TEXT("IfSuccecss"));
 }
 
 void UBossFSMComponent::TickWalk()
@@ -98,6 +115,20 @@ void UBossFSMComponent::TickBehindATK()
 void UBossFSMComponent::IdleFSM()
 {
 	float idleRandomDelay = UKismetMathLibrary::RandomFloatInRange(0.5f, 1.5f);
-	GetWorld()->GetTimerManager().SetTimer(idleTimer, idleRandomDelay, false);
-	EBossState::Walk();
+	GetWorld()->GetTimerManager().SetTimer(idleTimerHandle, this, &UBossFSMComponent::SetWalkRandomInt, idleRandomDelay);
+	// bossStates = EBossState::Walk;
+	GetWorld()->GetTimerManager().ClearTimer(idleTimerHandle);
+	// GetOwner()->GetWorldTimerManager().SetTimer(~~~)
 }
+
+void UBossFSMComponent::SetWalkRandomInt()
+{
+	walkRandomInt = UKismetMathLibrary::RandomIntegerInRange(1, 2);
+	GetWorld()->GetTimerManager().SetTimer(walkRandomIntTimerHandle, this, &UBossFSMComponent::SelectRandomInt, 5.f, true);
+}
+
+void UBossFSMComponent::SelectRandomInt()
+{
+	walkRandomInt = UKismetMathLibrary::RandomIntegerInRange(1, 2);
+}
+

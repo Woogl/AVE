@@ -43,6 +43,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EBossState bossStates;
 
+	UPROPERTY()
+	class ABoss* asBoss;
+
+	UPROPERTY()
+	class UBossAnimInstance* asBossAnim;
+	
 	void TickIdle();
 	void TickWalk();
 	void TickMove();
@@ -56,6 +62,16 @@ public:
 	void TickBehindATK();
 
 	void IdleFSM();
+	void SetWalkRandomInt();
+	void SelectRandomInt();
 
-	FTimerHandle idleTimer;
+	
+	FTimerHandle idleTimerHandle;
+	FTimerHandle walkRandomIntTimerHandle;
+
+	int walkRandomInt;
+
+	bool bDoOnce = false;
+
+	int seqValue;
 };
