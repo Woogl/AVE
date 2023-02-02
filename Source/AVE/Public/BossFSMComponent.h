@@ -62,6 +62,7 @@ public:
 	void TickBehindATK();
 
 	void IdleFSM();
+	void WalkFSM();
 	void SetWalkRandomInt();
 	void SelectRandomInt();
 

@@ -35,6 +35,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UCombatComponent* combatComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)\
+	class UBossFSMComponent* bossFSMComp;
+
 	UPROPERTY()
 	class APawn* playerPawn;
 	
@@ -61,4 +64,5 @@ public:
 	void SetZeroSpeed();
 	void SetFocusPlayerTick();
 	void AnimTurnInPlace();
+	void WalkToLocation();
 };

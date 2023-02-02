@@ -44,7 +44,11 @@ ABoss::ABoss()
     	weaponMeshSubComp->SetRelativeScale3D(FVector(1.f, 1.2f, 1.2f));
     }
 
+	//Combat Component 생성
 	combatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("combatComp"));
+
+	//BossFSM Component 생성
+	bossFSMComp = CreateDefaultSubobject<UBossFSMComponent>(TEXT("bossFSMComp"));
 }
 
 // Called when the game starts or when spawned
@@ -99,6 +103,13 @@ void ABoss::AnimTurnInPlace()
 			else
 				PlayAnimMontage(bossTurnL90);
 		}
+	}
+}
+
+void ABoss::WalkToLocation()
+{
+	if (bossFSMComp->walkRandomInt == 1)
+	{
 	}
 }
 

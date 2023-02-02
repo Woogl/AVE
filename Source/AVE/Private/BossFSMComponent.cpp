@@ -6,6 +6,7 @@
 #include "Boss.h"
 #include "BossAnimInstance.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Navigation/PathFollowingComponent.h"
 
@@ -59,21 +60,27 @@ void UBossFSMComponent::TickIdle()
 {
 	//int seqPlusValue = seqValue + 1;
 	//int clampSeqValue = UKismetMathLibrary::Clamp(seqPlusValue, 1, 2);
-	
-	//if (clampSeqValue == 1)
-	//{
-		// IdleFSM();
-	//}
-	//else if (clampSeqValue == 2)
-	//{
+	bDoOnce = true;
+	if (bDoOnce == true)
+	{
+		IdleFSM();
+		bDoOnce = false;
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, TEXT("TrueSuccecss"));
+	}
+	else
+	{
 		asBoss->SetZeroSpeed();
 		asBoss->SetFocusPlayerTick();
-	//}
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, TEXT("IfSuccecss"));
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, TEXT("FalseSuccecss"));
+	}
 }
 
 void UBossFSMComponent::TickWalk()
 {
+	SetWalkRandomInt(); // 한번만
+	
+	asBoss->GetCharacterMovement()->MaxWalkSpeed = 125.f; // 계속
+	
 }
 
 void UBossFSMComponent::TickMove()
@@ -119,6 +126,13 @@ void UBossFSMComponent::IdleFSM()
 	// bossStates = EBossState::Walk;
 	GetWorld()->GetTimerManager().ClearTimer(idleTimerHandle);
 	// GetOwner()->GetWorldTimerManager().SetTimer(~~~)
+}
+
+void UBossFSMComponent::WalkFSM()
+{
+	float walkRandomDelay = UKismetMathLibrary::RandomFloatInRange(2.f, 4.f);
+	GetWorld()->GetTimerManager().SetTimer(idleTimerHandle, this, &UBossFSMComponent::SetWalkRandomInt, walkRandomDelay);
+	bossStates = EBossState::Walk;
 }
 
 void UBossFSMComponent::SetWalkRandomInt()
