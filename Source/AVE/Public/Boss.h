@@ -35,7 +35,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UCombatComponent* combatComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)\
+	UPROPERTY(EditAnywhere)
 	class UBossFSMComponent* bossFSMComp;
 
 	UPROPERTY()
@@ -64,5 +64,5 @@ public:
 	void SetZeroSpeed();
 	void SetFocusPlayerTick();
 	void AnimTurnInPlace();
-	void WalkToLocation();
+	float DistanceBossToPlayer();
 };

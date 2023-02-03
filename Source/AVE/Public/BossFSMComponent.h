@@ -23,7 +23,7 @@ enum class EBossState : uint8
 	
 };
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
 class AVE_API UBossFSMComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -43,11 +43,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EBossState bossStates;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class ABoss* asBoss;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UBossAnimInstance* asBossAnim;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class APlayerCharacter* asPlayer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class AAIController* AiCtrl;
 	
 	void TickIdle();
 	void TickWalk();
@@ -61,18 +67,38 @@ public:
 	void TickBackstep();
 	void TickBehindATK();
 
-	void IdleFSM();
-	void WalkFSM();
+	UFUNCTION(BlueprintImplementableEvent)
+	void IdleDelay();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void WalkDelay();
+
+	UFUNCTION(BlueprintImplementableEvent)
 	void SetWalkRandomInt();
-	void SelectRandomInt();
-
 	
-	FTimerHandle idleTimerHandle;
-	FTimerHandle walkRandomIntTimerHandle;
+	UFUNCTION(BlueprintImplementableEvent)
+	void WalkToLocation(float locRange);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void MoveToLocation();
+
+	UFUNCTION()
+	void MoveToFSM();
+	
+	UFUNCTION()
+	void SetMoveSpeed();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int walkRandomInt;
 
-	bool bDoOnce = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int seqValue = 0;
 
-	int seqValue;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FTimerHandle WriTimerHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float randomPercent;
+
+	float dashATKPercent = 0.2;
 };

@@ -47,8 +47,8 @@ ABoss::ABoss()
 	//Combat Component 생성
 	combatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("combatComp"));
 
-	//BossFSM Component 생성
-	bossFSMComp = CreateDefaultSubobject<UBossFSMComponent>(TEXT("bossFSMComp"));
+	//BossFSM Component 생성 -> BP_BossFSM 에서 블루프린트와 조합해서 사용
+	//bossFSMComp = CreateDefaultSubobject<UBossFSMComponent>(TEXT("bossFSMComp"));
 }
 
 // Called when the game starts or when spawned
@@ -69,6 +69,7 @@ void ABoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	DistanceBossToPlayer();
 }
 
 // Called to bind functionality to input
@@ -106,13 +107,6 @@ void ABoss::AnimTurnInPlace()
 	}
 }
 
-void ABoss::WalkToLocation()
-{
-	if (bossFSMComp->walkRandomInt == 1)
-	{
-	}
-}
-
 void ABoss::SetFocusPlayerTick()
 {
 	if (asBossAnim->speed > 100)
@@ -120,7 +114,7 @@ void ABoss::SetFocusPlayerTick()
 		FRotator bossLookAtPlayer = UKismetMathLibrary::FindLookAtRotation(
 			GetActorLocation(), playerPawn->GetActorLocation());
 		FRotator setLerp = UKismetMathLibrary::RLerp(GetActorRotation(), bossLookAtPlayer, 0.1f, true);
-		this->SetActorRotation(setLerp);
+		this->SetActorRotation(FRotator(0, setLerp.Yaw, 0));
 	}
 	else
 	{
@@ -128,4 +122,9 @@ void ABoss::SetFocusPlayerTick()
 	}
 }
 
+float ABoss::DistanceBossToPlayer()
+{
+	float distanceValue = GetDistanceTo(playerPawn);
+	return distanceValue;
+}
 

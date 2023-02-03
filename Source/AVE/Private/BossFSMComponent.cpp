@@ -3,10 +3,14 @@
 
 #include "BossFSMComponent.h"
 
+#include "AIController.h"
 #include "Boss.h"
 #include "BossAnimInstance.h"
+#include "PlayerCharacter.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Navigation/PathFollowingComponent.h"
 
@@ -29,7 +33,8 @@ void UBossFSMComponent::BeginPlay()
 	// ...
 	bossStates = EBossState::Idle;
 	asBoss = Cast<ABoss>(GetOwner());
-
+	auto playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	asPlayer = Cast<APlayerCharacter>(playerPawn);
 	asBossAnim = Cast<UBossAnimInstance>(asBoss->GetMesh()->GetAnimInstance());
 }
 
@@ -58,33 +63,40 @@ void UBossFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 void UBossFSMComponent::TickIdle()
 {
-	//int seqPlusValue = seqValue + 1;
-	//int clampSeqValue = UKismetMathLibrary::Clamp(seqPlusValue, 1, 2);
-	bDoOnce = true;
-	if (bDoOnce == true)
+	seqValue += 1;
+	if (seqValue == 1)
 	{
-		IdleFSM();
-		bDoOnce = false;
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, TEXT("TrueSuccecss"));
+		IdleDelay();
 	}
-	else
-	{
-		asBoss->SetZeroSpeed();
-		asBoss->SetFocusPlayerTick();
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Blue, TEXT("FalseSuccecss"));
-	}
+	asBoss->SetZeroSpeed();
+	asBoss->SetFocusPlayerTick();
+	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Blue, TEXT("IdleTick"));
 }
 
 void UBossFSMComponent::TickWalk()
 {
-	SetWalkRandomInt(); // 한번만
-	
-	asBoss->GetCharacterMovement()->MaxWalkSpeed = 125.f; // 계속
-	
+	seqValue += 1;
+	if (seqValue == 1)
+	{
+		SetWalkRandomInt();
+		WalkDelay();
+	}
+	asBoss->GetCharacterMovement()->MaxWalkSpeed = 125.f;
+	WalkToLocation(1000);
+	asBoss->SetFocusPlayerTick();
 }
 
 void UBossFSMComponent::TickMove()
 {
+	seqValue += 1;
+	if (seqValue == 1)
+	{
+		randomPercent = UKismetMathLibrary::RandomFloatInRange(0, 1);
+	}
+	SetMoveSpeed();
+	asBoss->SetFocusPlayerTick();
+	MoveToLocation();
+	MoveToFSM();
 }
 
 void UBossFSMComponent::TickDashAtk()
@@ -119,30 +131,44 @@ void UBossFSMComponent::TickBehindATK()
 {
 }
 
-void UBossFSMComponent::IdleFSM()
+void UBossFSMComponent::MoveToFSM()
 {
-	float idleRandomDelay = UKismetMathLibrary::RandomFloatInRange(0.5f, 1.5f);
-	GetWorld()->GetTimerManager().SetTimer(idleTimerHandle, this, &UBossFSMComponent::SetWalkRandomInt, idleRandomDelay);
-	// bossStates = EBossState::Walk;
-	GetWorld()->GetTimerManager().ClearTimer(idleTimerHandle);
-	// GetOwner()->GetWorldTimerManager().SetTimer(~~~)
+	
+	if (randomPercent <= dashATKPercent && asBoss->DistanceBossToPlayer() <= 700 && asBoss->DistanceBossToPlayer() > 600)
+	{
+		bossStates = EBossState::DashATK;
+		seqValue = 0;
+	}
+	else if (asBoss->DistanceBossToPlayer() <= 250)
+	{
+		if (FMath::Abs(asBossAnim->yaw) > 120)
+		{
+			bossStates = EBossState::BehindATK;
+			seqValue = 0;
+		}
+		else
+		{
+			bossStates = EBossState::NormalATK;
+			seqValue = 0;
+		}
+	}
+	else
+	{
+		bossStates = EBossState::Move;
+		seqValue = 0;
+	}
 }
 
-void UBossFSMComponent::WalkFSM()
+void UBossFSMComponent::SetMoveSpeed()
 {
-	float walkRandomDelay = UKismetMathLibrary::RandomFloatInRange(2.f, 4.f);
-	GetWorld()->GetTimerManager().SetTimer(idleTimerHandle, this, &UBossFSMComponent::SetWalkRandomInt, walkRandomDelay);
-	bossStates = EBossState::Walk;
+	if (asBoss->DistanceBossToPlayer() <= 400)
+	{
+		float decreaseMaxSpeed = asBoss->GetCharacterMovement()->GetMaxSpeed() - 15;
+		asBoss->GetCharacterMovement()->MaxWalkSpeed = UKismetMathLibrary::FClamp(decreaseMaxSpeed, 0, 700);
+	}
+	else
+	{
+		float increaseMaxSpeed = asBoss->GetCharacterMovement()->GetMaxSpeed() + 15;
+		asBoss->GetCharacterMovement()->MaxWalkSpeed = UKismetMathLibrary::FClamp(increaseMaxSpeed, 0, 700);
+	}
 }
-
-void UBossFSMComponent::SetWalkRandomInt()
-{
-	walkRandomInt = UKismetMathLibrary::RandomIntegerInRange(1, 2);
-	GetWorld()->GetTimerManager().SetTimer(walkRandomIntTimerHandle, this, &UBossFSMComponent::SelectRandomInt, 5.f, true);
-}
-
-void UBossFSMComponent::SelectRandomInt()
-{
-	walkRandomInt = UKismetMathLibrary::RandomIntegerInRange(1, 2);
-}
-
