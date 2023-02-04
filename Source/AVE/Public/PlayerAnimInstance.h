@@ -72,4 +72,7 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_PlaySequence();
+
+	UFUNCTION()
+	void AnimNotify_PlayLightningSequence();
 };

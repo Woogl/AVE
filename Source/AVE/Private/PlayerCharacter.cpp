@@ -113,6 +113,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 		}
 	}
 
+	if ((!MoveComp->IsFalling()) && bIsLightningCharged) {
+		Groggy();
+	}
+
 	LastMoveTime += DeltaTime;
 	LastAttackTime += DeltaTime;
 	// 마지막 방향키 인풋이 0.4초를 지났으면
@@ -151,6 +155,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Finisher", IE_Pressed, this, &APlayerCharacter::Finisher);
 	PlayerInputComponent->BindAction("Skill", IE_Pressed, this, &APlayerCharacter::Skill);
 	PlayerInputComponent->BindAction("ChangeSkill", IE_Pressed, this, &APlayerCharacter::ChangeSkill);
+	PlayerInputComponent->BindAction("ChangeSpecialAttack", IE_Pressed, this, &APlayerCharacter::ChangeSpecialAttack);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &APlayerCharacter::MoveRight);
@@ -612,9 +617,15 @@ void APlayerCharacter::InitInvincibility() {
 	bIsInvincible = false;
 }
 
+void APlayerCharacter::InitCharge() {
+	bIsLightningCharged = false;
+}
+
 void APlayerCharacter::JumpAttack() {
 	if (bIsLightningCharged) {
 		PlayAnimMontage(JumpAttackMontages[1]);
+		bIsInvincible = true;
+		InitCharge();
 	}
 	else {
 		PlayAnimMontage(JumpAttackMontages[0]);
@@ -645,7 +656,15 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	// 적 방향으로 회전
 	RotateToDirection(DamageCauser->GetActorLocation(), 0.f, 0.f);
-	if (bIsParrying) {
+	if (DamageEvent.DamageTypeClass == ULightningDamageType::StaticClass() ) {
+		if (MoveComp->IsFalling()) {
+			Charge();
+		}
+		else {
+			Groggy();
+		}
+	}
+	else if (bIsParrying) {
 		ParryHit(DamageAmount, DamageEvent.DamageTypeClass);
 	}
 	else if (bIsBlocking) {
@@ -733,9 +752,19 @@ void APlayerCharacter::Hit(float Damage, TSubclassOf<UDamageType> DamageType) {
 }
 
 void APlayerCharacter::GuardBreak() {
-	StopAnimMontage();
 	PlayAnimMontage(GuardBreakMontage);
 	bIsGuardBroken = true;
+}
+
+void APlayerCharacter::Groggy() {
+	InitCharge();
+	PlayAnimMontage(GroggyMontage);
+	bIsGuardBroken = true;
+}
+
+void APlayerCharacter::Charge() {
+	PlayAnimMontage(ChargeMontage);
+	bIsLightningCharged = true;
 }
 
 void APlayerCharacter::Die() {
@@ -754,9 +783,16 @@ void APlayerCharacter::Skill() {
 
 void APlayerCharacter::ChangeSkill() {
 	CurSkill++;
-	if (CurSkill > 1)
+	if (CurSkill >= SkillMontages.Num())
 		CurSkill = 0;
 }
+
+void APlayerCharacter::ChangeSpecialAttack() {
+	CurSpecialAttack++;
+	if (CurSpecialAttack >= SpecialAttackMontages.Num())
+		CurSpecialAttack = 0;
+}
+
 void APlayerCharacter::MoveWeaponLeft() {
 	Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("katana2"));
 	Scabbard->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("katana2"));

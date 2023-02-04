@@ -99,6 +99,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
 	TArray<class UAnimMontage*> HitReactionMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
+	class UAnimMontage* ChargeMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
+	class UAnimMontage* GroggyMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
 	class UAnimMontage* DieMontage;
 
 protected:
@@ -209,16 +213,20 @@ public:
 
 	void InitState();
 	void InitInvincibility();
+	void InitCharge();
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	void ParryHit(float Damage, TSubclassOf<UDamageType> DamageType);
 	void GuardHit(float Damage, TSubclassOf<UDamageType> DamageType);
 	void Hit(float Damage, TSubclassOf<UDamageType> DamageType);
 	void GuardBreak();
+	void Groggy();
+	void Charge();
 	void Die();
 
 	void Skill();
 	void ChangeSkill();
+	void ChangeSpecialAttack();
 	UFUNCTION(BlueprintCallable)
 	void MoveWeaponLeft();
 	UFUNCTION(BlueprintCallable)
@@ -231,12 +239,15 @@ public:
 	// 처형 시퀀스 동작
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayFinisherSequence();
-	// 반갈죽 시퀀스 동작
-	UFUNCTION(BlueprintImplementableEvent)
-	void PlayJudgementCutSequence();
 	// 뇌반 시퀀스 동작
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayLightningShockSequence();
+	// 반갈죽 시퀀스 동작
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayJudgementCutSequence();
+	// 스킬 1 시퀀스 동작
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayEarthquakeSequence();
 	// 유도탄 시퀀스 동작
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayMissileSequence();

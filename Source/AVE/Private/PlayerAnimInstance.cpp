@@ -174,12 +174,18 @@ void UPlayerAnimInstance::AnimNotify_PlaySequence() {
 			break;
 
 			case 1:
-			Player->PlayLightningShockSequence();
+			Player->PlayEarthquakeSequence();
 			break;
 
 			case 2:
 			Player->PlayMissileSequence();
 			break;
 		}
+	}
+}
+
+void UPlayerAnimInstance::AnimNotify_PlayLightningSequence() {
+	if (Player) {
+		Player->PlayLightningShockSequence();
 	}
 }
