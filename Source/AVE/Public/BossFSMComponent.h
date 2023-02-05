@@ -16,9 +16,10 @@ enum class EBossState : uint8
 	NormalATK UMETA(Displayname = NormalATK),
 	ATK01 UMETA(Displayname = ATK01),
 	ATK02 UMETA(Displayname = ATK02),
-	ATK03 UMETA(Displayname = ATK03),
 	JumpATK UMETA(Displayname = JumpATK),
+	StanceATK UMETA(Displayname = StanceATK),
 	Backstep UMETA(Displayname = Backstep),
+	BladeAura UMETA(Displayname = BladeAura),
 	BehindATK UMETA(Displayname = BehindATK),
 	
 };
@@ -58,15 +59,19 @@ public:
 	void TickIdle();
 	void TickWalk();
 	void TickMove();
-	void TickDashAtk();
-	void TickNormalAtk();
+	void TickDashATK();
+	void TickNormalATK();
 	void TickATK01();
 	void TickATK02();
-	void TickATK03();
 	void TickJumpATK();
+	void TickStanceATK();
 	void TickBackstep();
+	void TickBladeAura();
 	void TickBehindATK();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void BossStateDebug();
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void IdleDelay();
 
@@ -82,11 +87,31 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void MoveToLocation();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void GuardSelect();
+	
 	UFUNCTION()
 	void MoveToFSM();
+
+	UFUNCTION()
+	void ReturnToMove();
+
+	UFUNCTION()
+	void ReturnToWalk();
 	
 	UFUNCTION()
 	void SetMoveSpeed();
+
+	UFUNCTION(BlueprintCallable)
+	void SetGuardMoveSpeed();
+	UFUNCTION(BlueprintCallable)
+	void GuardOrBackstep();
+	
+	UFUNCTION()
+	void RandomInt(int min, int max);
+
+	UFUNCTION()
+	void RandomFloat(float min, float max);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int walkRandomInt;
@@ -98,7 +123,19 @@ public:
 	FTimerHandle WriTimerHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float randomPercent;
+	FTimerHandle montageDelayHandle;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float randomFloatValue;
 
-	float dashATKPercent = 0.2;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int randomIntValue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsGuarding;
+	
+	float dashATKPercent = 0.2f;
+	float jumpATKPercent = 0.2f;
+	float backstepPercent = 0.2f;
+	int attackCount = 0;
 };

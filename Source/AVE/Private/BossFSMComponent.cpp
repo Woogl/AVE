@@ -9,6 +9,7 @@
 #include "PlayerCharacter.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "EnvironmentQuery/EnvQueryTypes.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -50,15 +51,17 @@ void UBossFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	case EBossState::Idle: TickIdle(); break;
 	case EBossState::Walk: TickWalk(); break;
 	case EBossState::Move: TickMove(); break;
-	case EBossState::DashATK: TickDashAtk(); break;
-	case EBossState::NormalATK: TickNormalAtk(); break;
+	case EBossState::DashATK: TickDashATK(); break;
+	case EBossState::NormalATK: TickNormalATK(); break;
 	case EBossState::ATK01: TickATK01(); break;
 	case EBossState::ATK02: TickATK02(); break;
-	case EBossState::ATK03: TickATK03(); break;
 	case EBossState::JumpATK: TickJumpATK(); break;
+	case EBossState::StanceATK: TickStanceATK(); break;
 	case EBossState::Backstep: TickBackstep(); break;
+	case EBossState::BladeAura: TickBladeAura(); break;
 	case EBossState::BehindATK: TickBehindATK(); break;
 	}
+	BossStateDebug();
 }
 
 void UBossFSMComponent::TickIdle()
@@ -70,7 +73,7 @@ void UBossFSMComponent::TickIdle()
 	}
 	asBoss->SetZeroSpeed();
 	asBoss->SetFocusPlayerTick();
-	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Blue, TEXT("IdleTick"));
+	//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Blue, TEXT("IdleTick"));
 }
 
 void UBossFSMComponent::TickWalk()
@@ -91,7 +94,7 @@ void UBossFSMComponent::TickMove()
 	seqValue += 1;
 	if (seqValue == 1)
 	{
-		randomPercent = UKismetMathLibrary::RandomFloatInRange(0, 1);
+		RandomFloat(0, 1);
 	}
 	SetMoveSpeed();
 	asBoss->SetFocusPlayerTick();
@@ -99,12 +102,55 @@ void UBossFSMComponent::TickMove()
 	MoveToFSM();
 }
 
-void UBossFSMComponent::TickDashAtk()
+void UBossFSMComponent::TickDashATK()
 {
+	seqValue += 1;
+	if (seqValue == 1)
+	{
+		RandomInt(1, 2);
+		if (asBossAnim->IsAnyMontagePlaying() == false)
+		{
+			if (randomIntValue == 1)
+			{
+				asBoss->OnMyPlayMontageSA(asBoss->animDashATK01, EBossState::Move);
+			}
+			if (randomIntValue == 2)
+			{
+				asBoss->OnMyPlayMontageSA(asBoss->animDashATK02, EBossState::Move);
+			}
+		}
+	}
+	asBoss->SetZeroSpeed();
 }
 
-void UBossFSMComponent::TickNormalAtk()
+void UBossFSMComponent::TickNormalATK()
 {
+	seqValue += 1;
+	if (seqValue == 1)
+	{
+		RandomInt(1, 2);
+		if (asBossAnim->IsAnyMontagePlaying() == false && bIsGuarding == false)
+		{
+			if (attackCount == 4)
+			{
+				bossStates = EBossState::JumpATK;
+				seqValue = 0;
+				attackCount = 0;
+			}
+			else if (randomIntValue == 1)
+			{
+				asBoss->OnMyPlayMontageNO(asBoss->animNormalATK01, EBossState::Move);
+				attackCount++;
+			}
+			else if (randomIntValue == 2)
+			{
+				asBoss->OnMyPlayMontageNO(asBoss->animNormalATK02, EBossState::Move);
+				attackCount++;
+			}
+		}
+	}
+	asBoss->SetZeroSpeed();
+	asBoss->SetFocusPlayerTick();
 }
 
 void UBossFSMComponent::TickATK01()
@@ -115,48 +161,125 @@ void UBossFSMComponent::TickATK02()
 {
 }
 
-void UBossFSMComponent::TickATK03()
-{
-}
-
 void UBossFSMComponent::TickJumpATK()
 {
+	seqValue += 1;
+	if (seqValue == 1)
+	{
+		if (asBossAnim->IsAnyMontagePlaying() == false)
+		{
+			asBoss->OnMyPlayMontageSA(asBoss->animJumpATK, EBossState::StanceATK);
+		}
+	}
+	asBoss->SetZeroSpeed();
+}
+
+void UBossFSMComponent::TickStanceATK()
+{
+	seqValue += 1;
+	if (seqValue == 1)
+	{
+		RandomInt(1, 2);
+		if (asBossAnim->IsAnyMontagePlaying() == false)
+		{
+			if (randomIntValue == 1)
+			{
+				asBoss->OnMyPlayMontageSA(asBoss->animStanceToStab, EBossState::Move);
+			}
+			if (randomIntValue == 2)
+			{
+				asBoss->OnMyPlayMontageSA(asBoss->animStanceToLowATK, EBossState::Walk);
+			}
+		}
+	}
 }
 
 void UBossFSMComponent::TickBackstep()
 {
+	seqValue += 1;
+	if (seqValue == 1)
+	{
+		RandomInt(1, 2);
+		if (asBossAnim->IsAnyMontagePlaying() == false)
+		{
+			if (randomIntValue == 1)
+			{
+				asBoss->OnMyPlayMontageSA(asBoss->animBackstep, EBossState::Walk);
+			}
+			if (randomIntValue == 2)
+			{
+				asBoss->OnMyPlayMontageSA(asBoss->animBackstep, EBossState::BladeAura);
+			}
+		}
+		
+	}
+	asBoss->SetFocusPlayerTick();
+}
+
+void UBossFSMComponent::TickBladeAura()
+{
+	seqValue += 1;
+	if (seqValue == 1)
+	{
+		if (asBossAnim->IsAnyMontagePlaying() == false)
+		{
+			asBoss->OnMyPlayMontageSA(asBoss->animBladeAura, EBossState::Walk);
+			
+		}
+	}
+	asBoss->SetFocusPlayerTick();
 }
 
 void UBossFSMComponent::TickBehindATK()
 {
+	seqValue += 1;
+	if (seqValue == 1)
+	{
+		if (asBossAnim->IsAnyMontagePlaying() == false)
+		{
+			asBoss->OnMyPlayMontageSA(asBoss->animBehindATK, EBossState::Move);
+		}
+	}
+	asBoss->SetFocusPlayerTick();
 }
 
 void UBossFSMComponent::MoveToFSM()
 {
-	
-	if (randomPercent <= dashATKPercent && asBoss->DistanceBossToPlayer() <= 700 && asBoss->DistanceBossToPlayer() > 600)
+	if (asBossAnim->IsAnyMontagePlaying() == false)
 	{
-		bossStates = EBossState::DashATK;
-		seqValue = 0;
-	}
-	else if (asBoss->DistanceBossToPlayer() <= 250)
-	{
-		if (FMath::Abs(asBossAnim->yaw) > 120)
+		if (randomFloatValue <= dashATKPercent && asBoss->DistanceBossToPlayer() <= 700 && asBoss->
+			DistanceBossToPlayer() > 600)
 		{
-			bossStates = EBossState::BehindATK;
+			bossStates = EBossState::DashATK;
 			seqValue = 0;
 		}
-		else
+		else if (asBoss->DistanceBossToPlayer() <= 250)
 		{
-			bossStates = EBossState::NormalATK;
-			seqValue = 0;
+			if (FMath::Abs(asBossAnim->yaw) > 120)
+			{
+				bossStates = EBossState::BehindATK;
+				seqValue = 0;
+			}
+			else
+			{
+				bossStates = EBossState::NormalATK;
+				seqValue = 0;
+			}
 		}
+		else ReturnToMove();
 	}
-	else
-	{
-		bossStates = EBossState::Move;
-		seqValue = 0;
-	}
+}
+
+void UBossFSMComponent::ReturnToMove()
+{
+	bossStates = EBossState::Move;
+	seqValue = 0;
+}
+
+void UBossFSMComponent::ReturnToWalk()
+{
+	bossStates = EBossState::Walk;
+	seqValue = 0;
 }
 
 void UBossFSMComponent::SetMoveSpeed()
@@ -172,3 +295,40 @@ void UBossFSMComponent::SetMoveSpeed()
 		asBoss->GetCharacterMovement()->MaxWalkSpeed = UKismetMathLibrary::FClamp(increaseMaxSpeed, 0, 700);
 	}
 }
+
+void UBossFSMComponent::SetGuardMoveSpeed()
+{
+	if (asBoss->DistanceBossToPlayer() <= 400)
+	{
+		float decreaseMaxSpeed = asBoss->GetCharacterMovement()->GetMaxSpeed() - 20;
+		asBoss->GetCharacterMovement()->MaxWalkSpeed = UKismetMathLibrary::FClamp(decreaseMaxSpeed, 0, 700);
+	}
+	else
+		asBoss->GetCharacterMovement()->MaxWalkSpeed = 125.f;
+}
+
+void UBossFSMComponent::GuardOrBackstep()
+{
+	if (asBoss->distanceValue <= 400)
+	{
+		RandomFloat(0, 1);
+		if (randomFloatValue <= backstepPercent)
+		{
+			bossStates = EBossState::Backstep;
+			seqValue = 0;
+		}
+		else GuardSelect();
+	}
+}
+
+void UBossFSMComponent::RandomInt(int min, int max)
+{
+	randomIntValue = UKismetMathLibrary::RandomIntegerInRange(min, max);
+}
+
+void UBossFSMComponent::RandomFloat(float min, float max)
+{
+	randomFloatValue = UKismetMathLibrary::RandomFloatInRange(min, max);
+}
+
+

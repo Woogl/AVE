@@ -124,7 +124,7 @@ void ABoss::SetFocusPlayerTick()
 
 float ABoss::DistanceBossToPlayer()
 {
-	float distanceValue = GetDistanceTo(playerPawn);
+	distanceValue = GetDistanceTo(playerPawn);
 	return distanceValue;
 }
 

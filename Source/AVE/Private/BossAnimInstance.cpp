@@ -30,8 +30,6 @@ void UBossAnimInstance::NativeBeginPlay()
 void UBossAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
-
-	// GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Blue, TEXT("NativeUpdateAnimation"));
 	
 	if (asBoss)
 	{

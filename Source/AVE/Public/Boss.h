@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BossFSMComponent.h"
 #include "GameFramework/Character.h"
 #include "Boss.generated.h"
 
@@ -38,31 +39,63 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UBossFSMComponent* bossFSMComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UBossAnimInstance* asBossAnim;
+
 	UPROPERTY()
 	class APawn* playerPawn;
 	
-	UPROPERTY()
-	class UBossAnimInstance* asBossAnim;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TurnInPlace")
 	class UAnimMontage* bossTurnR180;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TurnInPlace")
 	class UAnimMontage* bossTurnR90;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TurnInPlace")
 	class UAnimMontage* bossTurnL180;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TurnInPlace")
 	class UAnimMontage* bossTurnL90;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animDashATK01;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animDashATK02;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animNormalATK01;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animNormalATK02;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animJumpATK;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animStanceToLowATK;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animStanceToStab;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animBehindATK;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animBackstep;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animBladeAura;
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnMyPlayMontageSA(UAnimMontage* selectMontage, EBossState selectState);
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnMyPlayMontageNO(UAnimMontage* selectMontage, EBossState selectState);
 	
 	UPROPERTY(EditAnywhere)
 	float currentHP;
 	UPROPERTY(EditAnywhere)
 	float maxHP = 500.f;
 
-	void SetZeroSpeed();
-	void SetFocusPlayerTick();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsSuperArmor;
+
+	float MontageLength;
+	float distanceValue;
+	
+	UFUNCTION(BlueprintCallable)
 	void AnimTurnInPlace();
+	UFUNCTION(BlueprintCallable)
+	void SetFocusPlayerTick();
+
+	void SetZeroSpeed();
 	float DistanceBossToPlayer();
 };
