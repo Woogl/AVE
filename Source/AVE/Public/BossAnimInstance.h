@@ -25,6 +25,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class APawn* playerPawn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class APlayerCharacter* asPlayer;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FVector velocity;

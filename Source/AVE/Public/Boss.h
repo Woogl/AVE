@@ -42,6 +42,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UBossAnimInstance* asBossAnim;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class APlayerCharacter* asPlayer;
 	UPROPERTY()
 	class APawn* playerPawn;
 	
@@ -59,9 +61,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animDashATK02;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
-	class UAnimMontage* animNormalATK01;
+	class UAnimMontage* animNormalATKR01;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
-	class UAnimMontage* animNormalATK02;
+	class UAnimMontage* animNormalATKL01;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animNormalATKR02;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animNormalATKL02;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animNormalATKR03;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animNormalATKL03;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animJumpATK;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
@@ -80,13 +90,16 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnMyPlayMontageNO(UAnimMontage* selectMontage, EBossState selectState);
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float currentHP;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float maxHP = 500.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsSuperArmor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsParried;
 
 	float MontageLength;
 	float distanceValue;

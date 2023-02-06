@@ -13,6 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet2/BlueprintEditorUtils.h"
 #include "Navigation/PathFollowingComponent.h"
 
 // Sets default values for this component's properties
@@ -139,15 +140,16 @@ void UBossFSMComponent::TickNormalATK()
 			}
 			else if (randomIntValue == 1)
 			{
-				asBoss->OnMyPlayMontageNO(asBoss->animNormalATK01, EBossState::Move);
+				asBoss->OnMyPlayMontageNO(asBoss->animNormalATKR01, EBossState::Move);
 				attackCount++;
 			}
 			else if (randomIntValue == 2)
 			{
-				asBoss->OnMyPlayMontageNO(asBoss->animNormalATK02, EBossState::Move);
+				asBoss->OnMyPlayMontageNO(asBoss->animNormalATKL01, EBossState::Move);
 				attackCount++;
 			}
 		}
+		else ReturnToMove();
 	}
 	asBoss->SetZeroSpeed();
 	asBoss->SetFocusPlayerTick();

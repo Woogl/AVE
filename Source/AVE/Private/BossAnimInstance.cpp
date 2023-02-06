@@ -25,6 +25,7 @@ void UBossAnimInstance::NativeBeginPlay()
 	Super::NativeBeginPlay();
 	asBoss = Cast<ABoss>(TryGetPawnOwner());
 	playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	asPlayer = Cast<APlayerCharacter>(playerPawn);
 }
 
 void UBossAnimInstance::NativeUpdateAnimation(float DeltaSeconds)

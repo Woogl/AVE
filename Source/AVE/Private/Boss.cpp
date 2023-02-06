@@ -6,6 +6,7 @@
 #include "BossAnimInstance.h"
 #include "BossFSMComponent.h"
 #include "CombatComponent.h"
+#include "PlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -62,6 +63,7 @@ void ABoss::BeginPlay()
 	asBossAnim = Cast<UBossAnimInstance>(GetMesh()->GetAnimInstance());
 
 	playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	asPlayer = Cast<APlayerCharacter>(playerPawn);
 }
 
 // Called every frame
