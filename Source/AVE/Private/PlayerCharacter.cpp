@@ -108,7 +108,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 		FVector inputVector = GetLastMovementInputVector();
 		if (!inputVector.IsNearlyZero())
 		{
-
 			RotateToDirection(inputVector, DeltaTime, 4.f);
 		}
 	}
@@ -656,6 +655,8 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	// 적 방향으로 회전
 	RotateToDirection(DamageCauser->GetActorLocation(), 0.f, 0.f);
+	EnemyTarget = DamageCauser;
+	bIsTargeting = true;
 	if (DamageEvent.DamageTypeClass == ULightningDamageType::StaticClass() ) {
 		if (MoveComp->IsFalling()) {
 			Charge();
@@ -666,13 +667,15 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	}
 	else if (bIsParrying) {
 		ParryHit(DamageAmount, DamageEvent.DamageTypeClass);
+		FHitResult outHit;
+		UGameplayStatics::ApplyPointDamage(EnemyTarget,0.f,GetActorLocation(),outHit,GetController(),this,UStandardDamageType::StaticClass());
 	}
 	else if (bIsBlocking) {
 		GuardHit(DamageAmount, DamageEvent.DamageTypeClass);
 	}
 	else {
 		Hit(DamageAmount, DamageEvent.DamageTypeClass);
-		// 물건 주운 상태에서 피격 시 물건 떨굼
+		// 물건 주운	 상태에서 피격 시 물건 떨굼
 		if (bIsGrabbing == true && GrabbedMesh)
 		{
 			DropProp();
