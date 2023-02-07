@@ -575,10 +575,9 @@ void APlayerCharacter::Attack() {
 		// 점프 중이면 점프공격
 		if (MoveComp->IsFalling()) {
 			JumpAttack();
-			return;
 		}
 		// 움직임 커맨드 어레이에 2개 이상의 원소가 있으면
-		if (Tail > 0) {
+		else if (Tail > 0) {
 			// 마지막과 마지막의 앞에 있는 원소를 합치고 길이를 저장
 			float vectorLength = (MoveCommands[Tail] + MoveCommands[Tail - 1]).Size();
 			if (vectorLength <= 0) {
