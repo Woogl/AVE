@@ -97,10 +97,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsSuperArmor;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsParried;
-
+	bool bCanParry;
+	
 	float MontageLength;
 	float distanceValue;
 	
