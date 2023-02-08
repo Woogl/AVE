@@ -307,10 +307,10 @@ bool APlayerCharacter::CanJump()
 	return true;
 }
 
-bool APlayerCharacter::CanAttack()
+bool APlayerCharacter::CanAttack()	
 {
 	// 공격중이거나 회피/스킬사용, 가드브레이크 중이 아니면 true 리턴
-	return !(bIsAttacking || bIsInvincible || bIsGuardBroken);
+	return !(bIsAttacking || bIsInvincible || bIsGuardBroken || bIsHit);
 }
 
 bool APlayerCharacter::CanGuard()
@@ -328,7 +328,7 @@ bool APlayerCharacter::CanInteract()
 bool APlayerCharacter::CanDash()
 {
 	// 회피 중이거나 낙하 중, 대쉬 중, 가드브레이크 상태가 아니면 true 리턴
-	return !(MoveComp->IsFalling() || bIsInvincible || bIsDashing || bIsGuardBroken);
+	return !(MoveComp->IsFalling() || bIsInvincible || bIsDashing || bIsGuardBroken || bIsHit);
 }
 
 void APlayerCharacter::RotateToDirection(FVector Direction, float DeltaTime, float InterpSpeed)
@@ -596,7 +596,6 @@ void APlayerCharacter::Attack() {
 
 		Tail = -1;
 		LastAttackTime = 0.f;
-
 		// 공격 중으로 전환
 		bIsAttacking = true;
 	}
@@ -652,6 +651,9 @@ void APlayerCharacter::ComboAttack() {
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
 
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	if (bIsInvincible) {
+		return DamageAmount;
+	}
 	// 적 방향으로 회전
 	RotateToDirection(DamageCauser->GetActorLocation(), 0.f, 0.f);
 	EnemyTarget = DamageCauser;
@@ -770,7 +772,6 @@ void APlayerCharacter::Charge() {
 }
 
 void APlayerCharacter::Die() {
-	StopAnimMontage();
 	PlayAnimMontage(DieMontage);
 	bIsDead = true;
 }
@@ -780,6 +781,7 @@ void APlayerCharacter::Skill() {
 		PlayAnimMontage(SkillMontages[CurSkill]);
 		bIsAttacking = true;
 		bIsInvincible = true;
+
 	}
 }
 
@@ -811,8 +813,8 @@ void APlayerCharacter::RegeneratePosture() {
 	}
 }
 
-void APlayerCharacter::SpreadAoEDamage() {
+void APlayerCharacter::SpreadAoEDamage(TSubclassOf<UDamageType> AttackDamageType) {
 	TArray<AActor*> IgnoreList;
 	IgnoreList.Add(this);
-	UGameplayStatics::ApplyRadialDamage(GetWorld(), 50, GetActorLocation(), 1000.f, UKnockBackDamageType::StaticClass(), IgnoreList);
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), 50, GetActorLocation(), 1000.f, AttackDamageType, IgnoreList);
 }

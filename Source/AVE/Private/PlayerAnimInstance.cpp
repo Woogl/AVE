@@ -6,6 +6,7 @@
 #include <GameFramework/CharacterMovementComponent.h>
 #include <Kismet/KismetMathLibrary.h>
 #include "PlayerCharacter.h"
+#include "AllAVEDamageTypes.h"
 #include <Kismet/KismetSystemLibrary.h>
 
 UPlayerAnimInstance::UPlayerAnimInstance()
@@ -160,9 +161,15 @@ void UPlayerAnimInstance::InitPlayerState(UAnimMontage* Montage, bool bInterrupt
 	}
 }
 
-void UPlayerAnimInstance::AnimNotify_AoEDamage() {
+void UPlayerAnimInstance::AnimNotify_AoEKnockBackDamage() {
 	if (Player) {
-		Player->SpreadAoEDamage();
+		Player->SpreadAoEDamage(UKnockBackDamageType::StaticClass());
+	}
+}
+
+void UPlayerAnimInstance::AnimNotify_AoELightningDamage() {
+	if (Player) {
+		Player->SpreadAoEDamage(ULightningDamageType::StaticClass());
 	}
 }
 

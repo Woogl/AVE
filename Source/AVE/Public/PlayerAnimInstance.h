@@ -68,7 +68,10 @@ public:
 	void InitPlayerState(UAnimMontage* Montage, bool bInterrupted);
 
 	UFUNCTION()
-	void AnimNotify_AoEDamage();
+	void AnimNotify_AoEKnockBackDamage();
+
+	UFUNCTION()
+	void AnimNotify_AoELightningDamage();
 
 	UFUNCTION()
 	void AnimNotify_PlaySequence();

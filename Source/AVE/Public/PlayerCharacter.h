@@ -232,7 +232,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void MoveWeaponRight();
 	UFUNCTION(BlueprintCallable)
-	void SpreadAoEDamage();
+	void SpreadAoEDamage(TSubclassOf<UDamageType> AttackDamageType);
 
 	void RegeneratePosture();
 
