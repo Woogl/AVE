@@ -27,6 +27,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* Katana;
+
 	float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	void onActionAttack() override;
@@ -35,4 +38,5 @@ public:
 	void onHit(int characterDamage) override;
 	void onHitCrushed() override;
 	void onDie() override;
+	void onGetSet() override;
 };
