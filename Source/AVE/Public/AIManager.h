@@ -41,7 +41,7 @@ public:
 	bool running;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class AEnemySwordman> swordFactory;
+	TSubclassOf<class AEnemyBase> swordFactory;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TArray<AEnemyBase*> Enemies;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

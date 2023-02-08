@@ -26,9 +26,8 @@ void AAIManager::BeginPlay()
 	Super::BeginPlay();
 	EnemySpawn();
 
-	blackboard = UAIBlueprintHelperLibrary::GetBlackboard(this);
 	PlayerCharacter = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	blackboard->SetValueAsObject(TEXT("PlayerActor"), UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+	blackboard = UAIBlueprintHelperLibrary::GetBlackboard(this);
 }
 
 // Called every frame
@@ -64,6 +63,7 @@ void AAIManager::StartAI()
 {
 	if (!running)
 	{
+		blackboard->SetValueAsObject(TEXT("PlayerActor"), UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 		running = true;
 		for (int i = 0; i < Enemies.Num() ; i++)
 		{
@@ -73,5 +73,8 @@ void AAIManager::StartAI()
 					UAIBlueprintHelperLibrary::GetBlackboard(Enemies[i])->SetValueAsEnum(TEXT("AIState"),1);
 			}
 		}
+		return;
 	}
+	else
+	return;
 }
