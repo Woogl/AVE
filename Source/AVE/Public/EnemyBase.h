@@ -59,6 +59,8 @@ public:
 	// 래그돌 활성화
 	UFUNCTION(BlueprintCallable)
 		void ActivateRagdoll();
+	UFUNCTION(BlueprintCallable)
+		void UpdateMoveSpeed(float NewSpeed);
 
 	// 래그돌 활성화 타이머
 	FTimerHandle RagdollTimer;
@@ -71,12 +73,14 @@ public:
 		class UAnimMontage* enemyAnimMontage;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 		class UCombatComponent* CombatComp;
-
-	/*UPROPERTY(EditAnywhere)
-		class AAIControlManager* AIManager;*/
-
+	UPROPERTY()
+		class AAIManager* myManager;
 	UPROPERTY(EditAnywhere)
 		class UBaseBital* bital;
+	UPROPERTY(EditAnywhere)
+		class UBlackboardComponent* blackboard;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = UI)
+		class UWidgetComponent* enemyWidget;
 
 	virtual void onActionAttack();
 	virtual void onActionEvade();
@@ -84,5 +88,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void onHit(int characterDamage);
 	virtual void onHitCrushed();
-	virtual void onDie();
+	virtual void onDie();	
+	UFUNCTION(BlueprintCallable)
+	virtual void onGetSet();
+	virtual void onSetManager(AAIManager* Manager);
 };

@@ -6,7 +6,9 @@
 #include <Components/CapsuleComponent.h>
 #include "AIManager.h"
 #include <Kismet/GameplayStatics.h>
+#include "GameFramework/CharacterMovementComponent.h"
 #include <Kismet/KismetMathLibrary.h>
+#include <Blueprint/AIBlueprintHelperLibrary.h>
 
 // Sets default values
 AEnemyBase::AEnemyBase()
@@ -25,10 +27,9 @@ AEnemyBase::AEnemyBase()
 void AEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
-
-	//UGameplayStatics::GetActorOfClass(const UObject * WorldContextObject, TSubclassOf<AActor> ActorClass)
+	blackboard = UAIBlueprintHelperLibrary::GetBlackboard(this);
 }
- 
+
 // Called every frame
 void AEnemyBase::Tick(float DeltaTime)
 {
@@ -92,12 +93,12 @@ void AEnemyBase::OnFinishered()
 	LookAtPlayer();
 
 	// 테이크다운 애니메이션 실행
-	PlayAnimMontage(enemyAnimMontage,1,TEXT("Finish"));
+	PlayAnimMontage(enemyAnimMontage, 1, TEXT("Finish"));
 }
 
 void AEnemyBase::SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float RagdollDelay)
 {
-	
+
 	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 
 	// 머리 자를 경우
@@ -162,4 +163,19 @@ void AEnemyBase::ActivateRagdoll()
 
 	// 래그돌 활성화
 	GetMesh()->SetSimulatePhysics(true);
+}
+
+void AEnemyBase::onGetSet()
+{
+
+}
+
+void AEnemyBase::onSetManager(AAIManager* Manager)
+{
+	myManager = Manager;
+}
+
+void AEnemyBase::UpdateMoveSpeed(float NewSpeed)
+{
+	this->GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
 }

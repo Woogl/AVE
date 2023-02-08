@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "EnemyBase.h"
+#include "AC_Manager.h"
 #include "AIManager.generated.h"
 
 UCLASS()
@@ -33,10 +35,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int spawnShielderCount;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float spawnRadius;
+	float spawnRadius; 
+	UPROPERTY(EditAnywhere)
+	class UBlackboardComponent* blackboard;
+	bool running;
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class AAIController* MyManager;*/
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AEnemySwordman> swordFactory;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	TArray<AEnemyBase*> Enemies;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class APawn* PlayerCharacter;
 
 	void EnemySpawn();
+	void StartAI();
 };
