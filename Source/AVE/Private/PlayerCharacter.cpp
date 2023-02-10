@@ -108,9 +108,12 @@ void APlayerCharacter::Tick(float DeltaTime)
 		FVector inputVector = GetLastMovementInputVector();
 		if (!inputVector.IsNearlyZero())
 		{
-
 			RotateToDirection(inputVector, DeltaTime, 4.f);
 		}
+	}
+
+	if ((!MoveComp->IsFalling()) && bIsLightningCharged) {
+		Groggy();
 	}
 
 	LastMoveTime += DeltaTime;
@@ -150,6 +153,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Dash", IE_Released, this, &APlayerCharacter::StopDash);
 	PlayerInputComponent->BindAction("Finisher", IE_Pressed, this, &APlayerCharacter::Finisher);
 	PlayerInputComponent->BindAction("Skill", IE_Pressed, this, &APlayerCharacter::Skill);
+	PlayerInputComponent->BindAction("ChangeSkill", IE_Pressed, this, &APlayerCharacter::ChangeSkill);
+	PlayerInputComponent->BindAction("ChangeSpecialAttack", IE_Pressed, this, &APlayerCharacter::ChangeSpecialAttack);
 
 	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Move Right / Left", this, &APlayerCharacter::MoveRight);
@@ -302,10 +307,10 @@ bool APlayerCharacter::CanJump()
 	return true;
 }
 
-bool APlayerCharacter::CanAttack()
+bool APlayerCharacter::CanAttack()	
 {
 	// 공격중이거나 회피/스킬사용, 가드브레이크 중이 아니면 true 리턴
-	return !(bIsAttacking || bIsInvincible || bIsGuardBroken);
+	return !(bIsAttacking || bIsInvincible || bIsGuardBroken || bIsHit);
 }
 
 bool APlayerCharacter::CanGuard()
@@ -323,7 +328,7 @@ bool APlayerCharacter::CanInteract()
 bool APlayerCharacter::CanDash()
 {
 	// 회피 중이거나 낙하 중, 대쉬 중, 가드브레이크 상태가 아니면 true 리턴
-	return !(MoveComp->IsFalling() || bIsInvincible || bIsDashing || bIsGuardBroken);
+	return !(MoveComp->IsFalling() || bIsInvincible || bIsDashing || bIsGuardBroken || bIsHit);
 }
 
 void APlayerCharacter::RotateToDirection(FVector Direction, float DeltaTime, float InterpSpeed)
@@ -570,10 +575,9 @@ void APlayerCharacter::Attack() {
 		// 점프 중이면 점프공격
 		if (MoveComp->IsFalling()) {
 			JumpAttack();
-			return;
 		}
 		// 움직임 커맨드 어레이에 2개 이상의 원소가 있으면
-		if (Tail > 0) {
+		else if (Tail > 0) {
 			// 마지막과 마지막의 앞에 있는 원소를 합치고 길이를 저장
 			float vectorLength = (MoveCommands[Tail] + MoveCommands[Tail - 1]).Size();
 			if (vectorLength <= 0) {
@@ -592,7 +596,6 @@ void APlayerCharacter::Attack() {
 
 		Tail = -1;
 		LastAttackTime = 0.f;
-
 		// 공격 중으로 전환
 		bIsAttacking = true;
 	}
@@ -611,8 +614,19 @@ void APlayerCharacter::InitInvincibility() {
 	bIsInvincible = false;
 }
 
+void APlayerCharacter::InitCharge() {
+	bIsLightningCharged = false;
+}
+
 void APlayerCharacter::JumpAttack() {
-	PlayAnimMontage(JumpAttackMontage);
+	if (bIsLightningCharged) {
+		PlayAnimMontage(JumpAttackMontages[1]);
+		bIsInvincible = true;
+		InitCharge();
+	}
+	else {
+		PlayAnimMontage(JumpAttackMontages[0]);
+	}
 	Combo = -1;
 }
 
@@ -637,18 +651,32 @@ void APlayerCharacter::ComboAttack() {
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
 
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
+	if (bIsInvincible) {
+		return DamageAmount;
+	}
 	// 적 방향으로 회전
 	RotateToDirection(DamageCauser->GetActorLocation(), 0.f, 0.f);
-	if (bIsParrying) {
+	EnemyTarget = DamageCauser;
+	bIsTargeting = true;
+	if (DamageEvent.DamageTypeClass == ULightningDamageType::StaticClass() ) {
+		if (MoveComp->IsFalling()) {
+			Charge();
+		}
+		else {
+			Groggy();
+		}
+	}
+	else if (bIsParrying) {
 		ParryHit(DamageAmount, DamageEvent.DamageTypeClass);
+		FHitResult outHit;
+		UGameplayStatics::ApplyPointDamage(EnemyTarget,0.f,GetActorLocation(),outHit,GetController(),this,UStandardDamageType::StaticClass());
 	}
 	else if (bIsBlocking) {
 		GuardHit(DamageAmount, DamageEvent.DamageTypeClass);
 	}
 	else {
 		Hit(DamageAmount, DamageEvent.DamageTypeClass);
-		// 물건 주운 상태에서 피격 시 물건 떨굼
+		// 물건 주운	 상태에서 피격 시 물건 떨굼
 		if (bIsGrabbing == true && GrabbedMesh)
 		{
 			DropProp();
@@ -728,13 +756,22 @@ void APlayerCharacter::Hit(float Damage, TSubclassOf<UDamageType> DamageType) {
 }
 
 void APlayerCharacter::GuardBreak() {
-	StopAnimMontage();
 	PlayAnimMontage(GuardBreakMontage);
 	bIsGuardBroken = true;
 }
 
+void APlayerCharacter::Groggy() {
+	InitCharge();
+	PlayAnimMontage(GroggyMontage);
+	bIsGuardBroken = true;
+}
+
+void APlayerCharacter::Charge() {
+	PlayAnimMontage(ChargeMontage);
+	bIsLightningCharged = true;
+}
+
 void APlayerCharacter::Die() {
-	StopAnimMontage();
 	PlayAnimMontage(DieMontage);
 	bIsDead = true;
 }
@@ -744,7 +781,20 @@ void APlayerCharacter::Skill() {
 		PlayAnimMontage(SkillMontages[CurSkill]);
 		bIsAttacking = true;
 		bIsInvincible = true;
+
 	}
+}
+
+void APlayerCharacter::ChangeSkill() {
+	CurSkill++;
+	if (CurSkill >= SkillMontages.Num())
+		CurSkill = 0;
+}
+
+void APlayerCharacter::ChangeSpecialAttack() {
+	CurSpecialAttack++;
+	if (CurSpecialAttack >= SpecialAttackMontages.Num())
+		CurSpecialAttack = 0;
 }
 
 void APlayerCharacter::MoveWeaponLeft() {
@@ -763,8 +813,8 @@ void APlayerCharacter::RegeneratePosture() {
 	}
 }
 
-void APlayerCharacter::SpreadAoEDamage() {
+void APlayerCharacter::SpreadAoEDamage(TSubclassOf<UDamageType> AttackDamageType) {
 	TArray<AActor*> IgnoreList;
 	IgnoreList.Add(this);
-	UGameplayStatics::ApplyRadialDamage(GetWorld(), 50, GetActorLocation(), 1000.f, UKnockBackDamageType::StaticClass(), IgnoreList);
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), 50, GetActorLocation(), 1000.f, AttackDamageType, IgnoreList);
 }
