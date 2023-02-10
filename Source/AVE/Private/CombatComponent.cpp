@@ -5,29 +5,22 @@
 #include <Kismet/KismetSystemLibrary.h>
 #include <Kismet/GameplayStatics.h>
 #include <Particles/ParticleSystem.h>
-#include <../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h>
+#include <NiagaraFunctionLibrary.h>
 #include "MeshSlicer.h"
 #include <GameFramework/Character.h>
 
 UCombatComponent::UCombatComponent()
 {
-	TEnumAsByte<EObjectTypeQuery> pawn = UEngineTypes::ConvertToObjectType(ECC_Pawn);
-	TEnumAsByte<EObjectTypeQuery> destructible = UEngineTypes::ConvertToObjectType(ECC_Destructible);
-	TEnumAsByte<EObjectTypeQuery> worldStatic = UEngineTypes::ConvertToObjectType(ECC_WorldStatic);
-	TEnumAsByte<EObjectTypeQuery> worldDynamic = UEngineTypes::ConvertToObjectType(ECC_WorldDynamic);
-	ObjectTypes.Emplace(pawn);
-	ObjectTypes.Emplace(destructible);
-	ObjectTypes.Emplace(worldStatic);
-	ObjectTypes.Emplace(worldDynamic);
+
 }
 
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
-void UCombatComponent::SetupWeapon(UStaticMeshComponent* WeaponMesh)
+void UCombatComponent::SetupWeapon(UMeshComponent* WeaponMesh)
 {
 	MainWeapon = WeaponMesh;
 	SocketNames = MainWeapon->GetAllSocketNames();
@@ -51,19 +44,19 @@ void UCombatComponent::AttackCheckBegin()
 void UCombatComponent::AttackCheckTick()
 {
 	// 트레이스 결과를 저장
-	TArray<FHitResult> hits;
+	FHitResult hit;
 
 	// 무기의 모든 소켓에서 트레이스
 	for (int i = 0; i < SocketNames.Num(); i++)
 	{
 		CurSocketLocations[i] = MainWeapon->GetSocketLocation(SocketNames[i]);
+
 		// 지난 프레임부터 현재까지 트레이스 (소켓 위치)
-		bool bSuccess = UKismetSystemLibrary::LineTraceMultiForObjects(this, LastSocketLocations[i], CurSocketLocations[i], ObjectTypes, false, ActorsToIgnore,
-			EDrawDebugTrace::None, hits, true, FLinearColor::Red, FLinearColor::Green, 0.5f);
+		bool bSuccess = GetWorld()->LineTraceSingleByChannel(hit, LastSocketLocations[i], CurSocketLocations[i], AttackChannel);
 
 		if (bSuccess == true)
 		{
-			OnAttackSucceed(hits);
+			OnAttackSucceed(hit);
 		}
 	}
 
@@ -80,39 +73,36 @@ void UCombatComponent::SetDamageInfo(float InBaseDamage, TSubclassOf<UDamageType
 	DamageType = InDamageType;
 }
 
-void UCombatComponent::OnAttackSucceed(TArray<FHitResult> Hits)
+void UCombatComponent::OnAttackSucceed(FHitResult HitInfo)
 {
 	// 중복 타격 방지
-	for (FHitResult hit : Hits)
+	AActor* hitActor = HitInfo.GetActor();
+	// 이미 때린 액터인지 체크
+	if (AlreadyHitActors.Contains(hitActor) == false)
 	{
-		AActor* hitActor = hit.GetActor();
-		// 이미 때린 액터인지 체크
-		if (AlreadyHitActors.Contains(hitActor) == false)
+		// 새로 때린 액터만 추가
+		AlreadyHitActors.Emplace(hitActor);
+
+		// ECC_Destructible이면 Mesh Slicer 스폰
+		if (bEnableSlice == true && HitInfo.Component->GetCollisionObjectType() == ECC_Destructible)
 		{
-			// 새로 때린 액터만 추가
-			AlreadyHitActors.Emplace(hitActor);
-
-			// ECC_Destructible이면 Mesh Slicer 스폰
-			if (bEnableSlice == true && hit.Component->GetCollisionObjectType() == ECC_Destructible)
-			{
-				SpawnMeshSlicer(hit);
-			}
-
-			// 캐릭터에게 대미지 가하기
-			if (hitActor && hitActor->IsA(ACharacter::StaticClass()))
-			{
-				DealDamage(hitActor);
-			}
-
-			// 역경직 발생
-			if (HitstopTime > 0.f)
-			{
-				StartHitstop(HitstopTime);
-			}
-			
-			// 타격 VFX 발생
-			PlayHitFX(hit);
+			SpawnMeshSlicer(HitInfo);
 		}
+
+		// 캐릭터에게 대미지 가하기
+		if (hitActor && hitActor->IsA(ACharacter::StaticClass()))
+		{
+			DealDamage(hitActor);
+		}
+
+		// 역경직 발생
+		if (HitstopTime > 0.f)
+		{
+			StartHitstop(HitstopTime);
+		}
+
+		// 타격 VFX 발생
+		PlayHitFX(HitInfo);
 	}
 }
 
@@ -161,6 +151,6 @@ void UCombatComponent::SpawnMeshSlicer(FHitResult HitInfo)
 	FActorSpawnParameters spawnParams;
 	FVector spawnLoc = HitInfo.ImpactPoint;
 	FRotator spawnRot = MainWeapon->GetComponentRotation();
-	GetWorld()->SpawnActor<AMeshSlicer>(AMeshSlicer::StaticClass(), spawnLoc, spawnRot,	spawnParams);
+	GetWorld()->SpawnActor<AMeshSlicer>(AMeshSlicer::StaticClass(), spawnLoc, spawnRot, spawnParams);
 }
 

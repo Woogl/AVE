@@ -5,9 +5,9 @@
 #include <Components/BoxComponent.h>
 #include <Kismet/GameplayStatics.h>
 #include <GameFramework/Character.h>
-#include "Dummy.h"
 #include <../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraFunctionLibrary.h>
 #include "AllAVEDamageTypes.h"
+#include <../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h>
 
 AGrabbableActorBase::AGrabbableActorBase()
 {
@@ -19,6 +19,10 @@ AGrabbableActorBase::AGrabbableActorBase()
 	Mesh->BodyInstance.bNotifyRigidBodyCollision = true;
 	RootComponent = Mesh;
 
+	ElectricArc = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ElectricArc"));
+	ElectricArc->bAutoActivate = false;
+	ElectricArc->SetupAttachment(RootComponent);
+
 	// 대미지 타입 초기값
 	DamageType = UStandardDamageType::StaticClass();
 }
@@ -26,14 +30,38 @@ AGrabbableActorBase::AGrabbableActorBase()
 void AGrabbableActorBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	// 델리게이트 바인딩
 	Mesh->OnComponentHit.AddDynamic(this, &AGrabbableActorBase::OnMeshHit);
 }
 
-UStaticMeshComponent* AGrabbableActorBase::GetMesh()
+UStaticMeshComponent* AGrabbableActorBase::GetMesh() const
 {
 	return Mesh;
+}
+
+void AGrabbableActorBase::OnGrabbed()
+{
+	GetWorldTimerManager().SetTimer(ElectricArcTimer, this, &AGrabbableActorBase::StartElectricArc, 0.016f, true, 0.2f);
+
+	// 딜레이 람다함수
+	FTimerHandle WaitHandle;
+	GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			ElectricArc->Activate(true);
+		}), 0.2f, false);
+}
+
+void AGrabbableActorBase::StartElectricArc()
+{
+	ElectricArc->SetVectorParameter(TEXT("BeamEnd"), UGameplayStatics::GetPlayerCharacter(this, 0)->GetMesh()->GetSocketLocation(TEXT("hand_r")));
+}
+
+void AGrabbableActorBase::EndElectricArc()
+{
+	ElectricArc->Deactivate();
+
+	GetWorldTimerManager().ClearTimer(ElectricArcTimer);
 }
 
 void AGrabbableActorBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
@@ -42,24 +70,27 @@ void AGrabbableActorBase::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* O
 	if (bShouldAttack == false) return;
 
 	// 캐릭터인지 체크
-	if (OtherActor->IsA(ACharacter::StaticClass()))
+	if (OtherActor && OtherActor->IsA(ACharacter::StaticClass()))
 	{
 		FHitResult outHit;
 		UGameplayStatics::ApplyPointDamage(OtherActor, BaseDamage, GetActorLocation(), outHit, nullptr, this, DamageType);
+
+		FractureMesh();
+
+		Mesh->SetCollisionResponseToAllChannels(ECR_Ignore);
 
 		// 타격 VFX
 		if (HitNiagara)
 		{
 			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitNiagara, GetActorLocation(), GetActorRotation());
 		}
+
 		// 타격 SFX
 		if (HitSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
 		}
-	}
-	else if (OtherComponent->GetCollisionObjectType() == ECC_WorldStatic)
-	{
+
 		bShouldAttack = false;
 	}
 }

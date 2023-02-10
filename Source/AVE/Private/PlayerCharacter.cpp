@@ -84,6 +84,7 @@ void APlayerCharacter::BeginPlay()
 
 	// 컴뱃 컴포넌트에 무기 설정
 	CombatComp->SetupWeapon(Weapon);
+	CombatComp->AttackChannel = ECC_GameTraceChannel3;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -466,6 +467,7 @@ void APlayerCharacter::AttachProp()
 void APlayerCharacter::PushProp()
 {
 	// 분리하기
+	GrabbedActor->EndElectricArc();
 	GrabbedMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	GrabbedMesh->SetSimulatePhysics(true);
 
@@ -485,6 +487,8 @@ void APlayerCharacter::PushProp()
 
 void APlayerCharacter::DropProp()
 {
+	GrabbedActor->EndElectricArc();
+
 	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(InteractionMontages[0]))
 	{
 		GetMesh()->GetAnimInstance()->Montage_Stop(0.25f, InteractionMontages[0]);
@@ -518,7 +522,7 @@ bool APlayerCharacter::TryAutoTargeting(float SearchRadius)
 	{
 		// 방향키 방향으로 다시 트레이스
 		FVector loc = GetActorLocation() + GetLastMovementInputVector() * 200.f;
-		bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), loc, SearchRadius * 0.5f, TraceTypeQuery3, false, actorToIgnore,
+		bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, loc, loc, SearchRadius * 0.5f, TraceTypeQuery3, false, actorToIgnore,
 			EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f);
 		// 적을 찾으면 타겟으로 지정하고 true 반환
 		if (bSuccess == true)
@@ -608,6 +612,7 @@ void APlayerCharacter::InitState() {
 	bIsGuardBroken = false;
 	bIsDashing = false;
 	bIsHit = false;
+	RInterpSpeed = 0.f;
 }
 
 void APlayerCharacter::InitInvincibility() {

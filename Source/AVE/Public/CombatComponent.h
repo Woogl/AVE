@@ -12,39 +12,35 @@
 * 플레이어와 적의 공격 판정을 구하는 컴포넌트
 */
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class AVE_API UCombatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	UCombatComponent();
 
 protected:
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// 공격 판정을 계산할 무기
-	class UStaticMeshComponent* MainWeapon;
+	class UMeshComponent* MainWeapon;
 	UFUNCTION(BlueprintCallable)
-	void SetupWeapon(UStaticMeshComponent* WeaponMesh);
+		void SetupWeapon(UMeshComponent* WeaponMesh);
 
 	// 공격 판정 계산
 	void AttackCheckBegin();
 	void AttackCheckTick();
 
 	// 대미지
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	float BaseDamage;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	TSubclassOf<UAVEDamageType> DamageType;
-	UFUNCTION(BlueprintCallable)
 	void SetDamageInfo(float InBaseDamage, TSubclassOf<UDamageType> InDamageType);
-	void OnAttackSucceed(TArray<FHitResult> Hits);
+	void OnAttackSucceed(FHitResult HitInfo);
 	void DealDamage(AActor* Target);
 
 	// 역경직
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	float HitstopTime;
 	void StartHitstop(float Time);
 	void EndHitStop();
@@ -60,14 +56,15 @@ public:
 	TArray<FName> SocketNames;
 	TArray<FVector> CurSocketLocations;
 	TArray<FVector> LastSocketLocations;
-	TArray< AActor* > ActorsToIgnore;
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	// 트레이스 채널 기본값 = EnemyAttack
+	// NOTE : 주인공은 PlayerCharacter::BeginPlay()에서 트레이스 채널을 PlayerAttack으로 바꿔줬음
+	ECollisionChannel AttackChannel = ECC_GameTraceChannel5;
 
 	// 타격 VFX, SFX
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
-	class UNiagaraSystem* HitNiagara;
+		class UNiagaraSystem* HitNiagara;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
-	class USoundWave* HitSound;
+		class USoundWave* HitSound;
 	void PlayHitFX(FHitResult HitInfo);
 
 	// 메시 자르는 액터 스폰
