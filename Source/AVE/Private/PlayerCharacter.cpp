@@ -9,9 +9,12 @@
 #include "CombatComponent.h"
 #include <Kismet/KismetMathLibrary.h>
 #include <Kismet/KismetSystemLibrary.h>	
+
+#include "Boss.h"
 #include "MeshSlicer.h"
 #include "PlayerAnimInstance.h"
 #include "GrabbableActorBase.h"
+#include "Kismet/GameplayStatics.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -216,7 +219,7 @@ void APlayerCharacter::Guard()
 	// 0.3초 동안 패링 판정 발동 
 	bIsParrying = true;
 	GetWorldTimerManager().SetTimer(ParryingTimer, this, &APlayerCharacter::OnParryEnd, 0.3f, false);
-
+	
 	// ABP의 스테이트 변경
 	auto animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	animIns->bIsBlocking = true;
@@ -671,20 +674,45 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	FVector outImpulse;
 	DamageEvent.GetBestHitInfo(this,DamageCauser,outHit,outImpulse);
 	bIsHit = true;
+	EnemyTarget = Cast<ACharacter>(DamageCauser);
+	bIsTargeting = true;
 	// 적 방향으로 회전
 	RotateToDirection(DamageCauser->GetActorLocation(), 0.f, 0.f);
 	if (bIsParrying) {
 		ParryHit(DamageAmount,outHit.Item);
+		UGameplayStatics::ApplyPointDamage(DamageCauser,1.f,GetActorLocation(),outHit,GetController(),this,UDamageType::StaticClass());
 	}
 	else if (bIsBlocking) {
 		GuardHit(DamageAmount, outHit.Item);
 	}
-	else {
-		Hit(DamageAmount, outHit.Item);
-		// 물건 주운 상태에서 피격 시 물건 떨굼
-		if (bIsGrabbing == true && GrabbedObject)
+	else
 		{
-			PerformDiscard();
+		// 보스 간파베기
+		// UKismetSystemLibrary::PrintString(GetWorld(),TEXT("Pre-KanpaBegi"));
+
+		auto temp = (EnemyTarget->GetActorLocation() - this->GetActorLocation()).GetSafeNormal();
+		auto temp2 = GetVelocity().GetSafeNormal();
+		auto temp3 = FVector::DotProduct(temp, temp2);
+		
+		if(bIsDashing && temp3 > 0.f)
+		{
+			UGameplayStatics::ApplyPointDamage(DamageCauser,1.f,GetActorLocation(),outHit,GetController(),this,UDamageType::StaticClass());
+			UKismetSystemLibrary::PrintString(GetWorld(),TEXT("KanpaBegi Success"));
+		}
+		// else if(bIsDashing)
+		// {
+		// 	UKismetSystemLibrary::PrintString(GetWorld(),TEXT("KanpaBegi Fail"));
+		//
+		// 	//피했음
+		// }
+		else
+		{
+			Hit(DamageAmount, outHit.Item);
+			// 물건 주운 상태에서 피격 시 물건 떨굼
+			if (bIsGrabbing == true && GrabbedObject)
+			{
+				PerformDiscard();
+			}
 		}
 	}
 	return DamageAmount;

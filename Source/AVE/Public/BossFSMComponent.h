@@ -16,10 +16,11 @@ enum class EBossState : uint8
 	NormalATK UMETA(Displayname = NormalATK),
 	ATK01 UMETA(Displayname = ATK01),
 	ATK02 UMETA(Displayname = ATK02),
+	ATK03 UMETA(Displayname = ATK03),
 	JumpATK UMETA(Displayname = JumpATK),
 	StanceATK UMETA(Displayname = StanceATK),
 	Backstep UMETA(Displayname = Backstep),
-	BladeAura UMETA(Displayname = BladeAura),
+	BladeRangeATK UMETA(Displayname = BladeRangeATK),
 	BehindATK UMETA(Displayname = BehindATK),
 	
 };
@@ -63,10 +64,11 @@ public:
 	void TickNormalATK();
 	void TickATK01();
 	void TickATK02();
+	void TickATK03();
 	void TickJumpATK();
 	void TickStanceATK();
 	void TickBackstep();
-	void TickBladeAura();
+	void TickBladeRangeATK();
 	void TickBehindATK();
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -98,6 +100,12 @@ public:
 
 	UFUNCTION()
 	void ReturnToWalk();
+
+	UFUNCTION()
+	void ReturnToBladeRangeATK();
+
+	UFUNCTION()
+	void ReturnToStanceATK();
 	
 	UFUNCTION()
 	void SetMoveSpeed();
@@ -111,7 +119,7 @@ public:
 	void RandomInt(int min, int max);
 
 	UFUNCTION()
-	void RandomFloat(float min, float max);
+	void RandomFloat();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int walkRandomInt;
@@ -124,18 +132,23 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTimerHandle montageDelayHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FTimerHandle delayHandle;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float randomFloatValue;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int randomIntValue;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsGuarding;
 	
-	float dashATKPercent = 0.2f;
-	float jumpATKPercent = 0.2f;
-	float backstepPercent = 0.2f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int attackCount = 0;
+	
+	float dashATKPercent = 0.2f;
+	float backstepPercent = 0.2f;
+	
 };

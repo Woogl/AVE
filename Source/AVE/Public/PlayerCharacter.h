@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AVEEnums.h"
+#include "Boss.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
@@ -37,6 +38,7 @@ public:
 	// 타게팅 대상
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	AActor* EnemyTarget = nullptr;
+	
 	// 회전 속도 ( 회전 완료까지 1/x 초. 0이면 즉시 회전 완료 )
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RInterpSpeed = 0.f;
@@ -210,11 +212,12 @@ public:
 	void SpecialAttack();
 	void DashAttack();
 	void ComboAttack();
+	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	                 AActor* DamageCauser);
 
 	void InitState();
 	void InitInvincibility();
-
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	
 	void ParryHit(float Damage, int DamageType);
 	void GuardHit(float Damage, int DamageType);
 	void Hit(float Damage, int DamageType);
