@@ -508,12 +508,13 @@ bool APlayerCharacter::TryAutoTargeting(float SearchRadius)
 	bool bSuccess;
 
 	// 제자리에서 트레이스
-	bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), GetActorLocation(), SearchRadius, TraceTypeQuery3, false, actorToIgnore,
-		EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f);
+	bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), GetActorLocation(), SearchRadius, ETraceTypeQuery::TraceTypeQuery4, false, actorToIgnore,
+		EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f);
 	// 적을 찾으면 타겟으로 지정
 	if (bSuccess == true)
 	{
 		EnemyTarget = hit.GetActor();
+		UKismetSystemLibrary::PrintString(GetWorld(), EnemyTarget->GetName());
 		bIsTargeting = true;
 	}
 
@@ -522,8 +523,8 @@ bool APlayerCharacter::TryAutoTargeting(float SearchRadius)
 	{
 		// 방향키 방향으로 다시 트레이스
 		FVector loc = GetActorLocation() + GetLastMovementInputVector() * 200.f;
-		bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, loc, loc, SearchRadius * 0.5f, TraceTypeQuery3, false, actorToIgnore,
-			EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f);
+		bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, loc, loc, SearchRadius * 0.5f, ETraceTypeQuery::TraceTypeQuery4, false, actorToIgnore,
+			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f);
 		// 적을 찾으면 타겟으로 지정하고 true 반환
 		if (bSuccess == true)
 		{
@@ -612,7 +613,6 @@ void APlayerCharacter::InitState() {
 	bIsGuardBroken = false;
 	bIsDashing = false;
 	bIsHit = false;
-	RInterpSpeed = 0.f;
 }
 
 void APlayerCharacter::InitInvincibility() {
