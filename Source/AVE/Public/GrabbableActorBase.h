@@ -16,10 +16,10 @@ public:
 	AGrabbableActorBase();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-		UStaticMeshComponent* Mesh;
+	UStaticMeshComponent* Mesh;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-		class UNiagaraComponent* ElectricArc;
+	class UNiagaraComponent* ElectricArc;
 
 protected:
 	virtual void BeginPlay() override;
@@ -30,15 +30,15 @@ public:
 
 	// 대미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-		float BaseDamage = 10.f;
+	float BaseDamage = 10.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
-		TSubclassOf<class UAVEDamageType> DamageType;
+	TSubclassOf<class UAVEDamageType> DamageType;
 
 	// VFX, SFX
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
-		class UNiagaraSystem* HitNiagara;
+	class UNiagaraSystem* HitNiagara;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
-		class USoundWave* HitSound;
+	class USoundWave* HitSound;
 
 	// 잡았을 시 호출
 	void OnGrabbed();
@@ -48,11 +48,11 @@ public:
 
 	// 충돌 시 호출
 	UFUNCTION()
-		void OnMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
+	void OnMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
 	// 카오스 발동
 	UFUNCTION(BlueprintImplementableEvent)
-		void FractureMesh();
+	void FractureMesh();
 
 	UStaticMeshComponent* GetMesh() const;
 };

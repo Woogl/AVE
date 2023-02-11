@@ -8,16 +8,11 @@
 
 AMeshSlicer::AMeshSlicer()
 {
-	//PrimaryActorTick.bCanEverTick = true;
-
 	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
-	Box->SetCollisionProfileName(TEXT("SliceQuery"));
-	// 자를 크기 설정
 	Box->SetBoxExtent(FVector(30.f, 50.f, 0.f));
 	RootComponent = Box;
 
 	// 델리게이트 바인딩
-	//Box->OnComponentBeginOverlap.AddDynamic(this, &AMeshSlicer::OnBoxOverlapBegin);
 	Box->OnComponentEndOverlap.AddDynamic(this, &AMeshSlicer::OnBoxOverlapEnd);
 
 	// 스폰되고 0.01초 지나면 파괴
@@ -30,15 +25,13 @@ AMeshSlicer::AMeshSlicer()
 void AMeshSlicer::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	//디버그
-	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("SpawnMeshSlicer"));
+
 }
 
 void AMeshSlicer::OnBoxOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	// 단면에 덮어씌울 머터리얼 가져오기
-	auto sliceTarget = Cast<ASliceableActorBase>(OtherActor);
+	ASliceableActorBase* sliceTarget = Cast<ASliceableActorBase>(OtherActor);
 
 	if (sliceTarget)
 	{
@@ -50,9 +43,6 @@ void AMeshSlicer::OnBoxOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAct
 
 void AMeshSlicer::SliceMesh(UPrimitiveComponent* TargetMesh)
 {
-	// 디버그
-	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("SliceMesh"));
-
 	// 자를 메시
 	UProceduralMeshComponent* meshToSlice = Cast<UProceduralMeshComponent>(TargetMesh);
 	FVector planePosition = Box->GetComponentLocation();
@@ -77,6 +67,7 @@ void AMeshSlicer::SliceMesh(UPrimitiveComponent* TargetMesh)
 		// 잘라진 메시 분리
 		otherHalfMesh->SetSimulatePhysics(true);
 		otherHalfMesh->AddRadialImpulse(planePosition, 1000.f, 500.f, ERadialImpulseFalloff::RIF_Constant, true);
+		otherHalfMesh->SetAngularDamping(2.f);
 		meshToSlice->AddRadialImpulse(planePosition, 1000.f, 500.f, ERadialImpulseFalloff::RIF_Constant, true);
 	}
 }

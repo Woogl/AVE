@@ -51,12 +51,15 @@ void UCombatComponent::AttackCheckTick()
 	{
 		CurSocketLocations[i] = MainWeapon->GetSocketLocation(SocketNames[i]);
 
+		TArray<AActor*> ActorsToIgnore;
 		// 지난 프레임부터 현재까지 트레이스 (소켓 위치)
-		bool bSuccess = GetWorld()->LineTraceSingleByChannel(hit, LastSocketLocations[i], CurSocketLocations[i], AttackChannel);
+		bool bSuccess = UKismetSystemLibrary::LineTraceSingle(this, LastSocketLocations[i], CurSocketLocations[i], AttackTrace, false, ActorsToIgnore,
+			EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.0f);
 
 		if (bSuccess == true)
 		{
 			OnAttackSucceed(hit);
+			break;
 		}
 	}
 

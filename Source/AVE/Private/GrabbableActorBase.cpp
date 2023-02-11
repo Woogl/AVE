@@ -54,7 +54,7 @@ void AGrabbableActorBase::OnGrabbed()
 
 void AGrabbableActorBase::StartElectricArc()
 {
-	ElectricArc->SetVectorParameter(TEXT("BeamEnd"), UGameplayStatics::GetPlayerCharacter(this, 0)->GetMesh()->GetSocketLocation(TEXT("hand_r")));
+	ElectricArc->SetVectorParameter(TEXT("BeamEnd"), UGameplayStatics::GetPlayerCharacter(this, 0)->GetMesh()->GetSocketLocation("middle_03_r"));
 }
 
 void AGrabbableActorBase::EndElectricArc()

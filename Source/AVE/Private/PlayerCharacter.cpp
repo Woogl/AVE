@@ -84,7 +84,7 @@ void APlayerCharacter::BeginPlay()
 
 	// 컴뱃 컴포넌트에 무기 설정
 	CombatComp->SetupWeapon(Weapon);
-	CombatComp->AttackChannel = ECC_GameTraceChannel3;
+	CombatComp->AttackTrace = TraceTypeQuery4;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -114,7 +114,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	}
 
 	if ((!MoveComp->IsFalling()) && bIsLightningCharged) {
-		Groggy();
+		Groggy(); // 피격시에만 체크해도 되는 부분이면 TakeDamage()에 옮기는게 낫지 않을까? - 우성
 	}
 
 	LastMoveTime += DeltaTime;
@@ -130,7 +130,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		Combo = -1;
 		LastAttackTime = 0.f;
 	}
-	RegeneratePosture();
+	RegeneratePosture(); // 프레임레이트 영향 없애기 위해 TakeDamage()에서 타이머 + 루프 걸어서 호출하는게 낫지 않을까? - 우성
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -435,12 +435,13 @@ void APlayerCharacter::PullProp()
 
 	// 범위 내에 주울 물건 찾기
 	if (UKismetSystemLibrary::SphereTraceSingleForObjects(this, GetActorLocation(), GetActorLocation(), 150.f, objectTypes, false, actorToIgnores,
-		EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f))
+		EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f))
 	{
 		// 찾기 성공하면 주움
 		if (hit.GetActor()->IsA(AGrabbableActorBase::StaticClass()))
 		{
 			GrabbedActor = Cast<AGrabbableActorBase>(hit.GetActor());
+			GrabbedActor->OnGrabbed();
 			GrabbedMesh = GrabbedActor->GetMesh();
 			GrabbedMesh->SetSimulatePhysics(false);
 
@@ -466,23 +467,32 @@ void APlayerCharacter::AttachProp()
 
 void APlayerCharacter::PushProp()
 {
-	// 분리하기
-	GrabbedActor->EndElectricArc();
-	GrabbedMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	GrabbedMesh->SetSimulatePhysics(true);
-
-	// 발사하기
-	FVector OutLaunchVelocity;
-	UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, OutLaunchVelocity, GrabbedMesh->GetComponentLocation(), EnemyTarget->GetActorLocation(), 0.f, 0.9f);
-	GrabbedMesh->AddImpulse(OutLaunchVelocity * 64);
-	GrabbedMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
-	GrabbedActor->bShouldAttack = true;
-
+	// 몽타주 재생
+	RotateToDirection(EnemyTarget->GetActorLocation());
 	PlayAnimMontage(InteractionMontages[1]);
 
-	bIsGrabbing = false;
-	GrabbedMesh = nullptr;
-	GrabbedActor = nullptr;
+	// 딜레이 람다함수
+	FTimerHandle delayHandle;
+	float delayTime = 0.05f;
+	GetWorld()->GetTimerManager().SetTimer(delayHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			// 분리하기
+			GrabbedActor->EndElectricArc();
+			GrabbedMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+			GrabbedMesh->SetSimulatePhysics(true);
+
+			// 발사하기
+			FVector OutLaunchVelocity;
+			UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, OutLaunchVelocity, GrabbedMesh->GetComponentLocation(), EnemyTarget->GetActorLocation(), 0.f, 0.9f);
+			GrabbedMesh->AddImpulse(OutLaunchVelocity * 64);
+			GrabbedMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+			GrabbedActor->bShouldAttack = true;
+
+			bIsGrabbing = false;
+			GrabbedMesh = nullptr;
+			GrabbedActor = nullptr;
+
+		}), delayTime, false);
 }
 
 void APlayerCharacter::DropProp()
@@ -508,8 +518,8 @@ bool APlayerCharacter::TryAutoTargeting(float SearchRadius)
 	bool bSuccess;
 
 	// 제자리에서 트레이스
-	bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), GetActorLocation(), SearchRadius, ETraceTypeQuery::TraceTypeQuery4, false, actorToIgnore,
-		EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f);
+	bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, GetActorLocation(), GetActorLocation(), SearchRadius, ETraceTypeQuery::TraceTypeQuery3, false, actorToIgnore,
+		EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f);
 	// 적을 찾으면 타겟으로 지정
 	if (bSuccess == true)
 	{
@@ -523,8 +533,8 @@ bool APlayerCharacter::TryAutoTargeting(float SearchRadius)
 	{
 		// 방향키 방향으로 다시 트레이스
 		FVector loc = GetActorLocation() + GetLastMovementInputVector() * 200.f;
-		bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, loc, loc, SearchRadius * 0.5f, ETraceTypeQuery::TraceTypeQuery4, false, actorToIgnore,
-			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.f);
+		bSuccess = UKismetSystemLibrary::SphereTraceSingle(this, loc, loc, SearchRadius * 0.5f, ETraceTypeQuery::TraceTypeQuery3, false, actorToIgnore,
+			EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f);
 		// 적을 찾으면 타겟으로 지정하고 true 반환
 		if (bSuccess == true)
 		{
@@ -660,7 +670,7 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		return DamageAmount;
 	}
 	// 적 방향으로 회전
-	RotateToDirection(DamageCauser->GetActorLocation(), 0.f, 0.f);
+	RotateToDirection(DamageCauser->GetActorLocation());
 	EnemyTarget = DamageCauser;
 	bIsTargeting = true;
 	if (DamageEvent.DamageTypeClass == ULightningDamageType::StaticClass() ) {

@@ -58,13 +58,13 @@ public:
 	TArray<FVector> LastSocketLocations;
 	// 트레이스 채널 기본값 = EnemyAttack
 	// NOTE : 주인공은 PlayerCharacter::BeginPlay()에서 트레이스 채널을 PlayerAttack으로 바꿔줬음
-	ECollisionChannel AttackChannel = ECC_GameTraceChannel5;
+	ETraceTypeQuery AttackTrace = TraceTypeQuery5;
 
 	// 타격 VFX, SFX
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
-		class UNiagaraSystem* HitNiagara;
+	class UNiagaraSystem* HitNiagara;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
-		class USoundWave* HitSound;
+	class USoundWave* HitSound;
 	void PlayHitFX(FHitResult HitInfo);
 
 	// 메시 자르는 액터 스폰

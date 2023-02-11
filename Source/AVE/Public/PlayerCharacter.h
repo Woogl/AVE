@@ -141,7 +141,7 @@ public:
 	bool CanDash();
 
 	// 부드럽게 회전
-	void RotateToDirection(FVector Direction, float DeltaTime, float InterpSpeed);
+	void RotateToDirection(FVector Direction, float DeltaTime = 0.f, float InterpSpeed = 0.f);
 
 	// 각도 계산
 	float CalculateDirection(const FVector& Velocity, const FRotator& BaseRotation);
