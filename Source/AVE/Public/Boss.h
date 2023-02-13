@@ -88,6 +88,16 @@ public:
 	class UAnimMontage* animSlashATK;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animComboATK;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animStanceCounterATK;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animParryR;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animParryL;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animParryRATK;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animParryLATK;
 	
 
 	// º¯¼ö
@@ -158,6 +168,8 @@ public:
 	
 	UFUNCTION()
 	void AnimReboundATK();
+	// UFUNCTION()
+	// void AnimParryATK();
 	
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	

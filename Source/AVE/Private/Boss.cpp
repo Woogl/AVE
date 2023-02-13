@@ -345,21 +345,61 @@ void ABoss::AnimReboundATK()
 	}
 }
 
+// void ABoss::AnimParryATK()
+// {
+// 	if (randomIntValue == 1)
+// 	{
+// 		PlayAnimMontage(animParryRATK);
+// 		montageLength = PlayAnimMontage(animParryRATK, 1) / (1 * animParryRATK->RateScale);
+// 		attackCount += 1;
+// 	}
+// 	if (randomIntValue == 2)
+// 	{
+// 		PlayAnimMontage(animParryLATK);
+// 		montageLength = PlayAnimMontage(animParryLATK, 1) / (1 * animParryLATK->RateScale);
+// 		attackCount += 1;
+// 	}
+// 	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
+// }
+
 float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	// const float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
 	if (DamageAmount > 1.f)
 	{
-		currentHP -= DamageAmount;
+		if (bossFSMComp->bossStates == EBossState::NormalATK || bossFSMComp->bossStates == EBossState::Move)
+		{
+			//TODO: 노말어택 1, 2타 에서는 패링이 발동 안되는 문제, 패링할 때 attackCount 증가하도록
+			RandomInt(1, 2);
+			if (randomIntValue == 1)
+			{
+				PlayAnimMontage(animParryR);
+				montageLength = PlayAnimMontage(animParryR, 1) / (1 * animParryR->RateScale);
+				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
+			}
+			if (randomIntValue == 2)
+			{
+				PlayAnimMontage(animParryL);
+				montageLength = PlayAnimMontage(animParryL, 1) / (1 * animParryL->RateScale);
+				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
+			}
+		}
+		else
+			currentHP -= DamageAmount;
 	}
 	else
 	{
 		if (bIsSuperArmor == true)
 		{
-			bossFSMComp->ReturnToMove();
+			if (asPlayer->bIsDashing)
+			{
+				PlayAnimMontage(animStanceCounterATK);
+				montageLength = PlayAnimMontage(animStanceCounterATK, 1) / (1 * animStanceCounterATK->RateScale);
+				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
+			}
 		}
-		else
+		else if (bIsSuperArmor == false)
 		{
 			if (randomIntValue == 1)
 			{
@@ -373,6 +413,7 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 			}
 			GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::AnimReboundATK, 1.f, false, montageLength);
 		}
+		else ReturnToMove();
 	}
 	return DamageAmount;
 }

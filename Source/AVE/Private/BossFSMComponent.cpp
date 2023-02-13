@@ -196,7 +196,6 @@ void UBossFSMComponent::TickComboATK()
 			asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToMove,
 							1.f, false, asBoss->montageLength);
 		}
-		else ReturnToMove();
 	}
 	asBoss->SetZeroSpeed();
 	asBoss->SetFocusPlayerTick();
@@ -380,15 +379,22 @@ void UBossFSMComponent::ReturnToSlashATK()
 
 void UBossFSMComponent::SetMoveSpeed()
 {
-	if (asBoss->DistanceBossToPlayer() <= 250)
+	if (asBoss->DistanceBossToPlayer() <= 600)
 	{
-		float decreaseMaxSpeed = asBoss->GetCharacterMovement()->GetMaxSpeed() - 10;
-		asBoss->GetCharacterMovement()->MaxWalkSpeed = UKismetMathLibrary::FClamp(decreaseMaxSpeed, 0, 700);
+		float decreaseMaxSpeed = asBoss->GetCharacterMovement()->GetMaxSpeed() - 5.f;
+		asBoss->GetCharacterMovement()->MaxWalkSpeed = UKismetMathLibrary::FClamp(decreaseMaxSpeed, 125, 700);
+		//asBossAnim->activeChildIndex = 1;
+		if (asBoss->DistanceBossToPlayer() <= 250)
+		{
+			decreaseMaxSpeed = asBoss->GetCharacterMovement()->GetMaxSpeed() - 5.f;
+			asBoss->GetCharacterMovement()->MaxWalkSpeed = UKismetMathLibrary::FClamp(decreaseMaxSpeed, 0.f, 700.f);
+		}
 	}
 	else
 	{
 		float increaseMaxSpeed = asBoss->GetCharacterMovement()->GetMaxSpeed() + 15;
 		asBoss->GetCharacterMovement()->MaxWalkSpeed = UKismetMathLibrary::FClamp(increaseMaxSpeed, 0, 700);
+		//asBossAnim->activeChildIndex = 0;
 	}
 }
 
@@ -413,7 +419,7 @@ void UBossFSMComponent::GuardOrBackStep()
 			bossStates = EBossState::BackStep;
 			seqValue = 0;
 		}
-		else GuardSelect();
+		//else GuardSelect();
 	}
 }
 
