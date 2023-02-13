@@ -15,13 +15,14 @@ enum class EBossState : uint8
 	DashATK UMETA(Displayname = DashATK),
 	NormalATK UMETA(Displayname = NormalATK),
 	ATK01 UMETA(Displayname = ATK01),
-	ATK02 UMETA(Displayname = ATK02),
-	ATK03 UMETA(Displayname = ATK03),
+	SlashATK UMETA(Displayname = SlashATK),
+	ComboATK UMETA(Displayname = ATK03),
 	JumpATK UMETA(Displayname = JumpATK),
 	StanceATK UMETA(Displayname = StanceATK),
-	Backstep UMETA(Displayname = Backstep),
+	BackStep UMETA(Displayname = BackStep),
 	BladeRangeATK UMETA(Displayname = BladeRangeATK),
 	BehindATK UMETA(Displayname = BehindATK),
+	GrabATK UMETA(Displayname = GrabATK),
 	
 };
 
@@ -63,13 +64,14 @@ public:
 	void TickDashATK();
 	void TickNormalATK();
 	void TickATK01();
-	void TickATK02();
-	void TickATK03();
+	void TickSlashATK();
+	void TickComboATK();
 	void TickJumpATK();
 	void TickStanceATK();
-	void TickBackstep();
+	void TickBackStep();
 	void TickBladeRangeATK();
 	void TickBehindATK();
+	void TickGrabATK();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BossStateDebug();
@@ -106,6 +108,9 @@ public:
 
 	UFUNCTION()
 	void ReturnToStanceATK();
+
+	UFUNCTION()
+	void ReturnToSlashATK();
 	
 	UFUNCTION()
 	void SetMoveSpeed();
@@ -113,7 +118,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetGuardMoveSpeed();
 	UFUNCTION(BlueprintCallable)
-	void GuardOrBackstep();
+	void GuardOrBackStep();
 	
 	UFUNCTION()
 	void RandomInt(int min, int max);
@@ -148,7 +153,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int attackCount = 0;
 	
-	float dashATKPercent = 0.2f;
-	float backstepPercent = 0.2f;
-	
+	float dashATKPercent = 0.3f;
+	float backStepPercent = 0.3f;
+	float slashATKPercent = 0.3f;
 };

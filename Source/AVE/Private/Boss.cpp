@@ -171,8 +171,8 @@ void ABoss::AnimBehindATK()
 void ABoss::AnimBackStep()
 {
 	bIsSuperArmor = true;
-	PlayAnimMontage(animBackstep);
-	montageLength = PlayAnimMontage(animBackstep, 1) / (1 * animBackstep->RateScale);
+	PlayAnimMontage(animBackStep);
+	montageLength = PlayAnimMontage(animBackStep, 1) / (1 * animBackStep->RateScale);
 }
 
 void ABoss::AnimBladeRangeATK()
@@ -183,18 +183,25 @@ void ABoss::AnimBladeRangeATK()
 	montageLength = PlayAnimMontage(animBladeRangeATK, 1) / (1 * animBladeRangeATK->RateScale);
 }
 
-void ABoss::AnimATK02()
+void ABoss::AnimGrabATK()
 {
 	bIsSuperArmor = true;
-	PlayAnimMontage(animATK02);
-	montageLength = PlayAnimMontage(animATK02, 1) / (1 * animATK02->RateScale);
+	PlayAnimMontage(animGrabATK);
+	montageLength = PlayAnimMontage(animGrabATK, 1) / (1 * animGrabATK->RateScale);
 }
 
-void ABoss::AnimATK03()
+void ABoss::AnimSlashATK()
 {
 	bIsSuperArmor = true;
-	PlayAnimMontage(animATK03);
-	montageLength = PlayAnimMontage(animATK03, 1) / (1 * animATK03->RateScale);
+	PlayAnimMontage(animSlashATK);
+	montageLength = PlayAnimMontage(animSlashATK, 1) / (1 * animSlashATK->RateScale);
+}
+
+void ABoss::AnimComboATK()
+{
+	bIsSuperArmor = true;
+	PlayAnimMontage(animComboATK);
+	montageLength = PlayAnimMontage(animComboATK, 1) / (1 * animComboATK->RateScale);
 }
 
 // void ABoss::BossPlayMontage(UAnimMontage* selectMontage)
@@ -303,19 +310,19 @@ void ABoss::AnimReboundATK()
 	}
 	else if (attackCount == 4)
 	{
-		bossFSMComp->bossStates = EBossState::ATK02;
+		bossFSMComp->bossStates = EBossState::ComboATK;
 		attackCount += 1;
 		bossFSMComp->seqValue = 0;
 	}
 	else if (attackCount == 7)
 	{
-		bossFSMComp->bossStates = EBossState::ATK03;
+		bossFSMComp->bossStates = EBossState::GrabATK;
 		attackCount += 1;
 		bossFSMComp->seqValue = 0;
 	}
 	else if (attackCount >= 9)
 	{
-		bossFSMComp->bossStates = EBossState::Backstep;
+		bossFSMComp->bossStates = EBossState::BackStep;
 		attackCount = 0;
 		bossFSMComp->seqValue = 0;
 	}
@@ -365,11 +372,6 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 				montageLength = PlayAnimMontage(animReboundR, 1) / (1 * animReboundR->RateScale);
 			}
 			GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::AnimReboundATK, 1.f, false, montageLength);
-			// GetWorldTimerManager().SetTimer(delayHandle, FTimerDelegate::CreateLambda([&]()
-			// {
-			// 	AnimReboundATK();
-			// 	GetOwner()->GetWorldTimerManager().ClearTimer(delayHandle);
-			// }), 1.f, false, montageLength);
 		}
 	}
 	return DamageAmount;

@@ -71,7 +71,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animBehindATK;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
-	class UAnimMontage* animBackstep;
+	class UAnimMontage* animBackStep;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animBladeRangeATK;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
@@ -83,9 +83,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animReboundATKL;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
-	class UAnimMontage* animATK02;
+	class UAnimMontage* animGrabATK;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
-	class UAnimMontage* animATK03;
+	class UAnimMontage* animSlashATK;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animComboATK;
 	
 
 	// º¯¼ö
@@ -97,9 +99,8 @@ public:
 	bool bIsSuperArmor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanParry;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FTimerHandle delayHandle;
 	
+	FTimerHandle delayHandle;
 	int randomIntValue;
 	float randomFloatValue;
 	float montageLength;
@@ -123,9 +124,11 @@ public:
 	UFUNCTION()
 	void AnimBladeRangeATK();
 	UFUNCTION()
-	void AnimATK02();
+	void AnimGrabATK();
 	UFUNCTION()
-	void AnimATK03();
+	void AnimSlashATK();
+	UFUNCTION()
+	void AnimComboATK();
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnMyPlayMontageSA(UAnimMontage* selectMontage, EBossState selectState);
