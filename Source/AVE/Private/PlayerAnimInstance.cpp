@@ -6,6 +6,7 @@
 #include <GameFramework/CharacterMovementComponent.h>
 #include <Kismet/KismetMathLibrary.h>
 #include "PlayerCharacter.h"
+#include "AllAVEDamageTypes.h"
 #include <Kismet/KismetSystemLibrary.h>
 
 UPlayerAnimInstance::UPlayerAnimInstance()
@@ -156,13 +157,42 @@ void UPlayerAnimInstance::AnimNotify_EndInvincible() {
 void UPlayerAnimInstance::InitPlayerState(UAnimMontage* Montage, bool bInterrupted) {
 	if (Player) {
 		Player->InitState();
-		UKismetSystemLibrary::PrintString(GetWorld(),TEXT("InitState"));
 		Player->InitInvincibility();
 	}
 }
 
-void UPlayerAnimInstance::AnimNotify_AoEDamage() {
+void UPlayerAnimInstance::AnimNotify_AoEKnockBackDamage() {
 	if (Player) {
-		Player->SpreadAoEDamage();
+		Player->SpreadAoEDamage(UKnockBackDamageType::StaticClass());
+	}
+}
+
+void UPlayerAnimInstance::AnimNotify_AoELightningDamage() {
+	if (Player) {
+		Player->SpreadAoEDamage(ULightningDamageType::StaticClass());
+	}
+}
+
+void UPlayerAnimInstance::AnimNotify_PlaySequence() {
+	if (Player) {
+		switch (Player->CurSkill) {
+			case 0:
+			Player->PlayJudgementCutSequence();
+			break;
+
+			case 1:
+			Player->PlayEarthquakeSequence();
+			break;
+
+			case 2:
+			Player->PlayMissileSequence();
+			break;
+		}
+	}
+}
+
+void UPlayerAnimInstance::AnimNotify_PlayLightningSequence() {
+	if (Player) {
+		Player->PlayLightningShockSequence();
 	}
 }

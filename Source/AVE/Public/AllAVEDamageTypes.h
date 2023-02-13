@@ -7,3 +7,4 @@
 #include "KnockBackDamageType.h"
 #include "KnockDownDamageType.h"
 #include "KnockUpDamageType.h"
+#include "LightningDamageType.h"
