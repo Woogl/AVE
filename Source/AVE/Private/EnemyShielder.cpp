@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "EnemySwordman.h"
+#include "EnemyShielder.h"
 #include "AIManager.h"
 #include "CombatComponent.h"
 #include <Components/CapsuleComponent.h>
@@ -17,7 +17,7 @@
 #include <Perception/AISense_Damage.h>
 
 // Sets default values
-AEnemySwordman::AEnemySwordman()
+AEnemyShielder::AEnemyShielder()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -28,16 +28,16 @@ AEnemySwordman::AEnemySwordman()
 	if (tempBody.Succeeded()) {
 		GetMesh()->SetSkeletalMesh(tempBody.Object);
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
-		
+
 		static ConstructorHelpers::FObjectFinder<UAnimBlueprint> tempAnim(TEXT("AnimBlueprint'/Game/Team/TH/Animation/ABP_Swordman.ABP_Swordman'"));
 		this->GetMesh()->SetAnimInstanceClass(tempAnim.Object->GetAnimBlueprintGeneratedClass());
 	}
 
-	Katana = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Katana"));
-	Katana->SetupAttachment(GetMesh(), TEXT("SwordSocket"));
-	Katana->SetRelativeLocationAndRotation(FVector(-11, -23, -18), FRotator(31, 87.5f, -84));
-	Katana->SetCollisionProfileName(TEXT("NoCollision"));
-	
+	Shield = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Shield"));
+	Shield->SetupAttachment(GetMesh(), TEXT("SwordSocket"));
+	Shield->SetRelativeLocationAndRotation(FVector(-11, -23, -18), FRotator(31, 87.5f, -84));
+	Shield->SetCollisionProfileName(TEXT("NoCollision"));
+
 	/*enemyWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
 	enemyWidget->SetupAttachment(GetMesh());
 
@@ -52,27 +52,27 @@ AEnemySwordman::AEnemySwordman()
 }
 
 // Called when the game starts or when spawned
-void AEnemySwordman::BeginPlay()
+void AEnemyShielder::BeginPlay()
 {
 	Super::BeginPlay();
-	CombatComp->SetupWeapon(Katana);
+	CombatComp->SetupWeapon(Shield);
 }
 
 // Called every frame
-void AEnemySwordman::Tick(float DeltaTime)
+void AEnemyShielder::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
 // Called to bind functionality to input
-void AEnemySwordman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AEnemyShielder::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
 
-float AEnemySwordman::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+float AEnemyShielder::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	onGetSet();
 	blackboard->SetValueAsEnum(TEXT("AIState"), 4);
@@ -81,45 +81,45 @@ float AEnemySwordman::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	myManager->StartAI();
 
 	if (blackboard->GetValueAsBool(TEXT("Guard")))
-		posture-=DamageAmount;
-	hp-=DamageAmount;
+		posture -= DamageAmount;
+	hp -= DamageAmount;
 
-	if(hp<=0)
+	if (hp <= 0)
 		onDie();
-	else if(posture<=0)
+	else if (posture <= 0)
 		onHitCrushed();
 
 
 	return 0.0f;
 }
 
-void AEnemySwordman::onActionAttack()
+void AEnemyShielder::onActionAttack()
 {
 }
 
-void AEnemySwordman::onActionEvade()
+void AEnemyShielder::onActionEvade()
 {
 }
 
-void AEnemySwordman::onActionGuard()
-{
-} 
-
-void AEnemySwordman::onHit(int characterDamage)
+void AEnemyShielder::onActionGuard()
 {
 }
 
-void AEnemySwordman::onHitCrushed()
+void AEnemyShielder::onHit(int characterDamage)
 {
 }
 
-void AEnemySwordman::onDie()
+void AEnemyShielder::onHitCrushed()
 {
 }
 
-void AEnemySwordman::onGetSet()
+void AEnemyShielder::onDie()
+{
+}
+
+void AEnemyShielder::onGetSet()
 {
 	Super::onGetSet();
-	Katana->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::KeepWorldTransform, TEXT("hand_rSocket"));
-	Katana->SetRelativeLocationAndRotation(FVector(-25, -12, 34), FRotator(-66.8f, 62, -48));
+	Shield->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::KeepWorldTransform, TEXT("hand_rSocket"));
+	Shield->SetRelativeLocationAndRotation(FVector(-25, -12, 34), FRotator(-66.8f, 62, -48));
 }

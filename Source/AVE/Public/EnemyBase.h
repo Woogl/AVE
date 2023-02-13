@@ -79,8 +79,8 @@ public:
 		class UBaseBital* bital;
 	UPROPERTY(EditAnywhere)
 		class UBlackboardComponent* blackboard;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = UI)
-		class UWidgetComponent* enemyWidget;
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		class UWidgetComponent* enemyWidget;*/
 
 	virtual void onActionAttack();
 	virtual void onActionEvade();
