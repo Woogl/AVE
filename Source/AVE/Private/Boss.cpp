@@ -368,21 +368,22 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 	
 	if (DamageAmount > 1.f)
 	{
-		if (bossFSMComp->bossStates == EBossState::NormalATK || bossFSMComp->bossStates == EBossState::Move)
+		if (bossFSMComp->bossStates == EBossState::NormalATK || bossFSMComp->bossStates == EBossState::Move || bossFSMComp->bossStates == EBossState::Walk)
 		{
 			//TODO: 노말어택 1, 2타 에서는 패링이 발동 안되는 문제
-			RandomInt(1, 2);
-			if (randomIntValue == 1)
+			if (parryCount == 0)
 			{
 				PlayAnimMontage(animParryR);
 				attackCount += 1;
+				parryCount += 1;
 				montageLength = PlayAnimMontage(animParryR, 1) / (1 * animParryR->RateScale);
 				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
 			}
-			if (randomIntValue == 2)
+			else
 			{
 				PlayAnimMontage(animParryL);
 				attackCount += 1;
+				parryCount = 0;
 				montageLength = PlayAnimMontage(animParryL, 1) / (1 * animParryL->RateScale);
 				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
 			}

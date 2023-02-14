@@ -183,6 +183,7 @@ void UBossFSMComponent::TickSlashATK()
 		else ReturnToMove();
 	}
 	asBoss->SetZeroSpeed();
+	asBoss->SetFocusPlayerTick();
 }
 
 void UBossFSMComponent::TickComboATK()
@@ -320,15 +321,13 @@ void UBossFSMComponent::MoveToFSM()
 			bossStates = EBossState::DashATK;
 			seqValue = 0;
 		}
-		else if (randomFloatValue <= slashATKPercent && asBoss->DistanceBossToPlayer() <= 400 && asBoss->
-			DistanceBossToPlayer() > 350)
+		else if (randomFloatValue <= slashATKPercent && asBoss->DistanceBossToPlayer() <= 500 && asBoss->
+			DistanceBossToPlayer() > 400)
 		{
 			bossStates = EBossState::SlashATK;
 			seqValue = 0;
 		}
-		else bossStates = EBossState::Move; // 랜덤 플롯을 계속 실행시키지 않기 위해
-		
-		if (asBoss->DistanceBossToPlayer() <= 250)
+		else if (asBoss->DistanceBossToPlayer() <= 250)
 		{
 			float yawABS = FMath::Abs(asBossAnim->yaw);
 			if (yawABS > 100)
@@ -336,12 +335,13 @@ void UBossFSMComponent::MoveToFSM()
 				bossStates = EBossState::BehindATK;
 				seqValue = 0;
 			}
-			else
+			else if (randomFloatValue <= normalATKPercent)
 			{
 				bossStates = EBossState::NormalATK;
 				seqValue = 0;
 			}
 		}
+		else bossStates = EBossState::Move; // 랜덤 플롯을 계속 실행시키지 않기 위해
 	}
 }
 
@@ -356,6 +356,12 @@ void UBossFSMComponent::ReturnToWalk()
 {
 	asBoss->bIsSuperArmor = false;
 	bossStates = EBossState::Walk;
+	seqValue = 0;
+}
+
+void UBossFSMComponent::ReturnToNormalATK()
+{
+	bossStates = EBossState::NormalATK;
 	seqValue = 0;
 }
 
@@ -379,15 +385,15 @@ void UBossFSMComponent::ReturnToSlashATK()
 
 void UBossFSMComponent::SetMoveSpeed()
 {
-	if (asBoss->DistanceBossToPlayer() <= 600)
+	if (asBoss->DistanceBossToPlayer() <= 400)
 	{
-		float decreaseMaxSpeed = asBoss->GetCharacterMovement()->GetMaxSpeed() - 5.f;
+		float decreaseMaxSpeed = asBoss->GetCharacterMovement()->GetMaxSpeed() - 10.f;
 		asBoss->GetCharacterMovement()->MaxWalkSpeed = UKismetMathLibrary::FClamp(decreaseMaxSpeed, 125, 700);
 		//asBossAnim->activeChildIndex = 1;
 		if (asBoss->DistanceBossToPlayer() <= 250)
 		{
-			decreaseMaxSpeed = asBoss->GetCharacterMovement()->GetMaxSpeed() - 5.f;
-			asBoss->GetCharacterMovement()->MaxWalkSpeed = UKismetMathLibrary::FClamp(decreaseMaxSpeed, 0.f, 700.f);
+			decreaseMaxSpeed = asBoss->GetCharacterMovement()->GetMaxSpeed() - 10.f;
+			asBoss->GetCharacterMovement()->MaxWalkSpeed = UKismetMathLibrary::FClamp(decreaseMaxSpeed, 0, 125);
 		}
 	}
 	else

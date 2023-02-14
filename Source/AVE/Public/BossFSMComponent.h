@@ -104,6 +104,9 @@ public:
 	void ReturnToWalk();
 
 	UFUNCTION()
+	void ReturnToNormalATK();
+	
+	UFUNCTION()
 	void ReturnToBladeRangeATK();
 
 	UFUNCTION()
@@ -111,6 +114,7 @@ public:
 
 	UFUNCTION()
 	void ReturnToSlashATK();
+	
 	
 	UFUNCTION()
 	void SetMoveSpeed();
@@ -156,4 +160,5 @@ public:
 	float dashATKPercent = 0.3f;
 	float backStepPercent = 0.3f;
 	float slashATKPercent = 0.3f;
+	float normalATKPercent = 0.5f;
 };

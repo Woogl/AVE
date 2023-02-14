@@ -115,6 +115,7 @@ public:
 	float randomFloatValue;
 	float montageLength;
 	int attackCount;
+	int parryCount = 0;
 	// float distanceValue;
 
 
