@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/WidgetComponent.h"
 #include "EnemyWidget.generated.h"
 
 UCLASS(BlueprintType)

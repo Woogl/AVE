@@ -34,11 +34,11 @@ AEnemyShielder::AEnemyShielder()
 	}
 
 	Shield = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Shield"));
-	Shield->SetupAttachment(GetMesh(), TEXT("SwordSocket"));
-	Shield->SetRelativeLocationAndRotation(FVector(-11, -23, -18), FRotator(31, 87.5f, -84));
+	Shield->SetupAttachment(GetMesh(), TEXT("ShieldSocket"));
+	Shield->SetRelativeLocationAndRotation(FVector(-33,-80,90), FRotator(36, 63, 85));
 	Shield->SetCollisionProfileName(TEXT("NoCollision"));
 
-	/*enemyWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
+	enemyWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
 	enemyWidget->SetupAttachment(GetMesh());
 
 	enemyWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
@@ -48,7 +48,7 @@ AEnemyShielder::AEnemyShielder()
 	{
 		enemyWidget->SetWidgetClass(tempWidget.Class);
 		enemyWidget->SetDrawSize(FVector2D(150.0f, 50.0f));
-	}*/
+	}
 }
 
 // Called when the game starts or when spawned
@@ -89,7 +89,7 @@ float AEnemyShielder::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	else if (posture <= 0)
 		onHitCrushed();
 
-
+	//enemyWidget->Refresh(hp,posture);
 	return 0.0f;
 }
 
@@ -120,6 +120,6 @@ void AEnemyShielder::onDie()
 void AEnemyShielder::onGetSet()
 {
 	Super::onGetSet();
-	//Shield->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::KeepWorldTransform, TEXT("hand_rSocket"));
-	//Shield->SetRelativeLocationAndRotation(FVector(-25, -12, 34), FRotator(-66.8f, 62, -48));
+	/*Shield->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::KeepWorldTransform, TEXT("hand_rSocket"));
+	Shield->SetRelativeLocationAndRotation(FVector(-25, -12, 34), FRotator(-66.8f, 62, -48));*/
 }

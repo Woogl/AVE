@@ -7,6 +7,7 @@
 #include "GameFramework/Pawn.h"
 #include "BaseBital.h"
 #include "AVEEnums.h"
+#include "EnemyWidget.h"
 #include "EnemyBase.generated.h"
 
 //추상 클래스에 구현할 공통 요소 
@@ -79,8 +80,9 @@ public:
 		class UBaseBital* bital;
 	UPROPERTY(EditAnywhere)
 		class UBlackboardComponent* blackboard;
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		class UWidgetComponent* enemyWidget;*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		//class UEnemyWidget* enemyWidget;
+		class UWidgetComponent* enemyWidget;
 
 	virtual void onActionAttack();
 	virtual void onActionEvade();
@@ -91,5 +93,6 @@ public:
 	virtual void onDie();	
 	UFUNCTION(BlueprintCallable)
 	virtual void onGetSet();
+	UFUNCTION(BlueprintCallable)
 	virtual void onSetManager(AAIManager* Manager);
 };
