@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" addBOMForNewFiles="with BOM under Windows, with no BOM otherwise">
+    <file url="file://$PROJECT_DIR$/Source/AVE/Private/CombatComponent.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Source/AVE/Private/GhostTrail.cpp" charset="x-windows-949" />
+    <file url="file://$PROJECT_DIR$/Source/AVE/Private/PlayerCharacter.cpp" charset="x-windows-949" />
+    <file url="PROJECT" charset="x-windows-949" />
+  </component>
+</project>
