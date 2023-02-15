@@ -34,6 +34,9 @@ void UBossFSMComponent::BeginPlay()
 	auto playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	asPlayer = Cast<APlayerCharacter>(playerPawn);
 	asBossAnim = Cast<UBossAnimInstance>(asBoss->GetMesh()->GetAnimInstance());
+	bIsSecondPhase = false;
+	
+	asBoss->GetWorldTimerManager().SetTimer(secondPhaseHandle, this, &UBossFSMComponent::ReturnToSecondPhase, 1.f, true);
 }
 
 
@@ -59,10 +62,12 @@ void UBossFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	case EBossState::BladeRangeATK: TickBladeRangeATK(); break;
 	case EBossState::BehindATK: TickBehindATK(); break;
 	case EBossState::GrabATK: TickGrabATK(); break;
+	case EBossState::WarCry: TickWarCry(); break;
 	}
 	BossStateDebug();
 	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("attackCount %d"), attackCount));
 	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("randomIntValue %d"), randomIntValue));
+	
 }
 
 void UBossFSMComponent::TickIdle()
@@ -311,6 +316,21 @@ void UBossFSMComponent::TickGrabATK()
 	asBoss->SetZeroSpeed();
 }
 
+void UBossFSMComponent::TickWarCry()
+{
+	seqValue += 1;
+	if (seqValue == 1)
+	{
+		if (asBossAnim->IsAnyMontagePlaying() == false)
+		{
+			asBoss->AnimWarCry();
+			asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToMove,
+					1.f, false, asBoss->montageLength);
+		}
+	}
+	asBoss->SetZeroSpeed();
+}
+
 void UBossFSMComponent::MoveToFSM()
 {
 	if (asBossAnim->IsAnyMontagePlaying() == false)
@@ -335,7 +355,7 @@ void UBossFSMComponent::MoveToFSM()
 				bossStates = EBossState::BehindATK;
 				seqValue = 0;
 			}
-			else if (randomFloatValue <= normalATKPercent)
+			else
 			{
 				bossStates = EBossState::NormalATK;
 				seqValue = 0;
@@ -383,6 +403,17 @@ void UBossFSMComponent::ReturnToSlashATK()
 	seqValue = 0;
 }
 
+void UBossFSMComponent::ReturnToSecondPhase()
+{
+	if (asBoss->currentHP <= 100)
+	{
+		bossStates = EBossState::WarCry;
+		seqValue = 0;
+		bIsSecondPhase = true;
+		asBoss->GetWorldTimerManager().ClearTimer(secondPhaseHandle);
+	}
+}
+
 void UBossFSMComponent::SetMoveSpeed()
 {
 	if (asBoss->DistanceBossToPlayer() <= 400)
@@ -392,7 +423,7 @@ void UBossFSMComponent::SetMoveSpeed()
 		//asBossAnim->activeChildIndex = 1;
 		if (asBoss->DistanceBossToPlayer() <= 250)
 		{
-			decreaseMaxSpeed = asBoss->GetCharacterMovement()->GetMaxSpeed() - 10.f;
+			decreaseMaxSpeed = asBoss->GetCharacterMovement()->GetMaxSpeed() - 15.f;
 			asBoss->GetCharacterMovement()->MaxWalkSpeed = UKismetMathLibrary::FClamp(decreaseMaxSpeed, 0, 125);
 		}
 	}

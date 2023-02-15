@@ -8,6 +8,7 @@
 #include "CombatComponent.h"
 #include "MovieScene.h"
 #include "PlayerCharacter.h"
+#include "Blueprint/UserWidget.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -67,6 +68,8 @@ void ABoss::BeginPlay()
 	playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	asPlayer = Cast<APlayerCharacter>(playerPawn);
 	attackCount = 0;
+
+	CreateWidget()
 }
 
 // Called every frame
@@ -75,6 +78,7 @@ void ABoss::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	DistanceBossToPlayer();
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("attackCount %f"), currentHP));
 }
 
 // Called to bind functionality to input
@@ -201,6 +205,13 @@ void ABoss::AnimComboATK()
 {
 	bIsSuperArmor = true;
 	PlayAnimMontage(animComboATK);
+	montageLength = PlayAnimMontage(animComboATK, 1) / (1 * animComboATK->RateScale);
+}
+
+void ABoss::AnimWarCry()
+{
+	bIsSuperArmor = true;
+	PlayAnimMontage(animWarCry);
 	montageLength = PlayAnimMontage(animComboATK, 1) / (1 * animComboATK->RateScale);
 }
 
@@ -368,7 +379,7 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 	
 	if (DamageAmount > 1.f)
 	{
-		if (bossFSMComp->bossStates == EBossState::NormalATK || bossFSMComp->bossStates == EBossState::Move || bossFSMComp->bossStates == EBossState::Walk)
+		if (bossFSMComp->bossStates == EBossState::NormalATK && bIsSuperArmor == false)
 		{
 			//TODO: 노말어택 1, 2타 에서는 패링이 발동 안되는 문제
 			if (parryCount == 0)
@@ -402,7 +413,7 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
 			}
 		}
-		else if (bIsSuperArmor == false)
+		else
 		{
 			if (randomIntValue == 1)
 			{
@@ -416,7 +427,6 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 			}
 			GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::AnimReboundATK, 1.f, false, montageLength);
 		}
-		else ReturnToMove();
 	}
 	return DamageAmount;
 }

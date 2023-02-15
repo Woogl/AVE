@@ -42,6 +42,8 @@ public:
 	class APlayerCharacter* asPlayer;
 	UPROPERTY()
 	class APawn* playerPawn;
+	UPROPERTY()
+	class 
 
 	// 턴 몽타주 이름
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TurnInPlace")
@@ -94,17 +96,19 @@ public:
 	class UAnimMontage* animParryR;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animParryL;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	// class UAnimMontage* animParryRATK;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	// class UAnimMontage* animParryLATK;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
-	class UAnimMontage* animParryRATK;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
-	class UAnimMontage* animParryLATK;
+	class UAnimMontage* animWarCry;
 	
 
 	// 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float currentHP;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float maxHP = 500.f;
+	float maxHP = 200.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsSuperArmor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -140,6 +144,8 @@ public:
 	void AnimSlashATK();
 	UFUNCTION()
 	void AnimComboATK();
+	UFUNCTION()
+	void AnimWarCry();
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnMyPlayMontageSA(UAnimMontage* selectMontage, EBossState selectState);

@@ -23,7 +23,7 @@ enum class EBossState : uint8
 	BladeRangeATK UMETA(Displayname = BladeRangeATK),
 	BehindATK UMETA(Displayname = BehindATK),
 	GrabATK UMETA(Displayname = GrabATK),
-	
+	WarCry UMETA(Displayname = WarCry),
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
@@ -72,6 +72,7 @@ public:
 	void TickBladeRangeATK();
 	void TickBehindATK();
 	void TickGrabATK();
+	void TickWarCry();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BossStateDebug();
@@ -114,6 +115,9 @@ public:
 
 	UFUNCTION()
 	void ReturnToSlashATK();
+
+	UFUNCTION()
+	void ReturnToSecondPhase();
 	
 	
 	UFUNCTION()
@@ -144,6 +148,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTimerHandle delayHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FTimerHandle secondPhaseHandle;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float randomFloatValue;
@@ -153,6 +160,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsGuarding;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsSecondPhase;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int attackCount = 0;
