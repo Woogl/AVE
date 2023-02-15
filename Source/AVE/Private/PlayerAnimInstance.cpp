@@ -196,3 +196,21 @@ void UPlayerAnimInstance::AnimNotify_PlayLightningSequence() {
 		Player->PlayLightningShockSequence();
 	}
 }
+
+void UPlayerAnimInstance::AnimNotify_PlaySequence() {
+	if (Player) {
+		switch (Player->CurSkill) {
+			case 0:
+			Player->PlaySlashSequence();
+			break;
+
+			case 1:
+			Player->PlayLightningShockSequence();
+			break;
+
+			case 2:
+			Player->PlayMissileSequence();
+			break;
+		}
+	}
+}
