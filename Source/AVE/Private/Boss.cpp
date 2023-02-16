@@ -6,7 +6,10 @@
 #include "BossAnimInstance.h"
 #include "BossFSMComponent.h"
 #include "CombatComponent.h"
+#include "GanpaDamageType.h"
 #include "MovieScene.h"
+#include "ParryDamageType.h"
+#include "PierceDamageType.h"
 #include "PlayerCharacter.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -68,7 +71,8 @@ void ABoss::BeginPlay()
 	playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	asPlayer = Cast<APlayerCharacter>(playerPawn);
 	attackCount = 0;
-	
+
+	// CreateWidget()
 }
 
 // Called every frame
@@ -374,9 +378,30 @@ void ABoss::AnimReboundATK()
 
 float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	// const float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
-	if (DamageAmount > 1.f)
+	if (DamageEvent.DamageTypeClass == UParryDamageType::StaticClass() && bIsSuperArmor == false)
+	{
+		if (randomIntValue == 1)
+		{
+			PlayAnimMontage(animReboundR);
+			montageLength = PlayAnimMontage(animReboundR, 1) / (1 * animReboundR->RateScale);
+		}
+		if (randomIntValue == 2)
+		{
+			PlayAnimMontage(animReboundL);
+			montageLength = PlayAnimMontage(animReboundR, 1) / (1 * animReboundR->RateScale);
+		}
+		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::AnimReboundATK, 1.f, false, montageLength);
+	}
+	else if (DamageEvent.DamageTypeClass==UGanpaDamageType::StaticClass())
+	{
+		MyDebug("animStanceCounter");
+		// PlayAnimMontage(animStanceCounter);
+		montageLength = PlayAnimMontage(animStanceCounter, 1) / (1 * animStanceCounter->RateScale);
+		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
+	}
+	else
 	{
 		if (bossFSMComp->bossStates == EBossState::NormalATK && bIsSuperArmor == false)
 		{
@@ -400,32 +425,6 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 		}
 		else
 			currentHP -= DamageAmount;
-	}
-	else
-	{
-		if (bIsSuperArmor == true)
-		{
-			if (asPlayer->bIsDashing)
-			{
-				PlayAnimMontage(animStanceCounterATK);
-				montageLength = PlayAnimMontage(animStanceCounterATK, 1) / (1 * animStanceCounterATK->RateScale);
-				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
-			}
-		}
-		else
-		{
-			if (randomIntValue == 1)
-			{
-				PlayAnimMontage(animReboundR);
-				montageLength = PlayAnimMontage(animReboundR, 1) / (1 * animReboundR->RateScale);
-			}
-			if (randomIntValue == 2)
-			{
-				PlayAnimMontage(animReboundL);
-				montageLength = PlayAnimMontage(animReboundR, 1) / (1 * animReboundR->RateScale);
-			}
-			GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::AnimReboundATK, 1.f, false, montageLength);
-		}
 	}
 	return DamageAmount;
 }

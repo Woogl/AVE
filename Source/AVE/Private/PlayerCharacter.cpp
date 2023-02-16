@@ -13,6 +13,9 @@
 #include "GrabbableActorBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "AllAVEDamageTypes.h"
+#include "GanpaDamageType.h"
+#include "ParryDamageType.h"
+#include "PierceDamageType.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -666,13 +669,13 @@ void APlayerCharacter::ComboAttack() {
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
 
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	if (bIsInvincible) {
-		return DamageAmount;
-	}
+	
 	// 적 방향으로 회전
 	RotateToDirection(DamageCauser->GetActorLocation());
 	EnemyTarget = DamageCauser;
 	bIsTargeting = true;
+	FHitResult outHit;
+
 	if (DamageEvent.DamageTypeClass == ULightningDamageType::StaticClass() ) {
 		if (MoveComp->IsFalling()) {
 			Charge();
@@ -681,15 +684,42 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 			Groggy();
 		}
 	}
+	else if(DamageEvent.DamageTypeClass == UPierceDamageType::StaticClass())
+	{
+		if(bIsDashing)
+		{
+			MotionMorphGanpa();
+			PlayAnimMontage(GanpaMontage);
+			UGameplayStatics::ApplyPointDamage(EnemyTarget,0.1f,GetActorLocation(),outHit,GetController(),this,UGanpaDamageType::StaticClass());
+		}
+		else if(bIsParrying)
+		{
+			ParryHit(DamageAmount,UKnockBackDamageType::StaticClass());
+		}
+		else if(bIsBlocking)
+		{
+			GuardHit(DamageAmount,UKnockBackDamageType::StaticClass());
+		}
+		else
+		{
+			Hit(DamageAmount,UKnockBackDamageType::StaticClass());
+			if (bIsGrabbing == true && GrabbedMesh)
+			{
+				DropProp();
+			}
+		}
+	}
 	else if (bIsParrying) {
 		ParryHit(DamageAmount, DamageEvent.DamageTypeClass);
-		FHitResult outHit;
-		UGameplayStatics::ApplyPointDamage(EnemyTarget,0.f,GetActorLocation(),outHit,GetController(),this,UStandardDamageType::StaticClass());
+		UGameplayStatics::ApplyPointDamage(EnemyTarget,0.1f,GetActorLocation(),outHit,GetController(),this,UParryDamageType::StaticClass());
 	}
 	else if (bIsBlocking) {
 		GuardHit(DamageAmount, DamageEvent.DamageTypeClass);
 	}
 	else {
+		if (bIsInvincible) {
+			return DamageAmount;
+		}
 		Hit(DamageAmount, DamageEvent.DamageTypeClass);
 		// 물건 주운	 상태에서 피격 시 물건 떨굼
 		if (bIsGrabbing == true && GrabbedMesh)
@@ -704,6 +734,7 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 void APlayerCharacter::ParryHit(float Damage, TSubclassOf<UDamageType> DamageType) {
 	if (DamageType == UStandardDamageType::StaticClass()) {
 		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
+		UKismetSystemLibrary::PrintString(GetWorld(),TEXT("ParryHitMontage play"));
 		PlayAnimMontage(ParryHitMontages[0]);
 	}
 	else if (DamageType == UKnockBackDamageType::StaticClass()) {

@@ -42,6 +42,8 @@ public:
 	class APlayerCharacter* asPlayer;
 	UPROPERTY()
 	class APawn* playerPawn;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	// class UWidget widgetBossUI;
 
 	// 턴 몽타주 이름
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TurnInPlace")
@@ -89,7 +91,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animComboATK;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
-	class UAnimMontage* animStanceCounterATK;
+	class UAnimMontage* animStanceCounter;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animParryR;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")

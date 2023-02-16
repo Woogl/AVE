@@ -96,6 +96,8 @@ public:
 	TArray<class UAnimMontage*> DodgeMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
 	TArray<class UAnimMontage*> InteractionMontages;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
+	class UAnimMontage* GanpaMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
 	TArray<class UAnimMontage*> HitReactionMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
@@ -167,7 +169,9 @@ public:
 	// 모션 워핑 (BP에서 이벤트 구현)
 	UFUNCTION(BlueprintImplementableEvent)
 	void MotionMorph();
-
+	UFUNCTION(BlueprintImplementableEvent)
+	void MotionMorphGanpa();
+	
 	// 오토 타게팅
 	UFUNCTION(BlueprintCallable)	// 연구 중
 	bool TryAutoTargeting(float SearchRadius = 300.f);
