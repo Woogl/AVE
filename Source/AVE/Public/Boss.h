@@ -110,9 +110,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float maxHP = 200.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float bossPosture;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float bossMaxPosture = 100;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsSuperArmor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanParry;
+	
 	
 	FTimerHandle delayHandle;
 	int randomIntValue;
@@ -147,14 +152,6 @@ public:
 	UFUNCTION()
 	void AnimWarCry();
 	
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnMyPlayMontageSA(UAnimMontage* selectMontage, EBossState selectState);
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnMyPlayMontageNO(UAnimMontage* selectMontage, EBossState selectState);
-	// UFUNCTION(BlueprintCallable)
-	// void BossPlayMontageSA(UAnimMontage* selectMontage);
-	// UFUNCTION(BlueprintCallable)
-	// void BossPlayMontage(UAnimMontage* selectMontage);
 	UFUNCTION()
 	void ReturnToMove();
 	UFUNCTION()
@@ -169,6 +166,8 @@ public:
 	void AnimTurnInPlace();
 	UFUNCTION(BlueprintCallable)
 	void SetFocusPlayerTick();
+	UFUNCTION(BlueprintImplementableEvent)
+	float BossWidget();
 	
 	void SetZeroSpeed();
 	float DistanceBossToPlayer();

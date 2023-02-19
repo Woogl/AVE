@@ -11,6 +11,7 @@
 #include "ParryDamageType.h"
 #include "PierceDamageType.h"
 #include "PlayerCharacter.h"
+#include "AnimNodes/AnimNode_RandomPlayer.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -65,14 +66,13 @@ void ABoss::BeginPlay()
 	combatComp->SetupWeapon(weaponMeshSubComp);
 
 	currentHP = maxHP;
-
+	bossPosture = bossMaxPosture;
+	
 	asBossAnim = Cast<UBossAnimInstance>(GetMesh()->GetAnimInstance());
-
 	playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	asPlayer = Cast<APlayerCharacter>(playerPawn);
-	attackCount = 0;
 
-	// CreateWidget()
+	attackCount = 0;
 }
 
 // Called every frame
@@ -81,7 +81,8 @@ void ABoss::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	DistanceBossToPlayer();
-	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("attackCount %f"), currentHP));
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("currentHP %f"), currentHP));
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("bossPosture %f"), bossPosture));
 }
 
 // Called to bind functionality to input
@@ -117,13 +118,13 @@ void ABoss::AnimDashATK()
 	if (randomIntValue == 1)
 	{
 		bIsSuperArmor = true;
-		PlayAnimMontage(animDashATK01);
+		//PlayAnimMontage(animDashATK01);
 		montageLength = PlayAnimMontage(animDashATK01, 1) / (1 * animDashATK01->RateScale);
 	}
 	if (randomIntValue == 2)
 	{
 		bIsSuperArmor = true;
-		PlayAnimMontage(animDashATK02);
+		//PlayAnimMontage(animDashATK02);
 		montageLength = PlayAnimMontage(animDashATK02, 1) / (1 * animDashATK02->RateScale);
 	}
 }
@@ -133,13 +134,13 @@ void ABoss::AnimNormalATK()
 	RandomInt(1, 2);
 	if (randomIntValue == 1)
 	{
-		PlayAnimMontage(animNormalATKR01);
+		//PlayAnimMontage(animNormalATKR01);
 		attackCount++;
 		montageLength = PlayAnimMontage(animNormalATKR01, 1) / (1 * animNormalATKR01->RateScale);
 	}
 	if (randomIntValue == 2)
 	{
-		PlayAnimMontage(animNormalATKL01);
+		//PlayAnimMontage(animNormalATKL01);
 		attackCount++;
 		montageLength = PlayAnimMontage(animNormalATKL01, 1) / (1 * animNormalATKL01->RateScale);
 	}
@@ -148,7 +149,7 @@ void ABoss::AnimNormalATK()
 void ABoss::AnimJumpATK()
 {
 	bIsSuperArmor = true;
-	PlayAnimMontage(animJumpATK);
+	//PlayAnimMontage(animJumpATK);
 	montageLength = PlayAnimMontage(animJumpATK, 1) / (1 * animNormalATKL01->RateScale);
 }
 
@@ -158,12 +159,12 @@ void ABoss::AnimStanceATK()
 	RandomInt(1, 2);
 	if (randomIntValue == 1)
 	{
-		PlayAnimMontage(animStanceToStab);
+		//PlayAnimMontage(animStanceToStab);
 		montageLength = PlayAnimMontage(animStanceToStab, 1) / (1 * animStanceToStab->RateScale);
 	}
 	if (randomIntValue == 2)
 	{
-		PlayAnimMontage(animStanceToLowATK);
+		//PlayAnimMontage(animStanceToLowATK);
 		montageLength = PlayAnimMontage(animStanceToLowATK, 1) / (1 * animStanceToLowATK->RateScale);
 	}
 }
@@ -171,21 +172,21 @@ void ABoss::AnimStanceATK()
 void ABoss::AnimBehindATK()
 {
 	bIsSuperArmor = true;
-	PlayAnimMontage(animBehindATK);
+	//PlayAnimMontage(animBehindATK);
 	montageLength = PlayAnimMontage(animBehindATK, 1) / (1 * animBehindATK->RateScale);
 }
 
 void ABoss::AnimBackStep()
 {
 	bIsSuperArmor = true;
-	PlayAnimMontage(animBackStep);
+	//PlayAnimMontage(animBackStep);
 	montageLength = PlayAnimMontage(animBackStep, 1) / (1 * animBackStep->RateScale);
 }
 
 void ABoss::AnimBladeRangeATK()
 {
 	bIsSuperArmor = true;
-	PlayAnimMontage(animBladeRangeATK);
+	//PlayAnimMontage(animBladeRangeATK);
 	weaponMeshSubComp->SetRelativeScale3D(FVector(1.f, 5.f, 1.f));
 	montageLength = PlayAnimMontage(animBladeRangeATK, 1) / (1 * animBladeRangeATK->RateScale);
 }
@@ -193,29 +194,29 @@ void ABoss::AnimBladeRangeATK()
 void ABoss::AnimGrabATK()
 {
 	bIsSuperArmor = true;
-	PlayAnimMontage(animGrabATK);
+	//PlayAnimMontage(animGrabATK);
 	montageLength = PlayAnimMontage(animGrabATK, 1) / (1 * animGrabATK->RateScale);
 }
 
 void ABoss::AnimSlashATK()
 {
 	bIsSuperArmor = true;
-	PlayAnimMontage(animSlashATK);
+	//PlayAnimMontage(animSlashATK);
 	montageLength = PlayAnimMontage(animSlashATK, 1) / (1 * animSlashATK->RateScale);
 }
 
 void ABoss::AnimComboATK()
 {
 	bIsSuperArmor = true;
-	PlayAnimMontage(animComboATK);
+	//PlayAnimMontage(animComboATK);
 	montageLength = PlayAnimMontage(animComboATK, 1) / (1 * animComboATK->RateScale);
 }
 
 void ABoss::AnimWarCry()
 {
 	bIsSuperArmor = true;
-	PlayAnimMontage(animWarCry);
-	montageLength = PlayAnimMontage(animComboATK, 1) / (1 * animComboATK->RateScale);
+	//PlayAnimMontage(animWarCry);
+	montageLength = PlayAnimMontage(animWarCry, 1) / (1 * animWarCry->RateScale);
 }
 
 // void ABoss::BossPlayMontage(UAnimMontage* selectMontage)
@@ -344,14 +345,14 @@ void ABoss::AnimReboundATK()
 	{
 		if (randomIntValue == 1)
 		{
-			PlayAnimMontage(animReboundATKL);
+			//PlayAnimMontage(animReboundATKL);
 			montageLength = PlayAnimMontage(animReboundATKL, 1) / (1 * animReboundATKL->RateScale);
 			attackCount += 1;
 			GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
 		}
 		if (randomIntValue == 2)
 		{
-			PlayAnimMontage(animReboundATKR);
+			//PlayAnimMontage(animReboundATKR);
 			montageLength = PlayAnimMontage(animReboundATKR, 1) / (1 * animReboundATKR->RateScale);
 			attackCount += 1;
 			GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
@@ -378,18 +379,20 @@ void ABoss::AnimReboundATK()
 
 float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	// Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	
 	if (DamageEvent.DamageTypeClass == UParryDamageType::StaticClass() && bIsSuperArmor == false)
 	{
 		if (randomIntValue == 1)
 		{
-			PlayAnimMontage(animReboundR);
+			//PlayAnimMontage(animReboundR);
+			bossPosture -= 10;
 			montageLength = PlayAnimMontage(animReboundR, 1) / (1 * animReboundR->RateScale);
 		}
 		if (randomIntValue == 2)
 		{
-			PlayAnimMontage(animReboundL);
+			//PlayAnimMontage(animReboundL);
+			bossPosture -= 10;
 			montageLength = PlayAnimMontage(animReboundR, 1) / (1 * animReboundR->RateScale);
 		}
 		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::AnimReboundATK, 1.f, false, montageLength);
@@ -398,17 +401,19 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 	{
 		MyDebug("animStanceCounter");
 		// PlayAnimMontage(animStanceCounter);
+		currentHP -= 10;
+		bossPosture -= 10;
 		montageLength = PlayAnimMontage(animStanceCounter, 1) / (1 * animStanceCounter->RateScale);
 		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
 	}
 	else
 	{
-		if (bossFSMComp->bossStates == EBossState::NormalATK && bIsSuperArmor == false)
+		if ((asBossAnim->Montage_IsPlaying(animNormalATKR01) || asBossAnim->Montage_IsPlaying(animNormalATKL01)) && bIsSuperArmor == false)
 		{
 			//TODO: 노말어택 1, 2타 에서는 패링이 발동 안되는 문제
 			if (parryCount == 0)
 			{
-				PlayAnimMontage(animParryR);
+				//PlayAnimMontage(animParryR);
 				attackCount += 1;
 				parryCount += 1;
 				montageLength = PlayAnimMontage(animParryR, 1) / (1 * animParryR->RateScale);
@@ -416,7 +421,7 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 			}
 			else
 			{
-				PlayAnimMontage(animParryL);
+				//PlayAnimMontage(animParryL);
 				attackCount += 1;
 				parryCount = 0;
 				montageLength = PlayAnimMontage(animParryL, 1) / (1 * animParryL->RateScale);
@@ -424,7 +429,7 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 			}
 		}
 		else
-			currentHP -= DamageAmount;
+			currentHP -= 10;
 	}
 	return DamageAmount;
 }
