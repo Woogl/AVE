@@ -94,9 +94,15 @@ void ABoss::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ABoss::SetZeroSpeed()
 {
-	float decreaseWalkSpeed = GetCharacterMovement()->GetMaxSpeed() - 10.f;
-	float walkSpeedClamp = UKismetMathLibrary::FClamp(decreaseWalkSpeed, 0.f, 500.f);
-	GetCharacterMovement()->MaxWalkSpeed = walkSpeedClamp;
+	// float decreaseWalkSpeed = GetCharacterMovement()->GetMaxSpeed() - 10.f;
+	// float walkSpeedClamp = UKismetMathLibrary::FClamp(decreaseWalkSpeed, 0.f, 500.f);
+	// GetCharacterMovement()->MaxWalkSpeed = walkSpeedClamp;
+	float Deceleration = 100.f;
+	float CurrentSpeed = GetCharacterMovement()->MaxWalkSpeed;
+	float SpeedDelta = 700.f - CurrentSpeed;
+	float Decel = FMath::Min(SpeedDelta, Deceleration * GetWorld()->GetDeltaSeconds());
+	CurrentSpeed -= Decel;
+	FMath::Max(CurrentSpeed, 0.0f);
 }
 
 // void ABoss::BossPlayMontageSA(UAnimMontage* selectMontage)
@@ -106,10 +112,10 @@ void ABoss::SetZeroSpeed()
 // 	montageLength = EMontagePlayReturnType::MontageLength(selectMontage);
 // 	if (DistanceBossToPlayer() > 400)
 // 	{
-// 		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToWalk, 1.f, false, montageLength);
+// 		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToWalk, montageLength, false);
 // 	}
 // 	else
-// 		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
+// 		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
 // }
 
 void ABoss::AnimDashATK()
@@ -219,6 +225,17 @@ void ABoss::AnimWarCry()
 	montageLength = PlayAnimMontage(animWarCry, 1) / (1 * animWarCry->RateScale);
 }
 
+void ABoss::AnimInsal()
+{
+	bIsSuperArmor = true;
+	montageLength = PlayAnimMontage(animInsal, 1) / (1 * animInsal->RateScale);
+}
+
+void ABoss::AnimLaserRangeATK()
+{
+	montageLength = PlayAnimMontage(animLaserRangeATK, 1) / (1 * animLaserRangeATK->RateScale);
+}
+
 // void ABoss::BossPlayMontage(UAnimMontage* selectMontage)
 // {
 // 	PlayAnimMontage(selectMontage);
@@ -226,7 +243,7 @@ void ABoss::AnimWarCry()
 // 	//montageLength = EMontagePlayReturnType::MontageLength(selectMontage);
 // 	// if (DistanceBossToPlayer() > 400)
 // 	// {
-// 	// 	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToWalk, 1.f, false, montageLength);
+// 	// 	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToWalk, montageLength, false);
 // 	// }
 // 	// else if (bossFSMComp->bossStates == EBossState::Backstep)
 // 	// {
@@ -234,17 +251,17 @@ void ABoss::AnimWarCry()
 // 	// 	{
 // 	// 		
 // 	// 	}
-// 	// 	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToBladeRangeATK, 1.f, false, montageLength);
+// 	// 	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToBladeRangeATK, montageLength, false);
 // 	// }
 // 	// else
-// 	// 	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
+// 	// 	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
 // }
 //
 // void ABoss::ReturnToMove()
 // {
 // 	bIsSuperArmor = false;
 // 	bossFSMComp->bossStates = EBossState::Move;
-// 	bossFSMComp->seqValue = 0;
+// 	bossFSMComp->bHasExecuted = false;
 // }
 //
 
@@ -299,20 +316,20 @@ void ABoss::ReturnToMove()
 {
 	bIsSuperArmor = false;
 	bossFSMComp->bossStates = EBossState::Move;
-	bossFSMComp->seqValue = 0;
+	bossFSMComp->bHasExecuted = false;
 }
 
 void ABoss::ReturnToWalk()
 {
 	bIsSuperArmor = false;
 	bossFSMComp->bossStates = EBossState::Walk;
-	bossFSMComp->seqValue = 0;
+	bossFSMComp->bHasExecuted = false;
 }
 
 void ABoss::ReturnToBladeRangeATK()
 {
 	bossFSMComp->bossStates = EBossState::BladeRangeATK;
-	bossFSMComp->seqValue = 0;
+	bossFSMComp->bHasExecuted = false;
 }
 
 void ABoss::AnimReboundATK()
@@ -321,25 +338,31 @@ void ABoss::AnimReboundATK()
 	{
 		bossFSMComp->bossStates = EBossState::JumpATK;
 		attackCount += 1;
-		bossFSMComp->seqValue = 0;
+		bossFSMComp->bHasExecuted = false;
 	}
 	else if (attackCount == 4)
 	{
 		bossFSMComp->bossStates = EBossState::ComboATK;
 		attackCount += 1;
-		bossFSMComp->seqValue = 0;
+		bossFSMComp->bHasExecuted = false;
 	}
 	else if (attackCount == 7)
 	{
 		bossFSMComp->bossStates = EBossState::GrabATK;
 		attackCount += 1;
-		bossFSMComp->seqValue = 0;
+		bossFSMComp->bHasExecuted = false;
 	}
 	else if (attackCount >= 9)
 	{
 		bossFSMComp->bossStates = EBossState::BackStep;
 		attackCount = 0;
-		bossFSMComp->seqValue = 0;
+		bossFSMComp->bHasExecuted = false;
+	}
+	else if (bossPosture <= 0)
+	{
+		bossFSMComp->bossStates = EBossState::Insal;
+		bossFSMComp->bHasExecuted = false;
+		bossFSMComp->bIsSecondPhase = true;
 	}
 	else
 	{
@@ -348,14 +371,14 @@ void ABoss::AnimReboundATK()
 			//PlayAnimMontage(animReboundATKL);
 			montageLength = PlayAnimMontage(animReboundATKL, 1) / (1 * animReboundATKL->RateScale);
 			attackCount += 1;
-			GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
+			GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
 		}
 		if (randomIntValue == 2)
 		{
 			//PlayAnimMontage(animReboundATKR);
 			montageLength = PlayAnimMontage(animReboundATKR, 1) / (1 * animReboundATKR->RateScale);
 			attackCount += 1;
-			GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
+			GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
 		}
 	}
 }
@@ -374,7 +397,7 @@ void ABoss::AnimReboundATK()
 // 		montageLength = PlayAnimMontage(animParryLATK, 1) / (1 * animParryLATK->RateScale);
 // 		attackCount += 1;
 // 	}
-// 	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
+// 	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
 // }
 
 float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -395,7 +418,7 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 			bossPosture -= 10;
 			montageLength = PlayAnimMontage(animReboundR, 1) / (1 * animReboundR->RateScale);
 		}
-		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::AnimReboundATK, 1.f, false, montageLength);
+		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::AnimReboundATK, montageLength, false);
 	}
 	else if (DamageEvent.DamageTypeClass==UGanpaDamageType::StaticClass())
 	{
@@ -404,7 +427,7 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 		currentHP -= 10;
 		bossPosture -= 10;
 		montageLength = PlayAnimMontage(animStanceCounter, 1) / (1 * animStanceCounter->RateScale);
-		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
+		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
 	}
 	else
 	{
@@ -417,7 +440,7 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 				attackCount += 1;
 				parryCount += 1;
 				montageLength = PlayAnimMontage(animParryR, 1) / (1 * animParryR->RateScale);
-				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
+				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
 			}
 			else
 			{
@@ -425,7 +448,7 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 				attackCount += 1;
 				parryCount = 0;
 				montageLength = PlayAnimMontage(animParryL, 1) / (1 * animParryL->RateScale);
-				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, 1.f, false, montageLength);
+				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
 			}
 		}
 		else

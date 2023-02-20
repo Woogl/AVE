@@ -16,7 +16,7 @@ enum class EBossState : uint8
 	NormalATK UMETA(Displayname = NormalATK),
 	ATK01 UMETA(Displayname = ATK01),
 	SlashATK UMETA(Displayname = SlashATK),
-	ComboATK UMETA(Displayname = ATK03),
+	ComboATK UMETA(Displayname = ComboATK),
 	JumpATK UMETA(Displayname = JumpATK),
 	StanceATK UMETA(Displayname = StanceATK),
 	BackStep UMETA(Displayname = BackStep),
@@ -24,6 +24,8 @@ enum class EBossState : uint8
 	BehindATK UMETA(Displayname = BehindATK),
 	GrabATK UMETA(Displayname = GrabATK),
 	WarCry UMETA(Displayname = WarCry),
+	Insal UMETA(Displayname = Insal),
+	LaserRangeATK UMETA(Displayname = LaserRangeATK),
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
@@ -73,6 +75,8 @@ public:
 	void TickBehindATK();
 	void TickGrabATK();
 	void TickWarCry();
+	void TickInsal();
+	void TickLaserRangeATK();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BossStateDebug();
@@ -119,6 +123,11 @@ public:
 	UFUNCTION()
 	void ReturnToSecondPhase();
 	
+	UFUNCTION()
+	void ReturnToWarCry();
+
+	UFUNCTION()
+	void ReturnToLaserRangeATK();
 	
 	UFUNCTION()
 	void SetMoveSpeed();
@@ -136,9 +145,6 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int walkRandomInt;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int seqValue = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTimerHandle WriTimerHandle;
@@ -159,16 +165,22 @@ public:
 	int randomIntValue;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bHasExecuted;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsGuarding;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsSecondPhase;
+
+	bool bDoOnce = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int attackCount = 0;
 	
-	float dashATKPercent = 1.f;
+	float dashATKPercent = 0.3f;
 	float backStepPercent = 0.3f;
 	float slashATKPercent = 0.3f;
-	float normalATKPercent = 0.5f;
+	float normalATKPercent = 0.6f;
+	float laserRangeATKPercent = 0.7f;
 };

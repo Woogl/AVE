@@ -102,7 +102,10 @@ public:
 	// class UAnimMontage* animParryLATK;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animWarCry;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animInsal;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animLaserRangeATK;
 
 	// º¯¼ö
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -151,6 +154,10 @@ public:
 	void AnimComboATK();
 	UFUNCTION()
 	void AnimWarCry();
+	UFUNCTION()
+	void AnimInsal();
+	UFUNCTION()
+	void AnimLaserRangeATK();
 	
 	UFUNCTION()
 	void ReturnToMove();
