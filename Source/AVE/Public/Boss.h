@@ -115,7 +115,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float bossPosture;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float bossMaxPosture = 100;
+	float bossMaxPosture = 10;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsSuperArmor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

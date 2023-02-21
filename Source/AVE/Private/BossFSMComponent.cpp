@@ -253,7 +253,7 @@ void UBossFSMComponent::TickBackStep()
 		if (asBossAnim->IsAnyMontagePlaying() == false)
 		{
 			asBoss->AnimBackStep();
-			if (randomFloatValue <= backStepPercent)
+			if (bIsSecondPhase == false && randomFloatValue <= backStepPercent)
 			{
 				asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToBladeRangeATK,
 					asBoss->montageLength, false);
