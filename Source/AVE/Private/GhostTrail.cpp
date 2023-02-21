@@ -4,7 +4,7 @@
 #include "GhostTrail.h"
 #include <Components/PoseableMeshComponent.h>
 #include <GameFramework/Character.h>
-
+#include "Kismet/KismetSystemLibrary.h"
 AGhostTrail::AGhostTrail()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -39,10 +39,11 @@ void AGhostTrail::BeginGhostTrailEffect()
 
 		DynamicMatInstance = UMaterialInstanceDynamic::Create(GhostTrailMaterial, this);
 		TArray <FSkeletalMaterial> materials = CharacterRef->GetMesh()->SkeletalMesh->GetMaterials();
-
-		for (int32 Index = 0; Index < materials.Num(); ++Index)
+		
+		for (int32 Index = 0; Index < materials.Num(); Index++)
 		{
 			PoseableMeshComp->SetMaterial(Index, DynamicMatInstance);
+			//PoseableMeshComp->mesh
 		}
 
 		FOnTimelineFloat TimelineUpdateCallback;

@@ -21,14 +21,6 @@ APlayerCharacter::APlayerCharacter()
 	// Ä¸½¶
 	GetCapsuleComponent()->InitCapsuleSize(40.f, 90.0f);
 
-	// ½ºÄÌ·¹Å» ¸Þ½¬
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> meshAsset(TEXT("SkeletalMesh'/Game/ThirdPerson/Characters/Mannequin_UE4/Meshes/SK_Mannequin.SK_Mannequin'"));
-	if (meshAsset.Succeeded())
-	{
-		GetMesh()->SetSkeletalMesh(meshAsset.Object);
-		GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, -90.f, 0.f));
-	}
-
 	// Ä®
 	Weapon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Katana"));
 	Weapon->SetupAttachment(GetMesh(), TEXT("katana3"));
