@@ -28,7 +28,7 @@ APlayerCharacter::APlayerCharacter()
 
 	// 칼집
 	Scabbard = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Scabbard"));
-	Scabbard->SetupAttachment(GetMesh(), TEXT("scabbard1"));
+	Scabbard->SetupAttachment(GetMesh(), TEXT("katana1"));
 	Scabbard->SetCollisionProfileName(TEXT("NoCollision"));
 
 	// 기본 스프링암
@@ -198,7 +198,8 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 
 void APlayerCharacter::Jump()
 {
-	ACharacter::Jump();
+	if(CanJump())
+		ACharacter::Jump();
 }
 
 void APlayerCharacter::Guard()
@@ -297,7 +298,7 @@ void APlayerCharacter::Finisher()
 bool APlayerCharacter::CanJump()
 {
 	// TODO : 상태 체크
-	return true;
+	return !GetCurrentMontage();
 }
 
 bool APlayerCharacter::CanAttack()	
@@ -610,7 +611,7 @@ void APlayerCharacter::Attack() {
 
 void APlayerCharacter::InitState() {
 	bIsAttacking = false;
-	bIsBlocking = false;
+	StopGuard();
 	bIsParrying = false;
 	bIsGuardBroken = false;
 	bIsDashing = false;
