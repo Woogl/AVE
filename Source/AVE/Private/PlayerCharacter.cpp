@@ -291,6 +291,7 @@ void APlayerCharacter::Finisher()
 			PlayFinisherSequence();
 			bIsInvincible = true;
 			MotionMorph();
+			FinishEnemy();
 		}
 	}
 }
