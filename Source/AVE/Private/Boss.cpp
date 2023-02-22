@@ -9,9 +9,7 @@
 #include "GanpaDamageType.h"
 #include "MovieScene.h"
 #include "ParryDamageType.h"
-#include "PierceDamageType.h"
 #include "PlayerCharacter.h"
-#include "AnimNodes/AnimNode_RandomPlayer.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -57,6 +55,7 @@ ABoss::ABoss()
 
 	//BossFSM Component 생성 -> BP_BossFSM 에서 블루프린트와 조합해서 사용
 	bossFSMComp = CreateDefaultSubobject<UBossFSMComponent>(TEXT("bossFSMComp"));
+	
 }
 
 // Called when the game starts or when spawned
@@ -297,18 +296,43 @@ void ABoss::AnimTurnInPlace()
 	}
 }
 
+void ABoss::SetFocusPlayerInplace()
+{
+	FRotator bossLookAtPlayer = UKismetMathLibrary::FindLookAtRotation(
+			GetActorLocation(), playerPawn->GetActorLocation());
+	FRotator setLerp = UKismetMathLibrary::RLerp(GetActorRotation(), bossLookAtPlayer, 0.1f, true);
+	this->SetActorRotation(FRotator(0, setLerp.Yaw, 0));
+}
+
 void ABoss::SetFocusPlayerTick()
 {
 	if (asBossAnim->speed > 100)
 	{
-		FRotator bossLookAtPlayer = UKismetMathLibrary::FindLookAtRotation(
-			GetActorLocation(), playerPawn->GetActorLocation());
-		FRotator setLerp = UKismetMathLibrary::RLerp(GetActorRotation(), bossLookAtPlayer, 0.1f, true);
-		this->SetActorRotation(FRotator(0, setLerp.Yaw, 0));
+		SetFocusPlayerInplace();
 	}
 	else
 	{
 		AnimTurnInPlace();
+	}
+}
+
+void ABoss::OnLineTraceHit()
+{
+	FVector lineStartLoc = GetMesh()->GetSocketLocation(FName("head"));
+	FVector lineEndLoc = lineStartLoc + (GetActorForwardVector() * 300000.f);
+	FHitResult outHit;
+	AController* instigator = GetController();
+	ETraceTypeQuery AttackTrace = TraceTypeQuery5;
+	TArray<AActor*> IgnoreList;
+	
+	// bool bHit = GetWorld()->LineTraceSingleByChannel(outHit, lineStartLoc, lineEndLoc, ECollisionChannel::ECC_Visibility);
+	bool bHit = UKismetSystemLibrary::LineTraceSingle(this, lineStartLoc, lineEndLoc, AttackTrace,
+		false, IgnoreList, EDrawDebugTrace::None, outHit, true);
+	if (bHit)
+	{
+		EnemyTarget = outHit.GetActor();
+		UGameplayStatics::ApplyPointDamage(EnemyTarget, 5.f, EnemyTarget->GetActorLocation(),
+			outHit, instigator, this, UKnockBackDamageType::StaticClass());
 	}
 }
 

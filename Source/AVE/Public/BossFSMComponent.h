@@ -182,5 +182,5 @@ public:
 	float backStepPercent = 0.3f;
 	float slashATKPercent = 0.3f;
 	float normalATKPercent = 0.6f;
-	float laserRangeATKPercent = 0.7f;
+	float laserRangeATKPercent = 1.f;
 };

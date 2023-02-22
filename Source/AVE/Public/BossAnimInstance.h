@@ -50,4 +50,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int activeChildIndex = 0;
 
+	UFUNCTION()
+	void AnimNotify_WarCryBegin();
+
+	UFUNCTION()
+	void AnimNotify_WarCryEnd();
+
+	UFUNCTION()
+	void WarCryRadialATK();
+
+	FTimerHandle warCryTimerHandle;
+
+	bool bTakenWarCryDamage = false;
 };

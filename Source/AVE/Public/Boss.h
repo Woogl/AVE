@@ -42,8 +42,8 @@ public:
 	class APlayerCharacter* asPlayer;
 	UPROPERTY()
 	class APawn* playerPawn;
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	// class UWidget widgetBossUI;
+	UPROPERTY()
+	AActor* EnemyTarget = nullptr;
 
 	// 턴 몽타주 이름
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TurnInPlace")
@@ -115,7 +115,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float bossPosture;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float bossMaxPosture = 10;
+	float bossMaxPosture = 100;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsSuperArmor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -172,9 +172,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AnimTurnInPlace();
 	UFUNCTION(BlueprintCallable)
+	void SetFocusPlayerInplace();
+	UFUNCTION(BlueprintCallable)
 	void SetFocusPlayerTick();
-	UFUNCTION(BlueprintImplementableEvent)
-	float BossWidget();
+	UFUNCTION()
+	void OnLineTraceHit();
 	
 	void SetZeroSpeed();
 	float DistanceBossToPlayer();

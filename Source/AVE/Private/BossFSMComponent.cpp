@@ -36,7 +36,7 @@ void UBossFSMComponent::BeginPlay()
 	asBossAnim = Cast<UBossAnimInstance>(asBoss->GetMesh()->GetAnimInstance());
 	bIsSecondPhase = false;
 	bHasExecuted = false;
-	asBoss->GetWorldTimerManager().SetTimer(secondPhaseHandle, this, &UBossFSMComponent::ReturnToSecondPhase, 1.f, true);
+	asBoss->GetWorldTimerManager().SetTimer(secondPhaseHandle, this, &UBossFSMComponent::ReturnToSecondPhase, 0.1f, true);
 }
 
 
@@ -64,10 +64,11 @@ void UBossFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	case EBossState::GrabATK: TickGrabATK(); break;
 	case EBossState::WarCry: TickWarCry(); break;
 	case EBossState::Insal: TickInsal(); break;
+	case EBossState::LaserRangeATK: TickLaserRangeATK(); break;
 	}
 	BossStateDebug();
 	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("attackCount %d"), attackCount));
-	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("randomIntValue %d"), randomIntValue));
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("bIsSecondPhase %d"), bIsSecondPhase));
 }
 
 void UBossFSMComponent::TickIdle()
@@ -247,18 +248,17 @@ void UBossFSMComponent::TickStanceATK()
 
 void UBossFSMComponent::TickBackStep()
 {
-	
 	if (bHasExecuted == false)
 	{
 		if (asBossAnim->IsAnyMontagePlaying() == false)
 		{
 			asBoss->AnimBackStep();
-			if (bIsSecondPhase == false && randomFloatValue <= backStepPercent)
+			if (bIsSecondPhase == false) // && randomFloatValue <= backStepPercent
 			{
 				asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToBladeRangeATK,
 					asBoss->montageLength, false);
 			}
-			else if (bIsSecondPhase == true && randomFloatValue <= laserRangeATKPercent)
+			else if (bIsSecondPhase == true) // && randomFloatValue <= laserRangeATKPercent
 			{
 				asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToLaserRangeATK,
 					asBoss->montageLength, false);
@@ -276,7 +276,6 @@ void UBossFSMComponent::TickBackStep()
 
 void UBossFSMComponent::TickBladeRangeATK()
 {
-	
 	if (bHasExecuted == false)
 	{
 		if (asBossAnim->IsAnyMontagePlaying() == false)
@@ -316,7 +315,6 @@ void UBossFSMComponent::TickBehindATK()
 
 void UBossFSMComponent::TickGrabATK()
 {
-	
 	if (bHasExecuted == false)
 	{
 		if (asBossAnim->IsAnyMontagePlaying() == false)
@@ -354,7 +352,6 @@ void UBossFSMComponent::TickWarCry()
 
 void UBossFSMComponent::TickInsal()
 {
-	
 	if (bHasExecuted == false)
 	{
 		if (asBossAnim->IsAnyMontagePlaying() == false)
@@ -363,7 +360,7 @@ void UBossFSMComponent::TickInsal()
 			asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToWarCry,
 						asBoss->montageLength, false);
 		}
-		else ReturnToMove();
+		// else ReturnToMove();
 		bHasExecuted = true;
 	}
 	asBoss->GetCharacterMovement()->MaxWalkSpeed = 0.f;
@@ -381,7 +378,9 @@ void UBossFSMComponent::TickLaserRangeATK()
 			bHasExecuted = true;
 		}
 	}
+	asBoss->OnLineTraceHit();
 	asBoss->GetCharacterMovement()->MaxWalkSpeed = 0.f;
+	asBoss->SetFocusPlayerInplace();
 }
 
 void UBossFSMComponent::MoveToFSM()
