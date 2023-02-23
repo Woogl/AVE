@@ -42,13 +42,13 @@ void UBossAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		
 		velocity = asBoss->GetVelocity();
 		speed = UKismetMathLibrary::VSizeXY(velocity);
-		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("Debug %f"), speed));
+		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("Speed %f"), speed));
 		direction = UKismetAnimationLibrary::CalculateDirection(velocity, asBoss->GetActorRotation());
 		bIsFalling = asBoss->GetCharacterMovement()->IsFalling();
 		FRotator deltaRot = UKismetMathLibrary::NormalizedDeltaRotator(bossLookAtPlayer, asBoss->GetActorRotation());
 		pitch = deltaRot.Pitch;
 		yaw = deltaRot.Yaw;
-		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("Debug %f"), yaw));
+		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("Yaw %f"), yaw));
 	}
 }
 

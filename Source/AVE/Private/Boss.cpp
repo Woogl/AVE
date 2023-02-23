@@ -81,7 +81,15 @@ void ABoss::Tick(float DeltaTime)
 
 	DistanceBossToPlayer();
 	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("currentHP %f"), currentHP));
-	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("bossPosture %f"), bossPosture));
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("bossPosture %f"), bossPosture));
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, FString::Printf(TEXT("attackCount %d"), attackCount));
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Blue, FString::Printf(TEXT("TakeDamage %d"), bTakeDamage));
+	
+	if (asBossAnim->IsAnyMontagePlaying() == false)
+	{
+		//GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::PostureRecovery, 0.3f, false);
+		PostureRecovery();
+	}
 }
 
 // Called to bind functionality to input
@@ -140,13 +148,13 @@ void ABoss::AnimNormalATK()
 	if (randomIntValue == 1)
 	{
 		//PlayAnimMontage(animNormalATKR01);
-		attackCount++;
+		attackCount += 1;
 		montageLength = PlayAnimMontage(animNormalATKR01, 1) / (1 * animNormalATKR01->RateScale);
 	}
 	if (randomIntValue == 2)
 	{
 		//PlayAnimMontage(animNormalATKL01);
-		attackCount++;
+		attackCount += 1;
 		montageLength = PlayAnimMontage(animNormalATKL01, 1) / (1 * animNormalATKL01->RateScale);
 	}
 }
@@ -155,7 +163,7 @@ void ABoss::AnimJumpATK()
 {
 	bIsSuperArmor = true;
 	//PlayAnimMontage(animJumpATK);
-	montageLength = PlayAnimMontage(animJumpATK, 1) / (1 * animNormalATKL01->RateScale);
+	montageLength = PlayAnimMontage(animJumpATK, 1) / (1 * animJumpATK->RateScale);
 }
 
 void ABoss::AnimStanceATK()
@@ -171,6 +179,9 @@ void ABoss::AnimStanceATK()
 	{
 		//PlayAnimMontage(animStanceToLowATK);
 		montageLength = PlayAnimMontage(animStanceToLowATK, 1) / (1 * animStanceToLowATK->RateScale);
+		Tags.Add(TEXT("LowATK"));
+		MyDebug("On LowATK");
+		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ClearTags, montageLength, false);
 	}
 }
 
@@ -201,6 +212,8 @@ void ABoss::AnimGrabATK()
 	bIsSuperArmor = true;
 	//PlayAnimMontage(animGrabATK);
 	montageLength = PlayAnimMontage(animGrabATK, 1) / (1 * animGrabATK->RateScale);
+	Tags.Add(TEXT("GrabATK"));
+	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ClearTags, montageLength, false);
 }
 
 void ABoss::AnimSlashATK()
@@ -222,6 +235,9 @@ void ABoss::AnimWarCry()
 	bIsSuperArmor = true;
 	//PlayAnimMontage(animWarCry);
 	montageLength = PlayAnimMontage(animWarCry, 1) / (1 * animWarCry->RateScale);
+	Tags.Add(TEXT("UnableGuard"));
+	MyDebug("On UnableGuard");
+	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ClearTags, montageLength, false);
 }
 
 void ABoss::AnimInsal()
@@ -336,6 +352,16 @@ void ABoss::OnLineTraceHit()
 	}
 }
 
+void ABoss::TakeDamageFalse()
+{
+	bTakeDamage = false;
+}
+
+void ABoss::ClearTags()
+{
+	Tags.Empty();
+}
+
 void ABoss::ReturnToMove()
 {
 	bIsSuperArmor = false;
@@ -427,19 +453,22 @@ void ABoss::AnimReboundATK()
 float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	// Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	float bossTakenDamage = DamageAmount / bossArmor;
+	bTakeDamage = true;
+	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::TakeDamageFalse, 1.f, false);
 	
 	if (DamageEvent.DamageTypeClass == UParryDamageType::StaticClass() && bIsSuperArmor == false)
 	{
 		if (randomIntValue == 1)
 		{
 			//PlayAnimMontage(animReboundR);
-			bossPosture -= 10;
+			bossPosture -= 10.f;
 			montageLength = PlayAnimMontage(animReboundR, 1) / (1 * animReboundR->RateScale);
 		}
 		if (randomIntValue == 2)
 		{
 			//PlayAnimMontage(animReboundL);
-			bossPosture -= 10;
+			bossPosture -= 10.f;
 			montageLength = PlayAnimMontage(animReboundR, 1) / (1 * animReboundR->RateScale);
 		}
 		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::AnimReboundATK, montageLength, false);
@@ -448,8 +477,9 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 	{
 		MyDebug("animStanceCounter");
 		// PlayAnimMontage(animStanceCounter);
-		currentHP -= 10;
-		bossPosture -= 10;
+		currentHP -= bossTakenDamage * 5.f;
+		bossPosture -= 10.f;
+		bossArmor -= 1.f;
 		montageLength = PlayAnimMontage(animStanceCounter, 1) / (1 * animStanceCounter->RateScale);
 		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
 	}
@@ -476,8 +506,9 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 			}
 		}
 		else
-			currentHP -= 10;
+			currentHP -= bossTakenDamage;
 	}
+	
 	return DamageAmount;
 }
 
@@ -485,5 +516,17 @@ float ABoss::DistanceBossToPlayer()
 {
 	float distanceValue = GetDistanceTo(playerPawn);
 	return distanceValue;
+}
+
+void ABoss::PostureRecovery()
+{
+	if (bTakeDamage == false)
+	{
+		float hpPercent = currentHP / maxHP;
+		float recoveryValue = 1.f;
+		float result = recoveryValue * hpPercent;
+		bossPosture += result;
+		bossPosture = UKismetMathLibrary::FClamp(bossPosture, 0.f, bossMaxPosture);
+	}
 }
 

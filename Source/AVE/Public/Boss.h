@@ -129,7 +129,8 @@ public:
 	int attackCount;
 	int parryCount = 0;
 	// float distanceValue;
-
+	bool bTakeDamage = false;
+	
 
 	// ÇÔ¼ö
 	UFUNCTION()
@@ -177,9 +178,14 @@ public:
 	void SetFocusPlayerTick();
 	UFUNCTION()
 	void OnLineTraceHit();
+	UFUNCTION()
+	void TakeDamageFalse();
+	UFUNCTION(BlueprintCallable)
+	void ClearTags();
 	
 	void SetZeroSpeed();
 	float DistanceBossToPlayer();
+	void PostureRecovery();
 	
 	UFUNCTION()
 	void AnimReboundATK();
@@ -187,5 +193,5 @@ public:
 	// void AnimParryATK();
 	
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-	
+	float bossArmor = 5.f;
 };

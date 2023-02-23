@@ -45,16 +45,27 @@ void UCombatComponent::AttackCheckTick()
 {
 	// 트레이스 결과를 저장
 	FHitResult hit;
-
+	TArray<AActor*> ActorsToIgnore;
+	
+	// 연구 중 (손잡이에서 끝까지)
+	int lastIndex = SocketNames.Num();
+	FVector start = CurSocketLocations[0];
+	FVector end = CurSocketLocations[lastIndex - 1];
+	if (UKismetSystemLibrary::LineTraceSingle(this, start, end, AttackTrace, false, ActorsToIgnore,
+			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.0f))
+	{
+		OnAttackSucceed(hit);
+		return;
+	}
+	
 	// 무기의 모든 소켓에서 트레이스
 	for (int i = 0; i < SocketNames.Num(); i++)
 	{
 		CurSocketLocations[i] = MainWeapon->GetSocketLocation(SocketNames[i]);
-
-		TArray<AActor*> ActorsToIgnore;
+		
 		// 지난 프레임부터 현재까지 트레이스 (소켓 위치)
 		bool bSuccess = UKismetSystemLibrary::LineTraceSingle(this, LastSocketLocations[i], CurSocketLocations[i], AttackTrace, false, ActorsToIgnore,
-			EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.0f);
+			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.0f);
 
 		if (bSuccess == true)
 		{

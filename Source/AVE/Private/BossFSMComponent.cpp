@@ -36,7 +36,7 @@ void UBossFSMComponent::BeginPlay()
 	asBossAnim = Cast<UBossAnimInstance>(asBoss->GetMesh()->GetAnimInstance());
 	bIsSecondPhase = false;
 	bHasExecuted = false;
-	asBoss->GetWorldTimerManager().SetTimer(secondPhaseHandle, this, &UBossFSMComponent::ReturnToSecondPhase, 0.1f, true);
+	//asBoss->GetWorldTimerManager().SetTimer(secondPhaseHandle, this, &UBossFSMComponent::ReturnToSecondPhase, 0.1f, true);
 }
 
 
@@ -67,8 +67,9 @@ void UBossFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	case EBossState::LaserRangeATK: TickLaserRangeATK(); break;
 	}
 	BossStateDebug();
-	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("attackCount %d"), attackCount));
+	
 	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("bIsSecondPhase %d"), bIsSecondPhase));
+	ReturnToSecondPhase();
 }
 
 void UBossFSMComponent::TickIdle()
@@ -127,10 +128,9 @@ void UBossFSMComponent::TickDashATK()
 
 void UBossFSMComponent::TickNormalATK()
 {
-	
 	if (bHasExecuted == false)
 	{
-		if (asBossAnim->IsAnyMontagePlaying() == false && bIsGuarding == false)
+		if (asBossAnim->IsAnyMontagePlaying() == false)
 		{
 			if (asBoss->attackCount == 2)
 			{
@@ -152,10 +152,10 @@ void UBossFSMComponent::TickNormalATK()
 				bHasExecuted = false;
 				//asBoss->attackCount = 0;
 			}
-			else if (attackCount >= 9)
+			else if (asBoss->attackCount >= 9)
 			{
 				bossStates = EBossState::BackStep;
-				attackCount = 0;
+				asBoss->attackCount = 0;
 				bHasExecuted = false;
 			}
 			else
@@ -214,7 +214,6 @@ void UBossFSMComponent::TickComboATK()
 
 void UBossFSMComponent::TickJumpATK()
 {
-	
 	if (bHasExecuted == false)
 	{
 		if (asBossAnim->IsAnyMontagePlaying() == false)
@@ -292,7 +291,6 @@ void UBossFSMComponent::TickBladeRangeATK()
 		bHasExecuted = true;
 	}
 	asBoss->SetZeroSpeed();
-	asBoss->SetFocusPlayerTick();
 }
 
 void UBossFSMComponent::TickBehindATK()
@@ -410,19 +408,16 @@ void UBossFSMComponent::MoveToFSM()
 			{
 				if (randomFloatValue <= normalATKPercent)
 				{
-					bossStates = EBossState::NormalATK;
-					bHasExecuted = false;
+					ReturnToNormalATK();
 				}
 				else
 				{
-					bossStates = EBossState::WarCry;
-					bHasExecuted = false;
+					ReturnToWarCry();
 				}
 			}
 			else
 			{
-				bossStates = EBossState::NormalATK;
-				bHasExecuted = false;
+				ReturnToNormalATK();
 			}
 		}
 		else bossStates = EBossState::Move; // 랜덤 플롯을 계속 실행시키지 않기 위해

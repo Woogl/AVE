@@ -175,9 +175,6 @@ public:
 
 	bool bDoOnce = false;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int attackCount = 0;
-	
 	float dashATKPercent = 0.3f;
 	float backStepPercent = 0.3f;
 	float slashATKPercent = 0.3f;

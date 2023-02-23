@@ -219,7 +219,7 @@ void APlayerCharacter::Guard()
 
 	// 0.3초 동안 패링 판정 발동 
 	bIsParrying = true;
-	GetWorldTimerManager().SetTimer(ParryingTimer, this, &APlayerCharacter::OnParryEnd, 0.3f, false);
+	GetWorldTimerManager().SetTimer(ParryingTimer, this, &APlayerCharacter::OnParryEnd, 0.5f, false);
 
 	// ABP의 스테이트 변경
 	UPlayerAnimInstance* animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
@@ -684,9 +684,33 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 			Groggy();
 		}
 	}
+	else if (DamageCauser->ActorHasTag(TEXT("UnableGuard")))
+	{
+		MyDebug("WarCryHit");
+		Hit(DamageAmount,UKnockBackDamageType::StaticClass());
+	}
+	else if (DamageCauser->ActorHasTag(TEXT("LowATK")))
+	{
+		if ( MoveComp->IsFalling() == true)
+		{
+			MyDebug("LowATKEvade");
+			return DamageAmount;
+		}
+		MyDebug("LowATKHit");
+		Hit(DamageAmount, UKnockBackDamageType::StaticClass());
+	}
+	else if (DamageCauser->ActorHasTag(TEXT("GrabATK")))
+	{
+		MotionMorphGrabHit();
+		PlayAnimMontage(GrabHitMontage);
+		Hit(DamageAmount, nullptr);
+	}
 	else if(DamageEvent.DamageTypeClass == UPierceDamageType::StaticClass())
 	{
-		if(bIsDashing)
+		FVector dirEnemy = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal();
+		FVector dirPlayer = GetActorForwardVector();
+		float enemyDotPlayer = FVector::DotProduct(-dirEnemy, dirPlayer);
+		if(bIsDashing && enemyDotPlayer > 0.5f)
 		{
 			MotionMorphGanpa();
 			PlayAnimMontage(GanpaMontage);

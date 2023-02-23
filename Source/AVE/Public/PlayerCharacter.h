@@ -98,6 +98,8 @@ public:
 	TArray<class UAnimMontage*> InteractionMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
 	class UAnimMontage* GanpaMontage;
+	UPROPERTY(EditDefaultsOnly, Category = "Montages | Interactions")
+	class UAnimMontage* GrabHitMontage;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
 	TArray<class UAnimMontage*> HitReactionMontages;
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
@@ -170,7 +172,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void MotionMorph();
 	UFUNCTION(BlueprintImplementableEvent)
-	void MotionMorphGanpa();
+	void MotionMorphGanpa(); // 보스 찌르기 공격 간파베기 
+	UFUNCTION(BlueprintImplementableEvent)
+	void MotionMorphGrabHit(); // 보스 잡기 공격 피격
 	
 	// 오토 타게팅
 	UFUNCTION(BlueprintCallable)	// 연구 중
