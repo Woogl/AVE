@@ -47,7 +47,7 @@ void AAIManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 void AAIManager::EnemySpawn()
 {
 	FVector SpawnPoint;
-	for (int i = 0; i < spawnSwordmanCount; i++)
+	/*for (int i = 0; i < spawnSwordmanCount; i++)
 	{
 		UNavigationSystemV1::K2_GetRandomLocationInNavigableRadius(GetWorld(), this->GetActorLocation(), SpawnPoint, spawnRadius, nullptr, nullptr);
 		UE_LOG(LogTemp, Warning, TEXT("%f"), SpawnPoint.X);
@@ -56,7 +56,7 @@ void AAIManager::EnemySpawn()
 		ab->onSetManager(this);
 
 		Enemies.AddUnique(ab);
-	}
+	}*/
 }
 
 void AAIManager::StartAI()

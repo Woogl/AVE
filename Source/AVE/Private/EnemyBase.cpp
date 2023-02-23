@@ -2,12 +2,14 @@
 
 
 #include "EnemyBase.h"
+#include <AIModule/Classes/BehaviorTree/BlackboardComponent.h>
 #include "CombatComponent.h"
 #include <Components/CapsuleComponent.h>
 #include "AIManager.h"
 #include <Kismet/GameplayStatics.h>
 #include "GameFramework/CharacterMovementComponent.h"
 #include <Kismet/KismetMathLibrary.h>
+#include "EnemyWidget.h"
 #include <Blueprint/AIBlueprintHelperLibrary.h>
 
 // Sets default values
@@ -19,6 +21,8 @@ AEnemyBase::AEnemyBase()
 	hp = hpMax = 100;
 	posture = postureMax = 50;
 	damage = 10;
+	postureCool = 1;
+	postureRate = 1;
 
 	CombatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp"));
 }
@@ -55,7 +59,11 @@ void AEnemyBase::LookAtPlayer()
 
 float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
 	AActor* DamageCauser)
-{
+{/*
+	hp -= characterDamage;
+	if (hp < 0)
+		onDie();*/
+
 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
@@ -63,19 +71,13 @@ void AEnemyBase::onActionAttack()
 {
 }
 
-void AEnemyBase::onActionEvade()
-{
-}
-
 void AEnemyBase::onActionGuard()
 {
 }
 
-void AEnemyBase::onHit(int characterDamage)
+void AEnemyBase::onHit()
 {
-	hp -= characterDamage;
-	if (hp < 0)
-		onDie();
+	
 }
 
 void AEnemyBase::onHitCrushed()
@@ -93,7 +95,7 @@ void AEnemyBase::OnFinishered()
 	LookAtPlayer();
 
 	// 테이크다운 애니메이션 실행
-	PlayAnimMontage(enemyAnimMontage, 1, TEXT("Finish"));
+	PlayAnimMontage(enemyDeathMontage, 1, TEXT("Finish"));
 }
 
 void AEnemyBase::SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float RagdollDelay)
@@ -167,7 +169,8 @@ void AEnemyBase::ActivateRagdoll()
 
 void AEnemyBase::onGetSet()
 {
-
+	blackboard->SetValueAsBool(TEXT("Armed"), true);
+	blackboard->SetValueAsEnum(TEXT("AIState"), 7);
 }
 
 void AEnemyBase::onSetManager(AAIManager* Manager)
@@ -178,4 +181,31 @@ void AEnemyBase::onSetManager(AAIManager* Manager)
 void AEnemyBase::UpdateMoveSpeed(float NewSpeed)
 {
 	this->GetCharacterMovement()->MaxWalkSpeed = NewSpeed;
+}
+
+float AEnemyBase::GetHP()
+{
+	return hp;
+}
+
+float AEnemyBase::GetPosture()
+{
+	return posture;
+}
+
+float AEnemyBase::GetMaxHP()
+{
+	return hpMax;
+}
+
+float AEnemyBase::GetMaxPosture()
+{
+	return postureMax;
+}
+
+void AEnemyBase::regenPosture()
+{
+	posture += (postureMax / 10);
+	if (posture > 0)
+		executionable = false;
 }

@@ -42,6 +42,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AEnemyBase> swordFactory;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AEnemyBase> shielderFactory;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TArray<AEnemyBase*> Enemies;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

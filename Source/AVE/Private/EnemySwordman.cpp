@@ -97,17 +97,13 @@ void AEnemySwordman::onActionAttack()
 {
 }
 
-void AEnemySwordman::onActionEvade()
+void AEnemySwordman::onHit()
 {
 }
 
 void AEnemySwordman::onActionGuard()
 {
 } 
-
-void AEnemySwordman::onHit(int characterDamage)
-{
-}
 
 void AEnemySwordman::onHitCrushed()
 {

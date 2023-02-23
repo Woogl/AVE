@@ -4,6 +4,27 @@
 #include "EnemyWidget.h"
 #include "Components/ProgressBar.h"
 
+void UEnemyWidget::NativeTick(const FGeometry& MyGeometry, float InDeletaTime)
+{
+	Super::NativeTick(MyGeometry, InDeletaTime);
+
+	if (!OwnerEnemy.IsValid())
+		return;
+
+	HPBar->SetPercent(OwnerEnemy->GetHP() / OwnerEnemy->GetMaxHP());
+	PostureBar->SetPercent(OwnerEnemy->GetPosture() / OwnerEnemy->GetMaxPosture());
+
+	if (HPBar->Percent >= 1)
+		HPBar->SetVisibility(ESlateVisibility::Hidden);
+	else
+		HPBar->SetVisibility(ESlateVisibility::Visible);
+
+	if (PostureBar->Percent >= 1)
+		PostureBar->SetVisibility(ESlateVisibility::Hidden);
+	else
+		PostureBar->SetVisibility(ESlateVisibility::Visible);
+}
+
 //float UEnemyWidget::DisplayHP_C()
 //{
 //	HPBar->SetPercent(HP/HPMax);

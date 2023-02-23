@@ -7,7 +7,6 @@
 #include "GameFramework/Pawn.h"
 #include "BaseBital.h"
 #include "AVEEnums.h"
-#include "EnemyWidget.h"
 #include "EnemyBase.generated.h"
 
 //추상 클래스에 구현할 공통 요소 
@@ -41,15 +40,19 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		float damage;		//공격력
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float hp;			//체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float hpMax;		//최대체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float damage;		//공격력
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float posture;		//체간
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float postureMax;	//최대체간
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool executionable = false;	//처형가능여부
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool isGuard = false;	//가드 상태
 
 	// 마무리 공격 당할 때
 	UFUNCTION(BlueprintCallable)
@@ -65,13 +68,22 @@ public:
 
 	// 래그돌 활성화 타이머
 	FTimerHandle RagdollTimer;
+	//체간 회복 타이머
+	FTimerHandle regenTimerHandle;
+	//체간 회복 초기 딜레이
+	float postureCool;
+	//체간 회복 간격
+	float postureRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class USkeletalMeshComponent* bodyMeshComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 		class UStaticMeshComponent* Weapon;
 	UPROPERTY(EditAnywhere)
-		class UAnimMontage* enemyAnimMontage;
+		class UAnimMontage* enemyMoveMontage;
+	UPROPERTY(EditAnywhere)
+		class UAnimMontage* enemyDeathMontage;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 		class UCombatComponent* CombatComp;
 	UPROPERTY()
@@ -80,19 +92,31 @@ public:
 		class UBaseBital* bital;
 	UPROPERTY(EditAnywhere)
 		class UBlackboardComponent* blackboard;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		//class UEnemyWidget* enemyWidget;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget")
 		class UWidgetComponent* enemyWidget;
 
+	UFUNCTION(BlueprintCallable)
 	virtual void onActionAttack();
-	virtual void onActionEvade();
+	UFUNCTION(BlueprintCallable)
 	virtual void onActionGuard();
 	UFUNCTION(BlueprintCallable)
-	virtual void onHit(int characterDamage);
+	virtual void onHit();
+	UFUNCTION(BlueprintCallable)
 	virtual void onHitCrushed();
+	UFUNCTION(BlueprintCallable)
 	virtual void onDie();	
 	UFUNCTION(BlueprintCallable)
 	virtual void onGetSet();
 	UFUNCTION(BlueprintCallable)
 	virtual void onSetManager(AAIManager* Manager);
+	void regenPosture();
+
+	UFUNCTION(BlueprintCallable)
+	float GetHP();
+	UFUNCTION(BlueprintCallable)
+	float GetMaxHP();
+	UFUNCTION(BlueprintCallable)
+	float GetPosture();
+	UFUNCTION(BlueprintCallable)
+	float GetMaxPosture();
 };
