@@ -103,26 +103,38 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animWarCry;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
-	class UAnimMontage* animInsal;
+	class UAnimMontage* animFallDown;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animLaserRangeATK;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animLightningATK01;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animLightningATK02;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animLightningGroggy;
+	
 	// º¯¼ö
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float currentHP;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float maxHP = 200.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float bossPosture;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float bossMaxPosture = 100;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float bossMaxPosture = 100.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsSuperArmor;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCanParry;
-	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float currentElectricEnergy = 1.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float maxElectricEnergy = 100.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float materialVariable = currentElectricEnergy * 100.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float chargeColorParameter = (-1/99) * currentElectricEnergy + (100/99);
 	
 	FTimerHandle delayHandle;
+	FTimerHandle laserATKHandle;
 	int randomIntValue;
 	float randomFloatValue;
 	float montageLength;
@@ -156,9 +168,11 @@ public:
 	UFUNCTION()
 	void AnimWarCry();
 	UFUNCTION()
-	void AnimInsal();
+	void AnimFallDown();
 	UFUNCTION()
 	void AnimLaserRangeATK();
+	UFUNCTION()
+	void AnimLightningATK();
 	
 	UFUNCTION()
 	void ReturnToMove();
@@ -180,12 +194,13 @@ public:
 	void OnLineTraceHit();
 	UFUNCTION()
 	void TakeDamageFalse();
-	UFUNCTION(BlueprintCallable)
-	void ClearTags();
+	UFUNCTION()
+	void ClearFocus();
 	
 	void SetZeroSpeed();
 	float DistanceBossToPlayer();
 	void PostureRecovery();
+	void ElectricEnergyRecovery();
 	
 	UFUNCTION()
 	void AnimReboundATK();
@@ -193,5 +208,6 @@ public:
 	// void AnimParryATK();
 	
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-	float bossArmor = 5.f;
+
+	
 };

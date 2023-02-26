@@ -31,35 +31,42 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FVector velocity;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float speed;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float direction;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float pitch;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float yaw;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsFalling;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int activeChildIndex = 0;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int lightningVelocityZ = 1000;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int lightningVelocityMZ = -3000;
+	
 	UFUNCTION()
 	void AnimNotify_WarCryBegin();
-
 	UFUNCTION()
 	void AnimNotify_WarCryEnd();
-
 	UFUNCTION()
 	void WarCryRadialATK();
 
+	UFUNCTION()
+	void AnimNotify_OnSuperArmor();
+	UFUNCTION()
+	void AnimNotify_OffSuperArmor();
+
+	UFUNCTION()
+	void AnimNotify_LightningUp();
+	UFUNCTION()
+	void AnimNotify_LightningDown();
+	
 	FTimerHandle warCryTimerHandle;
 
 	bool bTakenWarCryDamage = false;
+	bool bDoOnce = false;
 };

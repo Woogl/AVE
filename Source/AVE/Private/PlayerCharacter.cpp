@@ -14,8 +14,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "AllAVEDamageTypes.h"
 #include "GanpaDamageType.h"
+#include "GrabAttackDamageType.h"
+#include "LowAttackDamageType.h"
 #include "ParryDamageType.h"
 #include "PierceDamageType.h"
+#include "UnguardableDamageType.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -684,26 +687,23 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 			Groggy();
 		}
 	}
-	else if (DamageCauser->ActorHasTag(TEXT("UnableGuard")))
+	else if (DamageEvent.DamageTypeClass == UUnguardableDamageType::StaticClass())
 	{
-		MyDebug("WarCryHit");
 		Hit(DamageAmount,UKnockBackDamageType::StaticClass());
 	}
-	else if (DamageCauser->ActorHasTag(TEXT("LowATK")))
+	else if (DamageEvent.DamageTypeClass == ULowAttackDamageType::StaticClass())
 	{
 		if ( MoveComp->IsFalling() == true)
 		{
-			MyDebug("LowATKEvade");
 			return DamageAmount;
 		}
-		MyDebug("LowATKHit");
 		Hit(DamageAmount, UKnockBackDamageType::StaticClass());
 	}
-	else if (DamageCauser->ActorHasTag(TEXT("GrabATK")))
+	else if (DamageEvent.DamageTypeClass == UGrabAttackDamageType::StaticClass())
 	{
 		MotionMorphGrabHit();
+		//Hit(DamageAmount, nullptr);
 		PlayAnimMontage(GrabHitMontage);
-		Hit(DamageAmount, nullptr);
 	}
 	else if(DamageEvent.DamageTypeClass == UPierceDamageType::StaticClass())
 	{

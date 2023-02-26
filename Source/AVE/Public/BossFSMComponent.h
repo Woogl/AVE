@@ -14,7 +14,7 @@ enum class EBossState : uint8
 	Move UMETA(Displayname = MOVE),
 	DashATK UMETA(Displayname = DashATK),
 	NormalATK UMETA(Displayname = NormalATK),
-	ATK01 UMETA(Displayname = ATK01),
+	LightningATK UMETA(Displayname = LightningATK),
 	SlashATK UMETA(Displayname = SlashATK),
 	ComboATK UMETA(Displayname = ComboATK),
 	JumpATK UMETA(Displayname = JumpATK),
@@ -24,7 +24,7 @@ enum class EBossState : uint8
 	BehindATK UMETA(Displayname = BehindATK),
 	GrabATK UMETA(Displayname = GrabATK),
 	WarCry UMETA(Displayname = WarCry),
-	Insal UMETA(Displayname = Insal),
+	FallDown UMETA(Displayname = FallDown),
 	LaserRangeATK UMETA(Displayname = LaserRangeATK),
 };
 
@@ -65,7 +65,7 @@ public:
 	void TickMove();
 	void TickDashATK();
 	void TickNormalATK();
-	void TickATK01();
+	void TickLightningATK();
 	void TickSlashATK();
 	void TickComboATK();
 	void TickJumpATK();
@@ -75,7 +75,7 @@ public:
 	void TickBehindATK();
 	void TickGrabATK();
 	void TickWarCry();
-	void TickInsal();
+	void TickFallDown();
 	void TickLaserRangeATK();
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -128,6 +128,9 @@ public:
 
 	UFUNCTION()
 	void ReturnToLaserRangeATK();
+
+	UFUNCTION()
+	void FinishExtendedSword();
 	
 	UFUNCTION()
 	void SetMoveSpeed();
@@ -172,12 +175,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsSecondPhase;
-
-	bool bDoOnce = false;
 	
 	float dashATKPercent = 0.3f;
 	float backStepPercent = 0.3f;
 	float slashATKPercent = 0.3f;
-	float normalATKPercent = 0.6f;
+	float warCryATKPercent = 0.6f;
 	float laserRangeATKPercent = 1.f;
 };

@@ -5,10 +5,8 @@
 
 #include "Boss.h"
 #include "KismetAnimationLibrary.h"
-#include "KnockBackDamageType.h"
 #include "PlayerCharacter.h"
-#include "StandardDamageType.h"
-#include "Components/SphereComponent.h"
+#include "UnguardableDamageType.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -55,6 +53,12 @@ void UBossAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 void UBossAnimInstance::AnimNotify_WarCryBegin()
 {
 	asBoss->GetWorldTimerManager().SetTimer(warCryTimerHandle, this, &UBossAnimInstance::WarCryRadialATK, 0.1f, true);
+	asBoss->currentElectricEnergy = 1.f;
+	if (bDoOnce == false)
+	{
+		asBoss->bossPosture = 100;
+		bDoOnce = true;
+	}
 }
 
 void UBossAnimInstance::AnimNotify_WarCryEnd()
@@ -62,12 +66,33 @@ void UBossAnimInstance::AnimNotify_WarCryEnd()
 	asBoss->GetWorldTimerManager().ClearTimer(warCryTimerHandle);
 }
 
+void UBossAnimInstance::AnimNotify_OnSuperArmor()
+{
+	asBoss->bIsSuperArmor = true;
+}
+
+void UBossAnimInstance::AnimNotify_OffSuperArmor()
+{
+	asBoss->bIsSuperArmor = false;
+}
+
+void UBossAnimInstance::AnimNotify_LightningUp()
+{
+	asBoss->LaunchCharacter(FVector(0, 0, lightningVelocityZ), false, false);
+	asBoss->weaponMeshSubComp->SetRelativeScale3D(FVector(1.f, 8.f, 1.f));
+}
+
+void UBossAnimInstance::AnimNotify_LightningDown()
+{
+	asBoss->LaunchCharacter(FVector(0, 0, lightningVelocityMZ), false, false);
+}
+
 void UBossAnimInstance::WarCryRadialATK()
 {
 	TArray<AActor*> IgnoreList; // IgnoreList가 필수로 있어야 해서 
 	IgnoreList.Add(asBoss); // 자기자신을 제외
 	
-	if(UGameplayStatics::ApplyRadialDamage(GetWorld(), 20, asBoss->GetActorLocation(), 500.f, UKnockBackDamageType::StaticClass(), IgnoreList, asBoss))
+	if(UGameplayStatics::ApplyRadialDamage(GetWorld(), 20, asBoss->GetActorLocation(), 500.f, UUnguardableDamageType::StaticClass(), IgnoreList, asBoss))
 	{
 		asBoss->GetWorldTimerManager().ClearTimer(warCryTimerHandle);
 	}
