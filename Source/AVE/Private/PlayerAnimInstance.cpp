@@ -8,6 +8,7 @@
 #include "PlayerCharacter.h"
 #include "AllAVEDamageTypes.h"
 #include <Kismet/KismetSystemLibrary.h>
+#include "Kismet/GameplayStatics.h"
 
 UPlayerAnimInstance::UPlayerAnimInstance()
 {
@@ -194,5 +195,22 @@ void UPlayerAnimInstance::AnimNotify_PlaySequence() {
 void UPlayerAnimInstance::AnimNotify_PlayLightningSequence() {
 	if (Player) {
 		Player->PlayLightningShockSequence();
+	}
+}
+
+void UPlayerAnimInstance::AnimNotify_PlayFootstepSound() {
+	if (Player) {
+		TArray<AActor*> actorsToIgnore;
+		FHitResult outHit;
+		actorsToIgnore.Add(Player);
+		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Player->GetActorLocation(), Player->GetActorLocation() + FVector(0.f, 0.f, -150.f), ETraceTypeQuery::TraceTypeQuery1, false, actorsToIgnore, EDrawDebugTrace::ForDuration, outHit, true)) {
+			EPhysicalSurface surfaceType = UGameplayStatics::GetSurfaceType(outHit);
+			if (surfaceType == EPhysicalSurface::SurfaceType1) {
+				Player->PlayWetFootstepSound(outHit.Location);
+			}
+			else {
+				Player->PlayDryFootstepSound(outHit.Location);
+			}
+		}
 	}
 }

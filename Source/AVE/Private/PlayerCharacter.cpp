@@ -123,6 +123,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 		LastAttackTime = 0.f;
 	}
 	RegeneratePosture(); // 프레임레이트 영향 없애기 위해 TakeDamage()에서 타이머 + 루프 걸어서 호출하는게 낫지 않을까? - 우성
+	SkillCooltime+=DeltaTime;
+	SpecialAttackCooltime+=DeltaTime;
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -603,10 +605,12 @@ void APlayerCharacter::Attack() {
 			ComboAttack();
 		}
 
-		Tail = -1;
-		LastAttackTime = 0.f;
-		// 공격 중으로 전환
-		bIsAttacking = true;
+		if (GetCurrentMontage()) {
+			Tail = -1;
+			LastAttackTime = 0.f;
+			// 공격 중으로 전환
+			bIsAttacking = true;
+		}
 	}
 }
 
@@ -640,8 +644,11 @@ void APlayerCharacter::JumpAttack() {
 }
 
 void APlayerCharacter::SpecialAttack() {
-	PlayAnimMontage(SpecialAttackMontages[CurSpecialAttack]);
-	Combo = -1;
+	if (SpecialAttackCooltime > 3.f) {
+		PlayAnimMontage(SpecialAttackMontages[CurSpecialAttack]);
+		Combo = -1;
+		SpecialAttackCooltime = 0.f;
+	}
 }
 
 void APlayerCharacter::DashAttack() {
@@ -786,11 +793,12 @@ void APlayerCharacter::Die() {
 }
 
 void APlayerCharacter::Skill() {
-	if (CanAttack()) {
+	if (CanAttack() && CurKatasiro > 0 && SkillCooltime > 5.f) {
 		PlayAnimMontage(SkillMontages[CurSkill]);
 		bIsAttacking = true;
 		bIsInvincible = true;
-
+		CurKatasiro--;
+		SkillCooltime = 0.f;
 	}
 }
 
@@ -818,7 +826,7 @@ void APlayerCharacter::MoveWeaponRight() {
 
 void APlayerCharacter::RegeneratePosture() {
 	if (!(bIsHit || bIsGuardBroken) && CurPosture < 100.f) {
-		CurPosture += 0.2f;
+		CurPosture += 0.05f;
 	}
 }
 
@@ -826,4 +834,12 @@ void APlayerCharacter::SpreadAoEDamage(TSubclassOf<UDamageType> AttackDamageType
 	TArray<AActor*> IgnoreList;
 	IgnoreList.Add(this);
 	UGameplayStatics::ApplyRadialDamage(GetWorld(), 50, GetActorLocation(), 1000.f, AttackDamageType, IgnoreList);
+}
+
+void APlayerCharacter::PlayWetFootstepSound(FVector Location) {
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), WetFootstep, Location, 0.5f);
+}
+
+void APlayerCharacter::PlayDryFootstepSound(FVector Location) {
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), DryFootstep, Location, 0.5f);
 }

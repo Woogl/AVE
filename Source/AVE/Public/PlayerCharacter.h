@@ -105,6 +105,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
 	class UAnimMontage* DieMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Sounds | Footstep")
+	class USoundBase* WetFootstep;
+	UPROPERTY(EditDefaultsOnly, Category = "Sounds | Footstep")
+	class USoundBase* DryFootstep;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -191,9 +196,16 @@ public:
 	float ComboResetLimit = 1.f;
 
 	// 현재 특수공격 인덱스
+	UPROPERTY(BlueprintReadOnly)
 	int CurSpecialAttack;
+	UPROPERTY(BlueprintReadOnly)
 	int CurSkill;
-
+	UPROPERTY(BlueprintReadOnly)
+	int CurKatasiro = 5;
+	UPROPERTY(BlueprintReadOnly)
+	float SkillCooltime = 5.f;
+	UPROPERTY(BlueprintReadOnly)
+	float SpecialAttackCooltime = 5.f;
 	// 물리 내성
 	float Defense;
 	// 전기 내성
@@ -251,4 +263,7 @@ public:
 	// 유도탄 시퀀스 동작
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayMissileSequence();
+
+	void PlayWetFootstepSound(FVector Location);
+	void PlayDryFootstepSound(FVector Location); 
 };
