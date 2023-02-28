@@ -11,7 +11,6 @@
 #include "ParryDamageType.h"
 #include "PlayerCharacter.h"
 #include "VectorTypes.h"
-#include "AnimNodes/AnimNode_RandomPlayer.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -140,11 +139,13 @@ void ABoss::AnimNormalATK()
 	if (randomIntValue == 1)
 	{
 		attackCount += 1;
+		//PlayAnimMontage(animNormalATKR01);
 		montageLength = PlayAnimMontage(animNormalATKR01, 1) / (1 * animNormalATKR01->RateScale);
 	}
 	if (randomIntValue == 2)
 	{
 		attackCount += 1;
+		//PlayAnimMontage(animNormalATKL01);
 		montageLength = PlayAnimMontage(animNormalATKL01, 1) / (1 * animNormalATKL01->RateScale);
 	}
 }
@@ -184,7 +185,6 @@ void ABoss::AnimBackStep()
 void ABoss::AnimBladeRangeATK()
 {
 	bIsSuperArmor = true;
-	weaponMeshSubComp->SetRelativeScale3D(FVector(1.f, 5.f, 1.f));
 	montageLength = PlayAnimMontage(animBladeRangeATK, 1) / (1 * animBladeRangeATK->RateScale);
 }
 
@@ -223,6 +223,7 @@ void ABoss::AnimLaserRangeATK()
 	bIsSuperArmor = true;
 	montageLength = PlayAnimMontage(animLaserRangeATK, 1) / (1 * animLaserRangeATK->RateScale);
 	GetWorldTimerManager().SetTimer(laserATKHandle, this, &ABoss::SetFocusPlayerInplace, 0.1f, true);
+	GetWorldTimerManager().SetTimer(laserHitHandle, this, &ABoss::OnLineTraceHit, 0.1f, true, 0.25f); // 0.25는 몽타주 블랜딩 인 타임
 	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ClearFocus, montageLength, false);
 }
 
@@ -254,8 +255,8 @@ void ABoss::RandomFloat()
 
 void ABoss::AnimTurnInPlace()
 {
-	if (asBossAnim->IsAnyMontagePlaying() == false)
-	{
+	if (asBossAnim->IsAnyMontagePlaying() == true) return;
+	
 		if (asBossAnim->yaw > 80)
 		{
 			if (asBossAnim->yaw > 135 && DistanceBossToPlayer() > 250)
@@ -270,7 +271,7 @@ void ABoss::AnimTurnInPlace()
 			else
 				PlayAnimMontage(bossTurnL90);
 		}
-	}
+	
 }
 
 void ABoss::SetFocusPlayerInplace()
@@ -279,6 +280,14 @@ void ABoss::SetFocusPlayerInplace()
 			GetActorLocation(), playerPawn->GetActorLocation());
 	FRotator setLerp = UKismetMathLibrary::RLerp(GetActorRotation(), bossLookAtPlayer, 0.1f, true);
 	this->SetActorRotation(FRotator(0, setLerp.Yaw, 0));
+}
+
+void ABoss::SetFocusPlayerPitchYaw()
+{
+	FRotator bossLookAtPlayer = UKismetMathLibrary::FindLookAtRotation(
+			GetActorLocation(), playerPawn->GetActorLocation());
+	FRotator setLerp = UKismetMathLibrary::RLerp(GetActorRotation(), bossLookAtPlayer, 0.1f, true);
+	this->SetActorRotation(FRotator(setLerp.Pitch, setLerp.Yaw, 0));
 }
 
 void ABoss::SetFocusPlayerTick()
@@ -303,12 +312,13 @@ void ABoss::OnLineTraceHit()
 	TArray<AActor*> IgnoreList;
 	
 	bool bHit = UKismetSystemLibrary::LineTraceSingle(this, lineStartLoc, lineEndLoc, AttackTrace,
-		false, IgnoreList, EDrawDebugTrace::ForDuration, outHit, true, FLinearColor::Red);
+		false, IgnoreList, EDrawDebugTrace::None, outHit, true, FLinearColor::Red);
 	if (bHit)
 	{
 		EnemyTarget = outHit.GetActor();
-		UGameplayStatics::ApplyPointDamage(EnemyTarget, 1.f, EnemyTarget->GetActorLocation(),
-			outHit, instigator, this, UStandardDamageType::StaticClass());
+		UGameplayStatics::ApplyPointDamage(EnemyTarget, 20.f, EnemyTarget->GetActorLocation(),
+			outHit, instigator, this, UKnockBackDamageType::StaticClass());
+		GetWorldTimerManager().ClearTimer(laserHitHandle);
 	}
 }
 
@@ -340,87 +350,101 @@ void ABoss::ReturnToBladeRangeATK()
 	bossFSMComp->bHasExecuted = false;
 }
 
-void ABoss::AnimReboundATK()
-{
-	if (attackCount == 2)
-	{
-		bossFSMComp->bossStates = EBossState::JumpATK;
-		attackCount += 1;
-		bossFSMComp->bHasExecuted = false;
-	}
-	else if (attackCount == 4)
-	{
-		bossFSMComp->bossStates = EBossState::ComboATK;
-		attackCount += 1;
-		bossFSMComp->bHasExecuted = false;
-	}
-	else if (attackCount == 7)
-	{
-		bossFSMComp->bossStates = EBossState::GrabATK;
-		attackCount += 1;
-		bossFSMComp->bHasExecuted = false;
-	}
-	else if (attackCount >= 9)
-	{
-		bossFSMComp->bossStates = EBossState::BackStep;
-		attackCount = 0;
-		bossFSMComp->bHasExecuted = false;
-	}
-	else
-	{
-		if (asBossAnim->IsAnyMontagePlaying() == false)
-		{
-			if (randomIntValue == 1)
-			{
-				montageLength = PlayAnimMontage(animReboundATKL, 1) / (1 * animReboundATKL->RateScale);
-				attackCount += 1;
-				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
-			}
-			if (randomIntValue == 2)
-			{
-				montageLength = PlayAnimMontage(animReboundATKR, 1) / (1 * animReboundATKR->RateScale);
-				attackCount += 1;
-				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
-			}
-		}
-	}
-}
+// void ABoss::AnimReboundATK()
+// {
+// 	if (attackCount == 2)
+// 	{
+// 		bossFSMComp->bossStates = EBossState::JumpATK;
+// 		attackCount += 1;
+// 		bossFSMComp->bHasExecuted = false;
+// 	}
+// 	else if (attackCount == 4)
+// 	{
+// 		bossFSMComp->bossStates = EBossState::ComboATK;
+// 		attackCount += 1;
+// 		bossFSMComp->bHasExecuted = false;
+// 	}
+// 	else if (attackCount == 7)
+// 	{
+// 		bossFSMComp->bossStates = EBossState::GrabATK;
+// 		attackCount += 1;
+// 		bossFSMComp->bHasExecuted = false;
+// 	}
+// 	else if (attackCount >= 9)
+// 	{
+// 		bossFSMComp->bossStates = EBossState::BackStep;
+// 		attackCount = 0;
+// 		bossFSMComp->bHasExecuted = false;
+// 	}
+// 	else
+// 	{
+// 		if (asBossAnim->IsAnyMontagePlaying() == false)
+// 		{
+// 			if (randomIntValue == 1)
+// 			{
+// 				montageLength = PlayAnimMontage(animReboundATKL, 1) / (1 * animReboundATKL->RateScale);
+// 				attackCount += 1;
+// 				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
+// 			}
+// 			if (randomIntValue == 2)
+// 			{
+// 				montageLength = PlayAnimMontage(animReboundATKR, 1) / (1 * animReboundATKR->RateScale);
+// 				attackCount += 1;
+// 				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
+// 			}
+// 		}
+// 	}
+// }
 
 float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	// Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	float bossTakenDamage = DamageAmount;
+	float bossTakenDamage = DamageAmount / bossArmor;
 	bTakeDamage = true;
 	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::TakeDamageFalse, 1.f, false);
-
 	
-	if (DamageEvent.DamageTypeClass == UParryDamageType::StaticClass() && bIsSuperArmor == false) 
+	if (DamageEvent.DamageTypeClass == UParryDamageType::StaticClass()) 
 	{
 		// 패리 데미지가 들어왔을 때 튕기는 모션
-		if (randomIntValue == 1)
+		if (randomIntValue == 1 && bIsSuperArmor == false)
 		{
 			bossPosture -= 10.f;
-			montageLength = PlayAnimMontage(animReboundR, 1) / (1 * animReboundR->RateScale);
+			attackCount += 1;
+			PlayAnimMontage(animReboundATKR);
+			//montageLength = PlayAnimMontage(animReboundATKR, 1) / (1 * animReboundR->RateScale);
 		}
-		if (randomIntValue == 2)
+		else bossPosture -= 3.f;
+		
+		if (randomIntValue == 2 && bIsSuperArmor == false)
 		{
 			bossPosture -= 10.f;
-			montageLength = PlayAnimMontage(animReboundR, 1) / (1 * animReboundR->RateScale);
+			attackCount += 1;
+			PlayAnimMontage(animReboundATKL);
+			//montageLength = PlayAnimMontage(animReboundATKL, 1) / (1 * animReboundL->RateScale);
 		}
-		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::AnimReboundATK, montageLength, false);
+		else bossPosture -= 3.f;
+		
+		//GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
 	}
-	else if (DamageEvent.DamageTypeClass==ULightningDamageType::StaticClass())
+	else if (DamageEvent.DamageTypeClass == ULightningDamageType::StaticClass())
 	{
-		currentHP -= 10.f;
-		bossPosture -= 10.f;
+		currentHP -= bossTakenDamage;
+		bossPosture -= bossTakenDamage;
 		montageLength = PlayAnimMontage(animLightningGroggy, 1) / (1 * animLightningGroggy->RateScale);
 		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
 	}
-	else if (DamageEvent.DamageTypeClass==UGanpaDamageType::StaticClass()) 
+	else if (DamageEvent.IsOfType(FRadialDamageEvent::ClassID))
+	{
+		currentHP -= 20.f;
+		PlayAnimMontage(animAoEDamageHit);
+		//montageLength = PlayAnimMontage(animAoEDamageHit, 1) / (1 * animAoEDamageHit->RateScale);
+		//GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
+	}
+	else if (DamageEvent.DamageTypeClass == UGanpaDamageType::StaticClass())
 	{
 		// 간파 데미지가 들어왔을 때 당하는 모션
-		currentHP -= 10.f;
-		bossPosture -= 10.f;
+		currentHP -= bossTakenDamage;
+		bossPosture -= bossTakenDamage;
 		montageLength = PlayAnimMontage(animStanceCounter, 1) / (1 * animStanceCounter->RateScale);
 		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
 	}
@@ -428,20 +452,43 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 	{
 		if (bIsSuperArmor == false)
 		{
-			// 일반 데미지가 들어왔을 때 슈퍼아머 상태가 아니면 보스가 패리하는 모션
-			if (parryCount == 0)
+			if (DamageEvent.DamageTypeClass == UStandardDamageType::StaticClass())
 			{
-				attackCount += 1;
-				parryCount += 1;
-				montageLength = PlayAnimMontage(animParryR, 1) / (1 * animParryR->RateScale);
-				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
+				// 일반 데미지가 들어왔을 때 슈퍼아머 상태가 아니면 보스가 패리하는 모션
+				if (parryCount == 0)
+				{
+					attackCount += 1;
+					parryCount += 1;
+					PlayAnimMontage(animParryR);
+					//montageLength = PlayAnimMontage(animParryR, 1) / (1 * animParryR->RateScale);
+					//GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::AnimParryATK, montageLength, false);
+				}
+				else
+				{
+					attackCount += 1;
+					parryCount = 0;
+					PlayAnimMontage(animParryL);
+					//montageLength = PlayAnimMontage(animParryL, 1) / (1 * animParryL->RateScale);
+					//GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::AnimParryATK, montageLength, false);
+				}
 			}
-			else
+			if (DamageEvent.DamageTypeClass == UKnockBackDamageType::StaticClass())
 			{
-				attackCount += 1;
-				parryCount = 0;
-				montageLength = PlayAnimMontage(animParryL, 1) / (1 * animParryL->RateScale);
-				GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
+				PlayAnimMontage(animKnockBackDamageGuard);
+				//montageLength = PlayAnimMontage(animKnockBackDamageGuard, 1) / (1 * animKnockBackDamageGuard->RateScale);
+				//GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
+			}
+			if (DamageEvent.DamageTypeClass == UKnockDownDamageType::StaticClass())
+			{
+				PlayAnimMontage(animKnockDownDamageGuard);
+				//montageLength = PlayAnimMontage(animKnockDownDamageGuard, 1) / (1 * animKnockDownDamageGuard->RateScale);
+				//GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
+			}
+			if (DamageEvent.DamageTypeClass == UKnockUpDamageType::StaticClass())
+			{
+				PlayAnimMontage(animKnockUpDamageGuard);
+				//montageLength = PlayAnimMontage(animKnockUpDamageGuard, 1) / (1 * animKnockUpDamageGuard->RateScale);
+				//GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
 			}
 		}
 		else

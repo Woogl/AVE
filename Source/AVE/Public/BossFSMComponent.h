@@ -104,37 +104,27 @@ public:
 
 	UFUNCTION()
 	void ReturnToMove();
-
 	UFUNCTION()
 	void ReturnToWalk();
-
 	UFUNCTION()
 	void ReturnToNormalATK();
-	
 	UFUNCTION()
 	void ReturnToBladeRangeATK();
-
 	UFUNCTION()
 	void ReturnToStanceATK();
-
 	UFUNCTION()
 	void ReturnToSlashATK();
-
 	UFUNCTION()
 	void ReturnToSecondPhase();
-	
 	UFUNCTION()
 	void ReturnToWarCry();
-
 	UFUNCTION()
 	void ReturnToLaserRangeATK();
-
 	UFUNCTION()
-	void FinishExtendedSword();
+	void ReturnToLightningATK();
 	
 	UFUNCTION()
 	void SetMoveSpeed();
-
 	UFUNCTION(BlueprintCallable)
 	void SetGuardMoveSpeed();
 	UFUNCTION(BlueprintCallable)
@@ -180,5 +170,5 @@ public:
 	float backStepPercent = 0.3f;
 	float slashATKPercent = 0.3f;
 	float warCryATKPercent = 0.6f;
-	float laserRangeATKPercent = 1.f;
+	float laserRangeATKPercent = 0.7f;
 };

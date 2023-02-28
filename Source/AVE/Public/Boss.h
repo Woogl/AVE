@@ -96,10 +96,10 @@ public:
 	class UAnimMontage* animParryR;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animParryL;
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
-	// class UAnimMontage* animParryRATK;
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
-	// class UAnimMontage* animParryLATK;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animParryRATK;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animParryLATK;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animWarCry;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
@@ -110,8 +110,17 @@ public:
 	class UAnimMontage* animLightningATK01;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animLightningATK02;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HitReaction")
 	class UAnimMontage* animLightningGroggy;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HitReaction")
+	class UAnimMontage* animAoEDamageHit;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HitReaction")
+	class UAnimMontage* animKnockBackDamageGuard;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HitReaction")
+	class UAnimMontage* animKnockDownDamageGuard;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HitReaction")
+	class UAnimMontage* animKnockUpDamageGuard;
 	
 	// º¯¼ö
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -135,6 +144,7 @@ public:
 	
 	FTimerHandle delayHandle;
 	FTimerHandle laserATKHandle;
+	FTimerHandle laserHitHandle;
 	int randomIntValue;
 	float randomFloatValue;
 	float montageLength;
@@ -180,6 +190,10 @@ public:
 	void ReturnToWalk();
 	UFUNCTION()
 	void ReturnToBladeRangeATK();
+	// UFUNCTION()
+	// void AnimReboundATK();
+
+
 	UFUNCTION()
 	void RandomInt(int min, int max);
 	UFUNCTION()
@@ -188,6 +202,8 @@ public:
 	void AnimTurnInPlace();
 	UFUNCTION(BlueprintCallable)
 	void SetFocusPlayerInplace();
+	UFUNCTION(BlueprintCallable)
+	void SetFocusPlayerPitchYaw();
 	UFUNCTION(BlueprintCallable)
 	void SetFocusPlayerTick();
 	UFUNCTION()
@@ -202,12 +218,12 @@ public:
 	void PostureRecovery();
 	void ElectricEnergyRecovery();
 	
-	UFUNCTION()
-	void AnimReboundATK();
+	// UFUNCTION()
+	// void AnimReboundATK();
 	// UFUNCTION()
 	// void AnimParryATK();
 	
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
-	
+	float bossArmor = 3.f;
 };

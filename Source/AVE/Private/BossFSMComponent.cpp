@@ -133,38 +133,37 @@ void UBossFSMComponent::TickNormalATK()
 		bHasExecuted = true;
 		if (asBossAnim->IsAnyMontagePlaying() == false)
 		{
-			if (asBoss->attackCount == 2)
-			{
-				bossStates = EBossState::JumpATK;
-				asBoss->attackCount += 1;
-				bHasExecuted = false;
-			}
-			else if (asBoss->attackCount == 4)
-			{
-				bossStates = EBossState::ComboATK;
-				asBoss->attackCount += 1;
-				bHasExecuted = false;
-				//asBoss->attackCount = 0;
-			}
-			else if (asBoss->attackCount == 7)
-			{
-				bossStates = EBossState::GrabATK;
-				asBoss->attackCount += 1;
-				bHasExecuted = false;
-				//asBoss->attackCount = 0;
-			}
-			else if (asBoss->attackCount >= 9)
-			{
-				bossStates = EBossState::BackStep;
-				asBoss->attackCount = 0;
-				bHasExecuted = false;
-			}
-			else
-			{
+			// if (asBoss->attackCount == 2)
+			// {
+			// 	bossStates = EBossState::JumpATK;
+			// 	asBoss->attackCount += 1;
+			// 	bHasExecuted = false;
+			// }
+			// else if (asBoss->attackCount == 4)
+			// {
+			// 	bossStates = EBossState::ComboATK;
+			// 	asBoss->attackCount += 1;
+			// 	bHasExecuted = false;
+			// 	//asBoss->attackCount = 0;
+			// }
+			// else if (asBoss->attackCount == 7)
+			// {
+			// 	bossStates = EBossState::GrabATK;
+			// 	asBoss->attackCount += 1;
+			// 	bHasExecuted = false;
+			// 	//asBoss->attackCount = 0;
+			// }
+			// else if (asBoss->attackCount >= 9)
+			// {
+			// 	bossStates = EBossState::BackStep;
+			// 	asBoss->attackCount = 0;
+			// 	bHasExecuted = false;
+			// }
+			// else
+			// {
 				asBoss->AnimNormalATK();
-				asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToMove,
-				                                        asBoss->montageLength, false);
-			}
+				asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToMove, asBoss->montageLength, false);
+			// }
 		}
 		else ReturnToMove();
 	}
@@ -180,13 +179,13 @@ void UBossFSMComponent::TickLightningATK()
 		if (asBossAnim->IsAnyMontagePlaying() == false)
 		{
 			asBoss->AnimLightningATK();
-			asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::FinishExtendedSword,
+			asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToWalk,
 							asBoss->montageLength, false);
 		}
 		else ReturnToMove();
 	}
 	asBoss->SetZeroSpeed();
-	asBoss->SetFocusPlayerInplace();
+	asBoss->SetFocusPlayerPitchYaw();
 }
 
 void UBossFSMComponent::TickSlashATK()
@@ -211,8 +210,12 @@ void UBossFSMComponent::TickComboATK()
 	if (bHasExecuted == false)
 	{
 		bHasExecuted = true;
-		if (asBossAnim->IsAnyMontagePlaying() == false)
+		if (asBossAnim->IsAnyMontagePlaying() == false || asBossAnim->bParry == true)
 		{
+			if (asBossAnim->bParry == true)
+			{
+				asBossAnim->bParry = false;
+			}
 			asBoss->AnimComboATK();
 			asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToMove,
 							asBoss->montageLength, false);
@@ -228,8 +231,12 @@ void UBossFSMComponent::TickJumpATK()
 	if (bHasExecuted == false)
 	{
 		bHasExecuted = true;
-		if (asBossAnim->IsAnyMontagePlaying() == false)
+		if (asBossAnim->IsAnyMontagePlaying() == false || asBossAnim->bParry == true)
 		{
+			if (asBossAnim->bParry == true)
+			{
+				asBossAnim->bParry = false;
+			}
 			asBoss->AnimJumpATK();
 			asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToStanceATK,
 					asBoss->montageLength, false);
@@ -260,8 +267,12 @@ void UBossFSMComponent::TickBackStep()
 	if (bHasExecuted == false)
 	{
 		bHasExecuted = true;
-		if (asBossAnim->IsAnyMontagePlaying() == false)
+		if (asBossAnim->IsAnyMontagePlaying() == false || asBossAnim->bParry == true)
 		{
+			if (asBossAnim->bParry == true)
+			{
+				asBossAnim->bParry = false;
+			}
 			asBoss->AnimBackStep();
 			if (bIsSecondPhase == false) // && randomFloatValue <= backStepPercent
 			{
@@ -270,8 +281,16 @@ void UBossFSMComponent::TickBackStep()
 			}
 			else if (bIsSecondPhase == true) // && randomFloatValue <= laserRangeATKPercent
 			{
-				asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToLaserRangeATK,
+				if (randomFloatValue <= laserRangeATKPercent)
+				{
+					asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToLaserRangeATK,
 					asBoss->montageLength, false);
+				}
+				else
+				{
+					asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToLightningATK,
+					asBoss->montageLength, false);
+				}
 			}
 			else
 				asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToWalk,
@@ -291,7 +310,7 @@ void UBossFSMComponent::TickBladeRangeATK()
 		if (asBossAnim->IsAnyMontagePlaying() == false)
 		{
 			asBoss->AnimBladeRangeATK();
-			asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::FinishExtendedSword,
+			asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToMove,
 				asBoss->montageLength, false);
 		}
 		else ReturnToMove();
@@ -321,8 +340,12 @@ void UBossFSMComponent::TickGrabATK()
 	if (bHasExecuted == false)
 	{
 		bHasExecuted = true;
-		if (asBossAnim->IsAnyMontagePlaying() == false)
+		if (asBossAnim->IsAnyMontagePlaying() == false || asBossAnim->bParry == true)
 		{
+			if (asBossAnim->bParry == true)
+			{
+				asBossAnim->bParry = false;
+			}
 			asBoss->AnimGrabATK();
 			asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToMove,
 					asBoss->montageLength, false);
@@ -373,18 +396,31 @@ void UBossFSMComponent::TickLaserRangeATK()
 		}
 		else ReturnToMove();
 	}
-	asBoss->OnLineTraceHit();
 	asBoss->GetCharacterMovement()->MaxWalkSpeed = 0.f;
 }
 
 void UBossFSMComponent::MoveToFSM()
 {
-	if (asBossAnim->IsAnyMontagePlaying() == false)
+	if (asBossAnim->IsAnyMontagePlaying() == true)return;
+
+	if (asBoss->DistanceBossToPlayer() <= 250)
 	{
-		if (randomFloatValue <= dashATKPercent && asBoss->DistanceBossToPlayer() <= 700 && asBoss->
-			DistanceBossToPlayer() > 600)
+		if (asBossAnim->yaw > 90 || asBossAnim->yaw < -90)
 		{
-			if (bIsSecondPhase == true && asBoss->currentElectricEnergy >= 50)
+			bossStates = EBossState::BehindATK;
+			bHasExecuted = false;
+		}
+		else
+		{
+			ReturnToNormalATK();
+		}
+	}
+	else if (randomFloatValue <= dashATKPercent && asBoss->DistanceBossToPlayer() <= 700 && asBoss->
+			DistanceBossToPlayer() > 600)
+	{
+		if (bIsSecondPhase == true)
+		{
+			if (asBoss->currentElectricEnergy >= 0 && asBoss->currentElectricEnergy < 70)
 			{
 				bossStates = EBossState::LightningATK;
 				bHasExecuted = false;
@@ -394,47 +430,20 @@ void UBossFSMComponent::MoveToFSM()
 				bossStates = EBossState::DashATK;
 				bHasExecuted = false;
 			}
-			
 		}
-		else if (randomFloatValue <= slashATKPercent && asBoss->DistanceBossToPlayer() <= 500 && asBoss->
-			DistanceBossToPlayer() > 400)
+		else
 		{
-			if (bIsSecondPhase == true && asBoss->currentElectricEnergy >= 50)
-			{
-				bossStates = EBossState::LightningATK;
-				bHasExecuted = false;
-			}
-			else
-			{
-				bossStates = EBossState::SlashATK;
-				bHasExecuted = false;
-			}
+			bossStates = EBossState::DashATK;
+			bHasExecuted = false;
 		}
-		else if (asBoss->DistanceBossToPlayer() <= 250)
-		{
-			if (asBossAnim->yaw > 90 || asBossAnim->yaw < -90)
-			{
-				bossStates = EBossState::BehindATK;
-				bHasExecuted = false;
-			}
-			else if (bIsSecondPhase == true)
-			{
-				if (asBoss->currentElectricEnergy == 100)
-				{
-					ReturnToWarCry();
-				}
-				else
-				{
-					ReturnToNormalATK();
-				}
-			}
-			else
-			{
-				ReturnToNormalATK();
-			}
-		}
-		else bossStates = EBossState::Move; // 랜덤 플롯을 계속 실행시키지 않기 위해
 	}
+	else if (randomFloatValue <= slashATKPercent && asBoss->DistanceBossToPlayer() <= 500 && asBoss->
+			DistanceBossToPlayer() > 400)
+	{
+		bossStates = EBossState::SlashATK;
+		bHasExecuted = false;
+	}
+	else bossStates = EBossState::Move; // 랜덤플롯을 실행시키지 않기 위해
 }
 
 void UBossFSMComponent::ReturnToMove()
@@ -499,10 +508,10 @@ void UBossFSMComponent::ReturnToLaserRangeATK()
 	bHasExecuted = false;
 }
 
-void UBossFSMComponent::FinishExtendedSword()
+void UBossFSMComponent::ReturnToLightningATK()
 {
-	asBoss->weaponMeshSubComp->SetRelativeScale3D(FVector(1.f, 1.f, 1.f));
-	ReturnToWalk();
+	bossStates = EBossState::LightningATK;
+	bHasExecuted = false;
 }
 
 void UBossFSMComponent::SetMoveSpeed()
