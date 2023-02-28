@@ -681,8 +681,12 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	}
 	// 적 방향으로 회전
 	RotateToDirection(DamageCauser->GetActorLocation());
-	EnemyTarget = DamageCauser;
-	bIsTargeting = true;
+
+	if (DamageCauser && DamageCauser->IsA(ACharacter::StaticClass()))
+	{
+		EnemyTarget = DamageCauser;
+		bIsTargeting = true;
+	}
 	if (DamageEvent.DamageTypeClass == ULightningDamageType::StaticClass() ) {
 		if (MoveComp->IsFalling()) {
 			Charge();
