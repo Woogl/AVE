@@ -81,4 +81,7 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_PlayFootstepSound();
+
+	UFUNCTION()
+	void AnimNotify_InitGuard();
 };

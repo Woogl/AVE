@@ -203,7 +203,7 @@ void UPlayerAnimInstance::AnimNotify_PlayFootstepSound() {
 		TArray<AActor*> actorsToIgnore;
 		FHitResult outHit;
 		actorsToIgnore.Add(Player);
-		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Player->GetActorLocation(), Player->GetActorLocation() + FVector(0.f, 0.f, -150.f), ETraceTypeQuery::TraceTypeQuery1, false, actorsToIgnore, EDrawDebugTrace::ForDuration, outHit, true)) {
+		if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Player->GetActorLocation(), Player->GetActorLocation() + FVector(0.f, 0.f, -150.f), ETraceTypeQuery::TraceTypeQuery1, false, actorsToIgnore, EDrawDebugTrace::None, outHit, true)) {
 			EPhysicalSurface surfaceType = UGameplayStatics::GetSurfaceType(outHit);
 			if (surfaceType == EPhysicalSurface::SurfaceType1) {
 				Player->PlayWetFootstepSound(outHit.Location);
@@ -213,4 +213,9 @@ void UPlayerAnimInstance::AnimNotify_PlayFootstepSound() {
 			}
 		}
 	}
+}
+
+void UPlayerAnimInstance::AnimNotify_InitGuard() {
+	if (Player)
+		Player->InitGuard();
 }

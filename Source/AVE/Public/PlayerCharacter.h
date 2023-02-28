@@ -228,6 +228,7 @@ public:
 	void InitState();
 	void InitInvincibility();
 	void InitCharge();
+	void InitGuard();
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	void ParryHit(float Damage, TSubclassOf<UDamageType> DamageType);

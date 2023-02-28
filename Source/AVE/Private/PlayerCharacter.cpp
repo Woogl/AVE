@@ -621,8 +621,6 @@ void APlayerCharacter::Attack() {
 
 void APlayerCharacter::InitState() {
 	bIsAttacking = false;
-	StopGuard();
-	bIsParrying = false;
 	bIsGuardBroken = false;
 	bIsDashing = false;
 	bIsHit = false;
@@ -634,6 +632,12 @@ void APlayerCharacter::InitInvincibility() {
 
 void APlayerCharacter::InitCharge() {
 	bIsLightningCharged = false;
+}
+
+void APlayerCharacter::InitGuard()
+{
+	StopGuard();
+	bIsParrying = false;
 }
 
 void APlayerCharacter::JumpAttack() {
