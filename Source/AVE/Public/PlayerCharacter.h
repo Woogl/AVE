@@ -24,6 +24,8 @@ public:
 	UStaticMeshComponent* Weapon;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	UStaticMeshComponent* Scabbard;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	class USpotLightComponent* CharLighting;
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input")
 	float TurnRateGamepad;
@@ -163,11 +165,11 @@ public:
 
 	// 물건 줍기, 던지기
 	void PullProp();
-	void AttachProp();
 	void PushProp();
 	void DropProp();
 	class AGrabbableActorBase* GrabbedActor;
-	UStaticMeshComponent* GrabbedMesh;
+	UFUNCTION()
+	void AttachGrabbedActor();
 
 	// 모션 워핑 (BP에서 이벤트 구현)
 	UFUNCTION(BlueprintImplementableEvent)

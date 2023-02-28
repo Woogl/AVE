@@ -21,6 +21,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class UNiagaraComponent* ElectricArc;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	class USphereComponent* HighlightSphere;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -40,19 +43,33 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
 	class USoundWave* HitSound;
 
-	// 잡았을 시 호출
+	// 잡았을 때 호출
 	void OnGrabbed();
 	FTimerHandle ElectricArcTimer;
 	void StartElectricArc();
 	void EndElectricArc();
 
+	// 발사할 때 호출
+	void OnPushed();
+
+	// 떨굴 때 호출
+	void OnDropped();
+
 	// 충돌 시 호출
 	UFUNCTION()
 	void OnMeshHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
+
+	// 외곽선 효과 키고 끄기
+	UFUNCTION()
+	void OnHighlightSphereOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnHighlightSphereOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	// 카오스 발동
 	UFUNCTION(BlueprintImplementableEvent)
 	void FractureMesh();
 
 	UStaticMeshComponent* GetMesh() const;
+
+	USkeletalMeshComponent* PlayerMesh;
 };

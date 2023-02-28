@@ -13,6 +13,7 @@
 #include "GrabbableActorBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "AllAVEDamageTypes.h"
+#include <Components/SpotLightComponent.h>
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -48,7 +49,16 @@ APlayerCharacter::APlayerCharacter()
 	// 물건 들기
 	GrabPoint = CreateDefaultSubobject<USceneComponent>(TEXT("GrabPoint"));
 	GrabPoint->SetupAttachment(RootComponent);
-	GrabPoint->SetRelativeLocation(FVector(0.f, 50.f, 50.f));
+	GrabPoint->SetRelativeLocation(FVector(100.f, -20.f, 100.f));
+
+	// 기본 조명
+	CharLighting = CreateDefaultSubobject<USpotLightComponent>(TEXT("CharLighting"));
+	CharLighting->SetupAttachment(RootComponent);
+	CharLighting->SetRelativeLocationAndRotation(FVector(0.f, 0.f, 220.f), FRotator(-90.f, 0.f, 0.f));
+	CharLighting->SetOuterConeAngle(24.f);
+	CharLighting->SetIntensity(800.f);
+	CharLighting->SetAttenuationRadius(350.f);
+	CharLighting->SetCastShadows(false);
 
 	// 회전 설정
 	TurnRateGamepad = 50.f;
@@ -428,37 +438,31 @@ void APlayerCharacter::PullProp()
 	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
 	objectTypes.Emplace(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
 	TArray<AActor*> actorToIgnores;
+	FVector loc = GetActorLocation();
 
 	// 범위 내에 주울 물건 찾기
-	if (UKismetSystemLibrary::SphereTraceSingleForObjects(this, GetActorLocation(), GetActorLocation(), 150.f, objectTypes, false, actorToIgnores,
-		EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.f))
+	if (UKismetSystemLibrary::SphereTraceSingleForObjects(this, loc, loc, 150.f, objectTypes, false, actorToIgnores,
+		EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 5.f))
 	{
 		// 찾기 성공하면 주움
 		if (hit.GetActor()->IsA(AGrabbableActorBase::StaticClass()))
 		{
 			GrabbedActor = Cast<AGrabbableActorBase>(hit.GetActor());
 			GrabbedActor->OnGrabbed();
-			GrabbedMesh = GrabbedActor->GetMesh();
-			GrabbedMesh->SetSimulatePhysics(false);
 
 			// 컴포넌트 이동시키기
 			FLatentActionInfo info;
 			info.CallbackTarget = this;
+			info.ExecutionFunction = FName("AttachGrabbedActor");	// MoveComponentTo가 완료되면 호출
 			info.Linkage = 0;
-			info.ExecutionFunction = FName("AttachProp");	// MoveComponentTo()가 끝나면 호출되는 함수
-			GrabbedMesh->AttachToComponent(GrabPoint, FAttachmentTransformRules::KeepWorldTransform);
-			UKismetSystemLibrary::MoveComponentTo(GrabbedMesh, GrabPoint->GetRelativeLocation(), GetActorRotation(), false, true, 0.2f, true, EMoveComponentAction::Move, info);
+
+			UKismetSystemLibrary::MoveComponentTo(GrabbedActor->GetRootComponent(), GrabPoint->GetComponentLocation(), GetActorRotation(), true, true, 0.2f, true, EMoveComponentAction::Move, info);
 
 			PlayAnimMontage(InteractionMontages[0]);
 
 			bIsGrabbing = true;
 		}
 	}
-}
-
-void APlayerCharacter::AttachProp()
-{
-	GrabbedMesh->AttachToComponent(GrabPoint, FAttachmentTransformRules::KeepWorldTransform);
 }
 
 void APlayerCharacter::PushProp()
@@ -472,38 +476,39 @@ void APlayerCharacter::PushProp()
 	float delayTime = 0.05f;
 	GetWorld()->GetTimerManager().SetTimer(delayHandle, FTimerDelegate::CreateLambda([&]()
 		{
-			// 분리하기
-			GrabbedActor->EndElectricArc();
-			GrabbedMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-			GrabbedMesh->SetSimulatePhysics(true);
+			GrabbedActor->OnPushed();
 
 			// 발사하기
 			FVector OutLaunchVelocity;
-			UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, OutLaunchVelocity, GrabbedMesh->GetComponentLocation(), EnemyTarget->GetActorLocation(), 0.f, 0.9f);
-			GrabbedMesh->AddImpulse(OutLaunchVelocity * 64);
-			GrabbedMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
-			GrabbedActor->bShouldAttack = true;
-
-			bIsGrabbing = false;
-			GrabbedMesh = nullptr;
-			GrabbedActor = nullptr;
-
+			if (UGameplayStatics::SuggestProjectileVelocity_CustomArc(this, OutLaunchVelocity, GrabbedActor->GetActorLocation(), EnemyTarget->GetActorLocation(), 0.f, 0.9f))
+			{
+				GrabbedActor->GetMesh()->AddImpulse(OutLaunchVelocity * 64);
+				bIsGrabbing = false;
+				GrabbedActor = nullptr;
+			}
+			else
+			{
+				DropProp();
+			}
 		}), delayTime, false);
 }
 
 void APlayerCharacter::DropProp()
 {
-	GrabbedActor->EndElectricArc();
+	GrabbedActor->OnDropped();
 
 	if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(InteractionMontages[0]))
 	{
 		GetMesh()->GetAnimInstance()->Montage_Stop(0.25f, InteractionMontages[0]);
 	}
-	GrabbedMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	GrabbedMesh->SetSimulatePhysics(true);
 
 	bIsGrabbing = false;
-	GrabbedMesh = nullptr;
+	GrabbedActor = nullptr;
+}
+
+void APlayerCharacter::AttachGrabbedActor()
+{
+	GrabbedActor->AttachToComponent(GrabPoint, FAttachmentTransformRules::KeepWorldTransform);
 }
 
 bool APlayerCharacter::TryAutoTargeting(float SearchRadius)
@@ -693,7 +698,7 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	else {
 		Hit(DamageAmount, DamageEvent.DamageTypeClass);
 		// 물건 주운	 상태에서 피격 시 물건 떨굼
-		if (bIsGrabbing == true && GrabbedMesh)
+		if (bIsGrabbing == true && GrabbedActor)
 		{
 			DropProp();
 		}
