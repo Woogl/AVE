@@ -210,12 +210,25 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 
 void APlayerCharacter::Jump()
 {
-	if(CanJump())
+	if (CanJump())
+	{
+		// 물건 들고 있으면 떨구기
+		if (bIsGrabbing == true && GrabbedActor)
+		{
+			DropProp();
+		}
 		ACharacter::Jump();
+	}
 }
 
 void APlayerCharacter::Guard()
 {
+	// 물건 들고 있으면 떨구기
+	if (bIsGrabbing == true && GrabbedActor)
+	{
+		DropProp();
+	}
+
 	// TODO: 가드 가능한 상태인지 체크
 	bIsBlocking = true;
 
@@ -279,6 +292,13 @@ void APlayerCharacter::Dash()
 {
 	if (CanDash()) {
 		bIsDashing = true;
+		
+		// 물건 들고 있으면 떨구기
+		if (bIsGrabbing == true && GrabbedActor)
+		{
+			DropProp();
+		}
+
 		// 4방향 회피
 		PerformDodge();
 
@@ -582,6 +602,14 @@ void APlayerCharacter::CreateMoveCommand(FVector2D InputDirection) {
 void APlayerCharacter::Attack() {
 	// 공격 중이 아니면
 	if (CanAttack()) {
+
+		// 물건 들고 있을 경우에는 공격 대체
+		if (bIsGrabbing == true)
+		{
+			Interact();
+			return;
+		}
+
 		// 오토 타겟팅으로 타겟 지정
 		TryAutoTargeting();
 
