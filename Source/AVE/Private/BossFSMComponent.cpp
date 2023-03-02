@@ -76,8 +76,8 @@ void UBossFSMComponent::TickIdle()
 {
 	if (bHasExecuted == false)
 	{
-		IdleDelay();
 		bHasExecuted = true;
+		IdleDelayCpp();
 	}
 	asBoss->SetZeroSpeed();
 	asBoss->SetFocusPlayerTick();
@@ -88,9 +88,10 @@ void UBossFSMComponent::TickWalk()
 {
 	if (bHasExecuted == false)
 	{
-		SetWalkRandomInt();
-		WalkDelay();
 		bHasExecuted = true;
+		SetWalkRandomIntCpp();
+		//WalkDelayCpp(); // 실제 사용할 함수
+		WalkDelay(); // 블루프린트에서 상태 수동 변환 테스트 용
 	}
 	asBoss->GetCharacterMovement()->MaxWalkSpeed = 125.f;
 	WalkToLocation(1000);
@@ -101,8 +102,8 @@ void UBossFSMComponent::TickMove()
 {
 	if (bHasExecuted == false)
 	{
-		RandomFloat();
 		bHasExecuted = true;
+		RandomFloat();
 	}
 	SetMoveSpeed();
 	asBoss->SetFocusPlayerTick();
@@ -133,37 +134,8 @@ void UBossFSMComponent::TickNormalATK()
 		bHasExecuted = true;
 		if (asBossAnim->IsAnyMontagePlaying() == false)
 		{
-			// if (asBoss->attackCount == 2)
-			// {
-			// 	bossStates = EBossState::JumpATK;
-			// 	asBoss->attackCount += 1;
-			// 	bHasExecuted = false;
-			// }
-			// else if (asBoss->attackCount == 4)
-			// {
-			// 	bossStates = EBossState::ComboATK;
-			// 	asBoss->attackCount += 1;
-			// 	bHasExecuted = false;
-			// 	//asBoss->attackCount = 0;
-			// }
-			// else if (asBoss->attackCount == 7)
-			// {
-			// 	bossStates = EBossState::GrabATK;
-			// 	asBoss->attackCount += 1;
-			// 	bHasExecuted = false;
-			// 	//asBoss->attackCount = 0;
-			// }
-			// else if (asBoss->attackCount >= 9)
-			// {
-			// 	bossStates = EBossState::BackStep;
-			// 	asBoss->attackCount = 0;
-			// 	bHasExecuted = false;
-			// }
-			// else
-			// {
-				asBoss->AnimNormalATK();
-				asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToMove, asBoss->montageLength, false);
-			// }
+			asBoss->AnimNormalATK();
+			asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToMove, asBoss->montageLength, false);
 		}
 		else ReturnToMove();
 	}
@@ -185,7 +157,7 @@ void UBossFSMComponent::TickLightningATK()
 		else ReturnToMove();
 	}
 	asBoss->SetZeroSpeed();
-	asBoss->SetFocusPlayerPitchYaw();
+	//asBoss->SetFocusPlayerPitchYaw();
 }
 
 void UBossFSMComponent::TickSlashATK()
@@ -281,7 +253,7 @@ void UBossFSMComponent::TickBackStep()
 			}
 			else if (bIsSecondPhase == true) // && randomFloatValue <= laserRangeATKPercent
 			{
-				if (randomFloatValue <= laserRangeATKPercent)
+				if (randomFloatValue0To1 <= laserRangeATKPercent)
 				{
 					asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToLaserRangeATK,
 					asBoss->montageLength, false);
@@ -399,6 +371,30 @@ void UBossFSMComponent::TickLaserRangeATK()
 	asBoss->GetCharacterMovement()->MaxWalkSpeed = 0.f;
 }
 
+void UBossFSMComponent::IdleDelayCpp()
+{
+	RandomFloatInRange(0.5f, 1.5f);
+	asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToWalk, randomFloatValueInRange, false);
+}
+
+void UBossFSMComponent::SetWalkRandomIntCpp()
+{
+	SelectWalkRandomIntCpp();
+	asBoss->GetWorldTimerManager().SetTimer(WriTimerHandle, this, &UBossFSMComponent::SelectWalkRandomIntCpp, 5.f, true);
+}
+
+void UBossFSMComponent::SelectWalkRandomIntCpp()
+{
+	RandomInt(1, 2);
+	walkRandomInt = randomIntValue;
+}
+
+void UBossFSMComponent::WalkDelayCpp()
+{
+	RandomFloatInRange(2.f, 3.f);
+	asBoss->GetWorldTimerManager().SetTimer(delayHandle, this, &UBossFSMComponent::ReturnToMove, randomFloatValueInRange, false);
+}
+
 void UBossFSMComponent::MoveToFSM()
 {
 	if (asBossAnim->IsAnyMontagePlaying() == true)return;
@@ -415,7 +411,7 @@ void UBossFSMComponent::MoveToFSM()
 			ReturnToNormalATK();
 		}
 	}
-	else if (randomFloatValue <= dashATKPercent && asBoss->DistanceBossToPlayer() <= 700 && asBoss->
+	else if (randomFloatValue0To1 <= dashATKPercent && asBoss->DistanceBossToPlayer() <= 700 && asBoss->
 			DistanceBossToPlayer() > 600)
 	{
 		if (bIsSecondPhase == true)
@@ -437,7 +433,7 @@ void UBossFSMComponent::MoveToFSM()
 			bHasExecuted = false;
 		}
 	}
-	else if (randomFloatValue <= slashATKPercent && asBoss->DistanceBossToPlayer() <= 500 && asBoss->
+	else if (randomFloatValue0To1 <= slashATKPercent && asBoss->DistanceBossToPlayer() <= 500 && asBoss->
 			DistanceBossToPlayer() > 400)
 	{
 		bossStates = EBossState::SlashATK;
@@ -450,6 +446,7 @@ void UBossFSMComponent::ReturnToMove()
 {
 	bossStates = EBossState::Move;
 	bHasExecuted = false;
+	asBoss->GetWorldTimerManager().ClearTimer(WriTimerHandle);
 }
 
 void UBossFSMComponent::ReturnToWalk()
@@ -550,7 +547,7 @@ void UBossFSMComponent::GuardOrBackStep()
 	if (asBoss->DistanceBossToPlayer() <= 400)
 	{
 		RandomFloat();
-		if (randomFloatValue <= backStepPercent)
+		if (randomFloatValue0To1 <= backStepPercent)
 		{
 			bossStates = EBossState::BackStep;
 			bHasExecuted = false;
@@ -566,5 +563,10 @@ void UBossFSMComponent::RandomInt(int min, int max)
 
 void UBossFSMComponent::RandomFloat()
 {
-	randomFloatValue = UKismetMathLibrary::RandomFloatInRange(0, 1);
+	randomFloatValue0To1 = UKismetMathLibrary::RandomFloatInRange(0, 1);
+}
+
+void UBossFSMComponent::RandomFloatInRange(float min, float max)
+{
+	randomFloatValueInRange = UKismetMathLibrary::RandomFloatInRange(min, max);
 }

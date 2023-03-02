@@ -12,6 +12,7 @@
 #include "PlayerCharacter.h"
 #include "VectorTypes.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/SpotLightComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -56,7 +57,15 @@ ABoss::ABoss()
 
 	//BossFSM Component 생성 -> BP_BossFSM 에서 블루프린트와 조합해서 사용
 	bossFSMComp = CreateDefaultSubobject<UBossFSMComponent>(TEXT("bossFSMComp"));
-	
+
+	// 기본 조명
+	CharLighting = CreateDefaultSubobject<USpotLightComponent>(TEXT("CharLighting"));
+	CharLighting->SetupAttachment(RootComponent);
+	CharLighting->SetRelativeLocationAndRotation(FVector(0.f, 0.f, 250.f), FRotator(-90.f, 0.f, 0.f));
+	CharLighting->SetOuterConeAngle(24.f);
+	CharLighting->SetIntensity(800.f);
+	CharLighting->SetAttenuationRadius(350.f);
+	CharLighting->SetCastShadows(false);
 }
 
 // Called when the game starts or when spawned
@@ -223,8 +232,8 @@ void ABoss::AnimLaserRangeATK()
 	bIsSuperArmor = true;
 	montageLength = PlayAnimMontage(animLaserRangeATK, 1) / (1 * animLaserRangeATK->RateScale);
 	GetWorldTimerManager().SetTimer(laserATKHandle, this, &ABoss::SetFocusPlayerInplace, 0.1f, true);
-	GetWorldTimerManager().SetTimer(laserHitHandle, this, &ABoss::OnLineTraceHit, 0.1f, true, 0.25f); // 0.25는 몽타주 블랜딩 인 타임
-	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ClearFocus, montageLength, false);
+	GetWorldTimerManager().SetTimer(laserHitHandle, this, &ABoss::OnLineTraceHit, 0.1f, true, 0.25f); // 0.25는 몽타주 블랜드 인 타임
+	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ClearFocus, montageLength - 0.25f, false); // 0.25는 몽타주 블랜드 아웃 타임
 }
 
 void ABoss::AnimLightningATK()

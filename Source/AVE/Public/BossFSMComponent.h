@@ -83,12 +83,20 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void IdleDelay();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void WalkDelay();
+	UFUNCTION()
+	void IdleDelayCpp();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void SetWalkRandomInt();
+	UFUNCTION()
+	void SetWalkRandomIntCpp();
+	UFUNCTION()
+	void SelectWalkRandomIntCpp();
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void WalkDelay();
+	UFUNCTION()
+	void WalkDelayCpp();
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void WalkToLocation(float locRange);
@@ -135,6 +143,8 @@ public:
 
 	UFUNCTION()
 	void RandomFloat();
+	UFUNCTION()
+	void RandomFloatInRange(float min, float max);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int walkRandomInt;
@@ -152,7 +162,9 @@ public:
 	FTimerHandle secondPhaseHandle;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float randomFloatValue;
+	float randomFloatValue0To1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float randomFloatValueInRange;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int randomIntValue;

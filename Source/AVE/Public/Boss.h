@@ -40,10 +40,12 @@ public:
 	class UBossAnimInstance* asBossAnim;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class APlayerCharacter* asPlayer;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class APawn* playerPawn;
 	UPROPERTY()
 	AActor* EnemyTarget = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class USpotLightComponent* CharLighting;
 
 	// 턴 몽타주 이름
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TurnInPlace")

@@ -52,7 +52,7 @@ void UCombatComponent::AttackCheckTick()
 	FVector start = CurSocketLocations[0];
 	FVector end = CurSocketLocations[lastIndex - 1];
 	if (UKismetSystemLibrary::LineTraceSingle(this, start, end, AttackTrace, false, ActorsToIgnore,
-			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.0f))
+			EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.0f))
 	{
 		OnAttackSucceed(hit);
 		return;
@@ -65,7 +65,7 @@ void UCombatComponent::AttackCheckTick()
 		
 		// 지난 프레임부터 현재까지 트레이스 (소켓 위치)
 		bool bSuccess = UKismetSystemLibrary::LineTraceSingle(this, LastSocketLocations[i], CurSocketLocations[i], AttackTrace, false, ActorsToIgnore,
-			EDrawDebugTrace::ForDuration, hit, true, FColor::Red, FColor::Green, 1.0f);
+			EDrawDebugTrace::None, hit, true, FColor::Red, FColor::Green, 1.0f);
 
 		if (bSuccess == true)
 		{
