@@ -56,6 +56,7 @@ public:
 	UPROPERTY()
 	class APawn* PlayerCharacter;
 
+	UFUNCTION(BlueprintCallable)
 	void EnemySpawn();
 	void RunAI();
 	void EnemyDelete(AEnemyBase* const InPawn);

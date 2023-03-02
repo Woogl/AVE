@@ -46,36 +46,34 @@ void AAIManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 void AAIManager::EnemySpawn()
 {
-	FVector SpawnPoint;
+	for (int i = 0; i < SpawnPoints.Num(); i++)
+	{
+		int j = 0;
+		// Spawn Swordman characters at current spawn point
+		if (i < spawnSwordmanCount)
+		{
+			AEnemyBase* Swordman = GetWorld()->SpawnActor<AEnemyBase>(swordFactory, SpawnPoints[i]->GetActorLocation(), FRotator::ZeroRotator);
+			Enemies.AddUnique(Swordman);
+			Swordman->onSetManager(this);
+		}
 
-	//for (int i = 0; i < SpawnPoints.Num(); i++)
-	//{
-	//	FVector SpawnLocation = SpawnPoints[i]->GetActorLocation(); // Get spawn point location
-	//
-	//	// Spawn Swordman characters at current spawn point
-	//	for (int j = 0; j < spawnSwordmanCount; j++)
-	//	{
-	//		AEnemyBase* Swordman = GetWorld()->SpawnActor<AEnemyBase>(swordFactory, SpawnLocation, FRotator::ZeroRotator);
-	//		Enemies.AddUnique(Swordman);
-	//		Swordman->onSetManager(this);
-	//	}
-	//
-	//	// Spawn Gunman characters at current spawn point
-	//	for (int j = 0; j < spawnGunmanCount; j++)
-	//	{
-	//		AEnemyBase* Gunman = GetWorld()->SpawnActor<AEnemyBase>(gunFactory, SpawnLocation, FRotator::ZeroRotator);
-	//		Enemies.AddUnique(Gunman);
-	//		Gunman->onSetManager(this);
-	//	}
-	//
-	//	// Spawn Shielder characters at current spawn point
-	//	for (int j = 0; j < spawnShielderCount; j++)
-	//	{
-	//		AEnemyBase* Shielder = GetWorld()->SpawnActor<AEnemyBase>(shielderFactory, SpawnLocation, FRotator::ZeroRotator);
-	//		Enemies.AddUnique(Shielder);
-	//		Shielder->onSetManager(this);
-	//	}
-	//}
+		// Spawn Gunman characters at current spawn point
+		else if (i < spawnGunmanCount+j)
+		{
+			AEnemyBase* Gunman = GetWorld()->SpawnActor<AEnemyBase>(gunFactory, SpawnPoints[i]->GetActorLocation(), FRotator::ZeroRotator);
+			Enemies.AddUnique(Gunman);
+			Gunman->onSetManager(this);
+		}
+
+		// Spawn Shielder characters at current spawn point
+		else if (i < spawnShielderCount+j)
+		{
+			AEnemyBase* Shielder = GetWorld()->SpawnActor<AEnemyBase>(shielderFactory, SpawnPoints[i]->GetActorLocation(), FRotator::ZeroRotator);
+			Enemies.AddUnique(Shielder);
+			Shielder->onSetManager(this);
+		}
+		j++;
+	}
 }
 
 void AAIManager::RunAI()
@@ -84,12 +82,12 @@ void AAIManager::RunAI()
 	{
 		blackboard->SetValueAsObject(TEXT("PlayerActor"), UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 		running = true;
-		for (int i = 0; i < Enemies.Num() ; i++)
+		for (int i = 0; i < Enemies.Num(); i++)
 		{
 			{
 				int eNum = UAIBlueprintHelperLibrary::GetBlackboard(Enemies[i])->GetValueAsEnum(TEXT("AIState"));
-				if(eNum != 3 || eNum != 4 || eNum != 5)
-					UAIBlueprintHelperLibrary::GetBlackboard(Enemies[i])->SetValueAsEnum(TEXT("AIState"),1);
+				if (eNum != 3 || eNum != 4 || eNum != 5)
+					UAIBlueprintHelperLibrary::GetBlackboard(Enemies[i])->SetValueAsEnum(TEXT("AIState"), 1);
 				/*UAIBlueprintHelperLibrary::GetBlackboard(Enemies[i])->SetValueAsObject(TEXT("PlayerActor"), PlayerCharacter);*/
 				Enemies[i]->onGetSet();
 			}
@@ -97,12 +95,12 @@ void AAIManager::RunAI()
 		return;
 	}
 	else
-	return;
+		return;
 }
 
-void AAIManager::EnemyDelete(AEnemyBase *const InPawn)
+void AAIManager::EnemyDelete(AEnemyBase* const InPawn)
 {
 	Enemies.Remove(InPawn);
-	if(Enemies.IsEmpty())
-	this->Destroy();
+	if (Enemies.IsEmpty())
+		this->Destroy();
 }
