@@ -59,13 +59,18 @@ void AEnemyBase::LookAtPlayer()
 
 float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
 	AActor* DamageCauser)
-{/*
+{
+	/*
 	hp -= characterDamage;
 	if (hp < 0)
 		onDie();*/
 
 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
+
+//void AEnemyBase::ReceivePointDamage(float Damage, const UDamageType* DamageType, FVector HitLocation, FVector HitNormal, UPrimitiveComponent* HitComponent, FName BoneName, FVector ShotFromDirection, AController* InstigatedBy, AActor* DamageCauser, const FHitResult& HitInfo)
+//{
+//}
 
 void AEnemyBase::onActionAttack()
 {
@@ -86,7 +91,6 @@ void AEnemyBase::onHitCrushed()
 
 void AEnemyBase::onDie()
 {
-	Destroy();
 }
 
 void AEnemyBase::OnFinishered()
@@ -95,7 +99,7 @@ void AEnemyBase::OnFinishered()
 	LookAtPlayer();
 
 	// 테이크다운 애니메이션 실행
-	PlayAnimMontage(enemyDeathMontage, 1, TEXT("Finish"));
+	PlayAnimMontage(enemyHitMontage, 1, TEXT("Finish"));
 }
 
 void AEnemyBase::SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float RagdollDelay)
@@ -170,7 +174,7 @@ void AEnemyBase::ActivateRagdoll()
 void AEnemyBase::onGetSet()
 {
 	blackboard->SetValueAsBool(TEXT("Armed"), true);
-	blackboard->SetValueAsEnum(TEXT("AIState"), 7);
+	blackboard->SetValueAsEnum(TEXT("AIState"), 6);
 }
 
 void AEnemyBase::onSetManager(AAIManager* Manager)
@@ -207,5 +211,6 @@ void AEnemyBase::regenPosture()
 {
 	posture += (postureMax / 10);
 	if (posture > 0)
-		executionable = false;
+		//executionable = false;
+		this->Tags.Remove(FName("Broken"));
 }

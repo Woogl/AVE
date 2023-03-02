@@ -15,6 +15,7 @@
 #include "Components/WidgetComponent.h"
 #include "EnemyWidget.h"
 #include <Perception/AISense_Damage.h>
+#include <Blueprint/AIBlueprintHelperLibrary.h>
 
 // Sets default values
 AEnemyShielder::AEnemyShielder()
@@ -37,7 +38,7 @@ AEnemyShielder::AEnemyShielder()
 
 	Shield = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Shield"));
 	Shield->SetupAttachment(GetMesh(), TEXT("ShieldSocket"));
-	Shield->SetRelativeLocationAndRotation(FVector(-33, -80, 90), FRotator(36, 63, 85));
+	Shield->SetRelativeLocationAndRotation(FVector(-125,-20, -20), FRotator(4,92,185));
 	Shield->SetCollisionProfileName(TEXT("NoCollision"));
 
 	enemyWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("BitalWidget"));
@@ -62,6 +63,7 @@ void AEnemyShielder::BeginPlay()
 	enemyBar->SetOwnerEnemy(this);
 
 	blackboard->SetValueAsEnum(TEXT("AIState"), 0);
+
 }
 
 // Called every frame
@@ -91,17 +93,34 @@ void AEnemyShielder::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 //	}
 //}
 
+//void AEnemyShielder::ReceivePointDamage(float Damage, const UDamageType* DamageType, FVector HitLocation, FVector HitNormal, UPrimitiveComponent* HitComponent, FName BoneName, FVector ShotFromDirection, AController* InstigatedBy, AActor* DamageCauser, const FHitResult& HitInfo)
+//{
+//	blackboard->SetValueAsObject(TEXT("PlayerActor"), DamageCauser);
+//
+//	UAISense_Damage::ReportDamageEvent(GetWorld(), this, DamageCauser, Damage, this->GetActorLocation(), this->GetActorLocation(), NAME_None);
+//	myManager->RunAI();
+//
+//	if (blackboard->GetValueAsBool(TEXT("Guard")))
+//		posture -= Damage;
+//	hp -= Damage;
+//
+//	if (hp <= 0)
+//		onDie();
+//	else if (posture <= 0)
+//		onHitCrushed();
+//	//else
+//	//	onHit();
+//}
+
 float AEnemyShielder::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	blackboard->SetValueAsEnum(TEXT("AIState"), 4);
-
 	GetWorldTimerManager().ClearTimer(regenTimerHandle);
 	GetWorldTimerManager().SetTimer(regenTimerHandle, this, &AEnemyShielder::regenPosture, postureRate, true, postureCool);
 
 	blackboard->SetValueAsObject(TEXT("PlayerActor"), DamageCauser);
 
 	UAISense_Damage::ReportDamageEvent(GetWorld(), this, DamageCauser, DamageAmount, this->GetActorLocation(), this->GetActorLocation(), NAME_None);
-	myManager->StartAI();
+	myManager->RunAI();
 
 	if (blackboard->GetValueAsBool(TEXT("Guard")))
 		posture -= DamageAmount;
@@ -111,48 +130,64 @@ float AEnemyShielder::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		onDie();
 	else if (posture <= 0)
 		onHitCrushed();
-	/*else
-		onHit();*/
+	//else
+	//	onHit();
 
 	return 0.0f;
 }
 
 void AEnemyShielder::onActionAttack()
 {
-	PlayAnimMontage(enemyMoveMontage, 1, FName("Attack0"));
+	PlayAnimMontage(enemyAttackMontage, 1, FName("ShielderAttack"));
+	blackboard->SetValueAsBool(TEXT("Guard"),false);
 	blackboard->SetValueAsEnum(TEXT("AIState"), 6);
 }
 
 void AEnemyShielder::onActionGuard()
 {
-	PlayAnimMontage(enemyMoveMontage, 1, FName("GuardHit0"));
+	PlayAnimMontage(enemyAttackMontage, 1, FName("GuardHit0"));
+	blackboard->SetValueAsBool(TEXT("Guard"), true);
 	blackboard->SetValueAsEnum(TEXT("AIState"), 6);
 }
 
 void AEnemyShielder::onHit()
 {
-	PlayAnimMontage(enemyDeathMontage, 1, FName("HitBack"));
+	PlayAnimMontage(enemyHitMontage, 1, FName("ShieldHit0"));
+	onGetSet();
+
 	blackboard->SetValueAsEnum(TEXT("AIState"), 6);
 
-	//onGetSet();
 }
 
 void AEnemyShielder::onHitCrushed()
 {
-	PlayAnimMontage(enemyDeathMontage, 1, FName("Break"));
-	executionable = true;
+	PlayAnimMontage(enemyHitMontage, 1, FName("Break"));
 	blackboard->SetValueAsEnum(TEXT("AIState"), 6);
+	this->Tags.Add(FName("Broken"));
 }
 
 void AEnemyShielder::onDie()
 {
-	PlayAnimMontage(enemyDeathMontage, 1, FName("Death0"));
+	UAIBlueprintHelperLibrary::GetAIController(this)->K2_ClearFocus();
+	PlayAnimMontage(enemyHitMontage, 1, FName("Death0"));
 	blackboard->SetValueAsEnum(TEXT("AIState"), 3);
+	myManager->EnemyDelete(this);
+	Shield->SetCollisionProfileName(FName("Ragdoll"));
+	Shield->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	Shield->SetSimulatePhysics(true);
+	Shield->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	//enemyWidget->DestroyComponent();
+	enemyWidget->SetVisibility(false);
+	this->ActivateRagdoll();
+	/*GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	GetMesh()->SetSimulatePhysics(true);*/
+	//this->GetController()->UnPossess();
 }
 
 void AEnemyShielder::onGetSet()
 {
 	Super::onGetSet();
+	blackboard->SetValueAsObject(TEXT("PlayerActor"),myManager->PlayerCharacter);
 	/*Shield->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::KeepWorldTransform, TEXT("hand_rSocket"));
 	Shield->SetRelativeLocationAndRotation(FVector(-25, -12, 34), FRotator(-66.8f, 62, -48));*/
 }

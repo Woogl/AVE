@@ -8,7 +8,7 @@ public class AVE : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ProceduralMeshComponent", "Niagara", "AIModule", "NavigationSystem", "GameplayTasks", "UMG" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ProceduralMeshComponent", "Niagara", "AIModule", "NavigationSystem", "GameplayTasks", "UMG" ,"AnimGraphRuntime"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

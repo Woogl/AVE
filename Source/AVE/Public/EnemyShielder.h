@@ -33,7 +33,7 @@ public:
 		UStaticMeshComponent* Shield;
 
 	float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-
+	/*void ReceivePointDamage(float Damage, const UDamageType* DamageType, FVector HitLocation, FVector HitNormal, UPrimitiveComponent* HitComponent, FName BoneName, FVector ShotFromDirection, AController* InstigatedBy, AActor* DamageCauser, const FHitResult& HitInfo) override;*/
 	void onActionAttack() override;
 	void onActionGuard() override;
 	void onHit() override;

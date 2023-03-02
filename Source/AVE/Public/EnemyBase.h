@@ -39,6 +39,8 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+	/*virtual void ReceivePointDamage(float Damage, const UDamageType* DamageType, FVector HitLocation, FVector HitNormal, UPrimitiveComponent* HitComponent, FName BoneName, FVector ShotFromDirection, AController* InstigatedBy, AActor* DamageCauser, const FHitResult& HitInfo);*/
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float damage;		//공격력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -49,8 +51,6 @@ public:
 		float posture;		//체간
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float postureMax;	//최대체간
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool executionable = false;	//처형가능여부
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool isGuard = false;	//가드 상태
 
@@ -80,9 +80,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 		class UStaticMeshComponent* Weapon;
 	UPROPERTY(EditAnywhere)
-		class UAnimMontage* enemyMoveMontage;
+		class UAnimMontage* enemyAttackMontage;
 	UPROPERTY(EditAnywhere)
-		class UAnimMontage* enemyDeathMontage;
+		class UAnimMontage* enemyHitMontage;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 		class UCombatComponent* CombatComp;

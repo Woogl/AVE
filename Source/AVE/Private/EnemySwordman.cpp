@@ -78,7 +78,7 @@ float AEnemySwordman::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	blackboard->SetValueAsEnum(TEXT("AIState"), 4);
 	blackboard->SetValueAsObject(TEXT("PlayerActor"), DamageCauser);
 	UAISense_Damage::ReportDamageEvent(GetWorld(), this, DamageCauser, DamageAmount, this->GetActorLocation(), this->GetActorLocation(), NAME_None);
-	myManager->StartAI();
+	myManager->RunAI();
 
 	if (blackboard->GetValueAsBool(TEXT("Guard")))
 		posture-=DamageAmount;

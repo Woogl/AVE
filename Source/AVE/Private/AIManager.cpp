@@ -47,19 +47,38 @@ void AAIManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 void AAIManager::EnemySpawn()
 {
 	FVector SpawnPoint;
-	/*for (int i = 0; i < spawnSwordmanCount; i++)
-	{
-		UNavigationSystemV1::K2_GetRandomLocationInNavigableRadius(GetWorld(), this->GetActorLocation(), SpawnPoint, spawnRadius, nullptr, nullptr);
-		UE_LOG(LogTemp, Warning, TEXT("%f"), SpawnPoint.X);
-		AEnemyBase* ab = GetWorld()->SpawnActor<AEnemyBase>(swordFactory, FTransform(FRotator(0), SpawnPoint, FVector(1)));
 
-		ab->onSetManager(this);
-
-		Enemies.AddUnique(ab);
-	}*/
+	//for (int i = 0; i < SpawnPoints.Num(); i++)
+	//{
+	//	FVector SpawnLocation = SpawnPoints[i]->GetActorLocation(); // Get spawn point location
+	//
+	//	// Spawn Swordman characters at current spawn point
+	//	for (int j = 0; j < spawnSwordmanCount; j++)
+	//	{
+	//		AEnemyBase* Swordman = GetWorld()->SpawnActor<AEnemyBase>(swordFactory, SpawnLocation, FRotator::ZeroRotator);
+	//		Enemies.AddUnique(Swordman);
+	//		Swordman->onSetManager(this);
+	//	}
+	//
+	//	// Spawn Gunman characters at current spawn point
+	//	for (int j = 0; j < spawnGunmanCount; j++)
+	//	{
+	//		AEnemyBase* Gunman = GetWorld()->SpawnActor<AEnemyBase>(gunFactory, SpawnLocation, FRotator::ZeroRotator);
+	//		Enemies.AddUnique(Gunman);
+	//		Gunman->onSetManager(this);
+	//	}
+	//
+	//	// Spawn Shielder characters at current spawn point
+	//	for (int j = 0; j < spawnShielderCount; j++)
+	//	{
+	//		AEnemyBase* Shielder = GetWorld()->SpawnActor<AEnemyBase>(shielderFactory, SpawnLocation, FRotator::ZeroRotator);
+	//		Enemies.AddUnique(Shielder);
+	//		Shielder->onSetManager(this);
+	//	}
+	//}
 }
 
-void AAIManager::StartAI()
+void AAIManager::RunAI()
 {
 	if (!running)
 	{
@@ -71,10 +90,19 @@ void AAIManager::StartAI()
 				int eNum = UAIBlueprintHelperLibrary::GetBlackboard(Enemies[i])->GetValueAsEnum(TEXT("AIState"));
 				if(eNum != 3 || eNum != 4 || eNum != 5)
 					UAIBlueprintHelperLibrary::GetBlackboard(Enemies[i])->SetValueAsEnum(TEXT("AIState"),1);
+				/*UAIBlueprintHelperLibrary::GetBlackboard(Enemies[i])->SetValueAsObject(TEXT("PlayerActor"), PlayerCharacter);*/
+				Enemies[i]->onGetSet();
 			}
 		}
 		return;
 	}
 	else
 	return;
+}
+
+void AAIManager::EnemyDelete(AEnemyBase *const InPawn)
+{
+	Enemies.Remove(InPawn);
+	if(Enemies.IsEmpty())
+	this->Destroy();
 }

@@ -36,19 +36,27 @@ public:
 	int spawnShielderCount;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float spawnRadius; 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int AttackChance;
+	UPROPERTY()
 	class UBlackboardComponent* blackboard;
 	bool running;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AEnemyBase> swordFactory;
 	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AEnemyBase> gunFactory;
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AEnemyBase> shielderFactory;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	TArray<AEnemyBase*> Enemies;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	/*TArray<FVector> SpawnPoints;*/
+	TArray<APawn*> SpawnPoints;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<AEnemyBase*> Enemies;
+	UPROPERTY()
 	class APawn* PlayerCharacter;
 
 	void EnemySpawn();
-	void StartAI();
+	void RunAI();
+	void EnemyDelete(AEnemyBase* const InPawn);
 };
