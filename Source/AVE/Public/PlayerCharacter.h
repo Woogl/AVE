@@ -24,6 +24,8 @@ public:
 	UStaticMeshComponent* Weapon;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	UStaticMeshComponent* Scabbard;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	class USpotLightComponent* CharLighting;
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Input")
 	float TurnRateGamepad;
@@ -105,6 +107,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Montages | HitReactions")
 	class UAnimMontage* DieMontage;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Sounds | Footstep")
+	class USoundBase* WetFootstep;
+	UPROPERTY(EditDefaultsOnly, Category = "Sounds | Footstep")
+	class USoundBase* DryFootstep;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -158,11 +165,11 @@ public:
 
 	// 물건 줍기, 던지기
 	void PullProp();
-	void AttachProp();
 	void PushProp();
 	void DropProp();
 	class AGrabbableActorBase* GrabbedActor;
-	UStaticMeshComponent* GrabbedMesh;
+	UFUNCTION()
+	void AttachGrabbedActor();
 
 	// 모션 워핑 (BP에서 이벤트 구현)
 	UFUNCTION(BlueprintImplementableEvent)
@@ -191,9 +198,16 @@ public:
 	float ComboResetLimit = 1.f;
 
 	// 현재 특수공격 인덱스
+	UPROPERTY(BlueprintReadOnly)
 	int CurSpecialAttack;
+	UPROPERTY(BlueprintReadOnly)
 	int CurSkill;
-
+	UPROPERTY(BlueprintReadOnly)
+	int CurKatasiro = 5;
+	UPROPERTY(BlueprintReadOnly)
+	float SkillCooltime = 5.f;
+	UPROPERTY(BlueprintReadOnly)
+	float SpecialAttackCooltime = 5.f;
 	// 물리 내성
 	float Defense;
 	// 전기 내성
@@ -214,6 +228,7 @@ public:
 	void InitState();
 	void InitInvincibility();
 	void InitCharge();
+	void InitGuard();
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	void ParryHit(float Damage, TSubclassOf<UDamageType> DamageType);
@@ -251,4 +266,7 @@ public:
 	// 유도탄 시퀀스 동작
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayMissileSequence();
+
+	void PlayWetFootstepSound(FVector Location);
+	void PlayDryFootstepSound(FVector Location); 
 };

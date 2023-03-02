@@ -154,6 +154,7 @@ void UCombatComponent::SpawnMeshSlicer(FHitResult HitInfo)
 	FActorSpawnParameters spawnParams;
 	FVector spawnLoc = HitInfo.ImpactPoint;
 	FRotator spawnRot = MainWeapon->GetComponentRotation();
+	spawnRot.Roll -= 90.f;
 	GetWorld()->SpawnActor<AMeshSlicer>(AMeshSlicer::StaticClass(), spawnLoc, spawnRot, spawnParams);
 }
 
