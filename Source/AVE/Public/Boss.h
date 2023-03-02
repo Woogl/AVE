@@ -42,6 +42,8 @@ public:
 	class APlayerCharacter* asPlayer;
 	UPROPERTY()
 	class APawn* playerPawn;
+	UPROPERTY()
+	AActor* EnemyTarget = nullptr;
 
 	// 턴 몽타주 이름
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TurnInPlace")
@@ -89,37 +91,68 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animComboATK;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
-	class UAnimMontage* animStanceCounterATK;
+	class UAnimMontage* animStanceCounter;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animParryR;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animParryL;
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
-	// class UAnimMontage* animParryRATK;
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
-	// class UAnimMontage* animParryLATK;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animParryRATK;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animParryLATK;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
 	class UAnimMontage* animWarCry;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animFallDown;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animLaserRangeATK;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animLightningATK01;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Action")
+	class UAnimMontage* animLightningATK02;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HitReaction")
+	class UAnimMontage* animLightningGroggy;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HitReaction")
+	class UAnimMontage* animAoEDamageHit;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HitReaction")
+	class UAnimMontage* animKnockBackDamageGuard;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HitReaction")
+	class UAnimMontage* animKnockDownDamageGuard;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HitReaction")
+	class UAnimMontage* animKnockUpDamageGuard;
+	
 	// 변수
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float currentHP;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float maxHP = 200.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float bossPosture;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float bossMaxPosture = 100.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsSuperArmor;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCanParry;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float currentElectricEnergy = 1.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float maxElectricEnergy = 100.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float materialVariable = currentElectricEnergy * 100.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float chargeColorParameter = (-1/99) * currentElectricEnergy + (100/99);
 	
 	FTimerHandle delayHandle;
+	FTimerHandle laserATKHandle;
+	FTimerHandle laserHitHandle;
 	int randomIntValue;
 	float randomFloatValue;
 	float montageLength;
 	int attackCount;
 	int parryCount = 0;
 	// float distanceValue;
-
+	bool bTakeDamage = false;
+	
 
 	// 함수
 	UFUNCTION()
@@ -144,21 +177,23 @@ public:
 	void AnimComboATK();
 	UFUNCTION()
 	void AnimWarCry();
+	UFUNCTION()
+	void AnimFallDown();
+	UFUNCTION()
+	void AnimLaserRangeATK();
+	UFUNCTION()
+	void AnimLightningATK();
 	
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnMyPlayMontageSA(UAnimMontage* selectMontage, EBossState selectState);
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnMyPlayMontageNO(UAnimMontage* selectMontage, EBossState selectState);
-	// UFUNCTION(BlueprintCallable)
-	// void BossPlayMontageSA(UAnimMontage* selectMontage);
-	// UFUNCTION(BlueprintCallable)
-	// void BossPlayMontage(UAnimMontage* selectMontage);
 	UFUNCTION()
 	void ReturnToMove();
 	UFUNCTION()
 	void ReturnToWalk();
 	UFUNCTION()
 	void ReturnToBladeRangeATK();
+	// UFUNCTION()
+	// void AnimReboundATK();
+
+
 	UFUNCTION()
 	void RandomInt(int min, int max);
 	UFUNCTION()
@@ -166,16 +201,29 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AnimTurnInPlace();
 	UFUNCTION(BlueprintCallable)
+	void SetFocusPlayerInplace();
+	UFUNCTION(BlueprintCallable)
+	void SetFocusPlayerPitchYaw();
+	UFUNCTION(BlueprintCallable)
 	void SetFocusPlayerTick();
+	UFUNCTION()
+	void OnLineTraceHit();
+	UFUNCTION()
+	void TakeDamageFalse();
+	UFUNCTION()
+	void ClearFocus();
 	
 	void SetZeroSpeed();
 	float DistanceBossToPlayer();
+	void PostureRecovery();
+	void ElectricEnergyRecovery();
 	
-	UFUNCTION()
-	void AnimReboundATK();
+	// UFUNCTION()
+	// void AnimReboundATK();
 	// UFUNCTION()
 	// void AnimParryATK();
 	
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-	
+
+	float bossArmor = 3.f;
 };

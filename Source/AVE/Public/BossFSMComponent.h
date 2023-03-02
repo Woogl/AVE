@@ -14,9 +14,9 @@ enum class EBossState : uint8
 	Move UMETA(Displayname = MOVE),
 	DashATK UMETA(Displayname = DashATK),
 	NormalATK UMETA(Displayname = NormalATK),
-	ATK01 UMETA(Displayname = ATK01),
+	LightningATK UMETA(Displayname = LightningATK),
 	SlashATK UMETA(Displayname = SlashATK),
-	ComboATK UMETA(Displayname = ATK03),
+	ComboATK UMETA(Displayname = ComboATK),
 	JumpATK UMETA(Displayname = JumpATK),
 	StanceATK UMETA(Displayname = StanceATK),
 	BackStep UMETA(Displayname = BackStep),
@@ -24,6 +24,8 @@ enum class EBossState : uint8
 	BehindATK UMETA(Displayname = BehindATK),
 	GrabATK UMETA(Displayname = GrabATK),
 	WarCry UMETA(Displayname = WarCry),
+	FallDown UMETA(Displayname = FallDown),
+	LaserRangeATK UMETA(Displayname = LaserRangeATK),
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
@@ -63,7 +65,7 @@ public:
 	void TickMove();
 	void TickDashATK();
 	void TickNormalATK();
-	void TickATK01();
+	void TickLightningATK();
 	void TickSlashATK();
 	void TickComboATK();
 	void TickJumpATK();
@@ -73,6 +75,8 @@ public:
 	void TickBehindATK();
 	void TickGrabATK();
 	void TickWarCry();
+	void TickFallDown();
+	void TickLaserRangeATK();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BossStateDebug();
@@ -100,29 +104,27 @@ public:
 
 	UFUNCTION()
 	void ReturnToMove();
-
 	UFUNCTION()
 	void ReturnToWalk();
-
 	UFUNCTION()
 	void ReturnToNormalATK();
-	
 	UFUNCTION()
 	void ReturnToBladeRangeATK();
-
 	UFUNCTION()
 	void ReturnToStanceATK();
-
 	UFUNCTION()
 	void ReturnToSlashATK();
-
 	UFUNCTION()
 	void ReturnToSecondPhase();
-	
+	UFUNCTION()
+	void ReturnToWarCry();
+	UFUNCTION()
+	void ReturnToLaserRangeATK();
+	UFUNCTION()
+	void ReturnToLightningATK();
 	
 	UFUNCTION()
 	void SetMoveSpeed();
-
 	UFUNCTION(BlueprintCallable)
 	void SetGuardMoveSpeed();
 	UFUNCTION(BlueprintCallable)
@@ -136,9 +138,6 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int walkRandomInt;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int seqValue = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTimerHandle WriTimerHandle;
@@ -159,16 +158,17 @@ public:
 	int randomIntValue;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bHasExecuted;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsGuarding;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsSecondPhase;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int attackCount = 0;
-	
 	float dashATKPercent = 0.3f;
 	float backStepPercent = 0.3f;
 	float slashATKPercent = 0.3f;
-	float normalATKPercent = 0.5f;
+	float warCryATKPercent = 0.6f;
+	float laserRangeATKPercent = 0.7f;
 };
