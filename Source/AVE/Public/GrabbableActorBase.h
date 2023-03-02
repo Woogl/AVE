@@ -41,10 +41,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
 	class UNiagaraSystem* HitNiagara;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
+	class USoundWave* PullSound;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
+	class USoundWave* PushSound;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
 	class USoundWave* HitSound;
 
 	// 잡았을 때 호출
-	void OnGrabbed();
+	void OnPulled();
 	FTimerHandle ElectricArcTimer;
 	void StartElectricArc();
 	void EndElectricArc();

@@ -50,12 +50,14 @@ UStaticMeshComponent* AGrabbableActorBase::GetMesh() const
 	return Mesh;
 }
 
-void AGrabbableActorBase::OnGrabbed()
+void AGrabbableActorBase::OnPulled()
 {
 	if (PlayerMesh == nullptr)
 	{
 		PlayerMesh = UGameplayStatics::GetPlayerCharacter(this, 0)->GetMesh();
 	}
+
+	UGameplayStatics::PlaySoundAtLocation(this, PullSound, GetActorLocation());
 
 	Mesh->SetCollisionResponseToChannel(ECC_GameTraceChannel3, ECR_Ignore);
 	Mesh->SetSimulatePhysics(false);
@@ -88,6 +90,8 @@ void AGrabbableActorBase::OnPushed()
 
 	Mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	Mesh->SetSimulatePhysics(true);
+
+	UGameplayStatics::PlaySoundAtLocation(this, PushSound, GetActorLocation());
 
 	bShouldAttack = true;
 }
