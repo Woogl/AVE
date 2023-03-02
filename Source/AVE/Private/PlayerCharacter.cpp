@@ -704,18 +704,13 @@ void APlayerCharacter::ComboAttack() {
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
 
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	if (bIsInvincible) {
-		return DamageAmount;
-	}
 	// 적 방향으로 회전
 	RotateToDirection(DamageCauser->GetActorLocation());
+	EnemyTarget = DamageCauser;
+	bIsTargeting = true;
+	FHitResult outHit;
 
-	if (DamageCauser && DamageCauser->IsA(ACharacter::StaticClass()))
-	{
-		EnemyTarget = DamageCauser;
-		bIsTargeting = true;
-	}
-	if (DamageEvent.DamageTypeClass == ULightningDamageType::StaticClass() ) {
+	if (DamageEvent.DamageTypeClass == ULightningDamageType::StaticClass()) {
 		if (MoveComp->IsFalling()) {
 			Charge();
 		}
@@ -723,15 +718,63 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 			Groggy();
 		}
 	}
+	else if (DamageEvent.DamageTypeClass == UUnguardableDamageType::StaticClass())
+	{
+		Hit(DamageAmount, UKnockBackDamageType::StaticClass());
+	}
+	else if (DamageEvent.DamageTypeClass == ULowAttackDamageType::StaticClass())
+	{
+		if (MoveComp->IsFalling() == true)
+		{
+			return DamageAmount;
+		}
+		Hit(DamageAmount, UKnockBackDamageType::StaticClass());
+	}
+	else if (DamageEvent.DamageTypeClass == UGrabAttackDamageType::StaticClass())
+	{
+		MotionMorphGrabHit();
+		Hit(DamageAmount, UGrabAttackDamageType::StaticClass());
+	}
+	else if (DamageEvent.DamageTypeClass == UPierceDamageType::StaticClass())
+	{
+		FVector dirEnemy = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal();
+		FVector dirPlayer = GetActorForwardVector();
+		float enemyDotPlayer = FVector::DotProduct(-dirEnemy, dirPlayer);
+		if (bIsDashing && enemyDotPlayer > 0.5f)
+		{
+			MotionMorphGanpa();
+			PlayAnimMontage(GanpaMontage);
+			UGameplayStatics::ApplyPointDamage(EnemyTarget, 0.1f, GetActorLocation(), outHit, GetController(), this, UGanpaDamageType::StaticClass());
+		}
+		else if (bIsParrying)
+		{
+			ParryHit(DamageAmount, UKnockBackDamageType::StaticClass());
+		}
+		else if (bIsBlocking)
+		{
+			GuardHit(DamageAmount, UKnockBackDamageType::StaticClass());
+		}
+		else
+		{
+			Hit(DamageAmount, UKnockBackDamageType::StaticClass());
+			if (bIsGrabbing == true && GrabbedActor)
+			{
+				DropProp();
+			}
+		}
+	}
 	else if (bIsParrying) {
 		ParryHit(DamageAmount, DamageEvent.DamageTypeClass);
-		FHitResult outHit;
-		UGameplayStatics::ApplyPointDamage(EnemyTarget,0.f,GetActorLocation(),outHit,GetController(),this,UStandardDamageType::StaticClass());
+		//UGameplayStatics::ApplyPointDamage(EnemyTarget,0.1f,GetActorLocation(),outHit,GetController(),this,UParryDamageType::StaticClass());
+		UGameplayStatics::ApplyDamage(EnemyTarget, 0.1f, GetController(), this, UParryDamageType::StaticClass());
 	}
 	else if (bIsBlocking) {
 		GuardHit(DamageAmount, DamageEvent.DamageTypeClass);
 	}
 	else {
+		if (bIsInvincible) {
+			return DamageAmount;
+		}
 		Hit(DamageAmount, DamageEvent.DamageTypeClass);
 		// 물건 주운	 상태에서 피격 시 물건 떨굼
 		if (bIsGrabbing == true && GrabbedActor)
