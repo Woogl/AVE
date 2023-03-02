@@ -48,7 +48,6 @@ void AAIManager::EnemySpawn()
 {
 	for (int i = 0; i < SpawnPoints.Num(); i++)
 	{
-		int j = 0;
 		// Spawn Swordman characters at current spawn point
 		if (i < spawnSwordmanCount)
 		{
@@ -58,7 +57,7 @@ void AAIManager::EnemySpawn()
 		}
 
 		// Spawn Gunman characters at current spawn point
-		else if (i < spawnGunmanCount+j)
+		else if (i < spawnGunmanCount + spawnSwordmanCount)
 		{
 			AEnemyBase* Gunman = GetWorld()->SpawnActor<AEnemyBase>(gunFactory, SpawnPoints[i]->GetActorLocation(), FRotator::ZeroRotator);
 			Enemies.AddUnique(Gunman);
@@ -66,13 +65,12 @@ void AAIManager::EnemySpawn()
 		}
 
 		// Spawn Shielder characters at current spawn point
-		else if (i < spawnShielderCount+j)
+		else if (i < spawnShielderCount + spawnGunmanCount + spawnSwordmanCount)
 		{
 			AEnemyBase* Shielder = GetWorld()->SpawnActor<AEnemyBase>(shielderFactory, SpawnPoints[i]->GetActorLocation(), FRotator::ZeroRotator);
 			Enemies.AddUnique(Shielder);
 			Shielder->onSetManager(this);
 		}
-		j++;
 	}
 }
 
