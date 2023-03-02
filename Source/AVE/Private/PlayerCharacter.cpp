@@ -468,7 +468,7 @@ void APlayerCharacter::PullProp()
 		if (hit.GetActor()->IsA(AGrabbableActorBase::StaticClass()))
 		{
 			GrabbedActor = Cast<AGrabbableActorBase>(hit.GetActor());
-			GrabbedActor->OnGrabbed();
+			GrabbedActor->OnPulled();
 
 			// 컴포넌트 이동시키기
 			FLatentActionInfo info;

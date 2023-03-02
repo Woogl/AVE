@@ -5,6 +5,7 @@
 #include <Components/BoxComponent.h>
 #include "SliceableActorBase.h"
 #include "KismetProceduralMeshLibrary.h"
+#include <Kismet/GameplayStatics.h>
 
 AMeshSlicer::AMeshSlicer()
 {
@@ -36,8 +37,15 @@ void AMeshSlicer::OnBoxOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAct
 	if (sliceTarget)
 	{
 		MatForSlicedSection = sliceTarget->SectionMaterial;
+		
 		// 충돌한 메시 자르고 파괴
 		SliceMesh(OtherComp);
+
+		// SFX
+		if (USoundWave* sfx = sliceTarget->SliceSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, sfx, GetActorLocation());
+		}
 	}
 }
 
