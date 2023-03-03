@@ -244,6 +244,10 @@ public:
 	void Groggy();
 	void Charge();
 	void Die();
+	UFUNCTION(BlueprintCallable)
+	void Reset();
+	UFUNCTION(BlueprintImplementableEvent)
+	void EndGame();
 
 	void Skill();
 	void ChangeSkill();

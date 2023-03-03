@@ -703,6 +703,9 @@ void APlayerCharacter::ComboAttack() {
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
 
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	if (bIsDead) {
+		return 0;
+	}
 	// 적 방향으로 회전
 	RotateToDirection(DamageCauser->GetActorLocation());
 	if (DamageCauser->IsA(ACharacter::StaticClass()))
@@ -717,23 +720,6 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		else {
 			Groggy();
 		}
-	}
-	else if (DamageEvent.DamageTypeClass == UUnguardableDamageType::StaticClass())
-	{
-		Hit(DamageAmount, UKnockBackDamageType::StaticClass());
-	}
-	else if (DamageEvent.DamageTypeClass == ULowAttackDamageType::StaticClass())
-	{
-		if (MoveComp->IsFalling() == true)
-		{
-			return DamageAmount;
-		}
-		Hit(DamageAmount, UKnockBackDamageType::StaticClass());
-	}
-	else if (DamageEvent.DamageTypeClass == UGrabAttackDamageType::StaticClass())
-	{
-		MotionMorphGrabHit();
-		Hit(DamageAmount, UGrabAttackDamageType::StaticClass());
 	}
 	else if (DamageEvent.DamageTypeClass == UPierceDamageType::StaticClass())
 	{
@@ -756,12 +742,35 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		}
 		else
 		{
+			if (bIsInvincible) {
+				return DamageAmount;
+			}
 			Hit(DamageAmount, UKnockBackDamageType::StaticClass());
 			if (bIsGrabbing == true && GrabbedActor)
 			{
 				DropProp();
 			}
 		}
+	}
+	else if (DamageEvent.DamageTypeClass == UUnguardableDamageType::StaticClass())
+	{
+		Hit(DamageAmount, UKnockBackDamageType::StaticClass());
+	}
+	else if (DamageEvent.DamageTypeClass == ULowAttackDamageType::StaticClass())
+	{
+		if (MoveComp->IsFalling() == true)
+		{
+			return DamageAmount;
+		}
+		Hit(DamageAmount, UKnockBackDamageType::StaticClass());
+	}
+	else if (DamageEvent.DamageTypeClass == UGrabAttackDamageType::StaticClass())
+	{
+		MotionMorphGrabHit();
+		Hit(DamageAmount, UGrabAttackDamageType::StaticClass());
+	}
+	else if (bIsInvincible) {
+		return DamageAmount;
 	}
 	else if (bIsParrying) {
 		ParryHit(DamageAmount, DamageEvent.DamageTypeClass);
@@ -772,9 +781,6 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		GuardHit(DamageAmount, DamageEvent.DamageTypeClass);
 	}
 	else {
-		if (bIsInvincible) {
-			return DamageAmount;
-		}
 		Hit(DamageAmount, DamageEvent.DamageTypeClass);
 		// 물건 주운	 상태에서 피격 시 물건 떨굼
 		if (bIsGrabbing == true && GrabbedActor)
@@ -878,6 +884,15 @@ void APlayerCharacter::Charge() {
 void APlayerCharacter::Die() {
 	PlayAnimMontage(DieMontage);
 	bIsDead = true;
+	DisableInput(UGameplayStatics::GetPlayerController(GetWorld(),0));
+	EndGame();
+}
+
+void APlayerCharacter::Reset() {
+	InitState();
+	CurPosture = MaxPosture;
+	CurHealth = MaxHealth;
+	CurKatasiro = 5;
 }
 
 void APlayerCharacter::Skill() {
