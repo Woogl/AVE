@@ -51,5 +51,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RunAI();
 	void EnemyDelete(AActor* const InPawn);
+	UFUNCTION(BlueprintCallable)
 	void EnemySearch();
 };
