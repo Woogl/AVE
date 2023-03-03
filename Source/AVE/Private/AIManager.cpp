@@ -25,8 +25,6 @@ void AAIManager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASpawnPointer::StaticClass(), SpawnPoints);
-
 	PlayerCharacter = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	blackboard = UAIBlueprintHelperLibrary::GetBlackboard(this);
 
@@ -46,34 +44,12 @@ void AAIManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 }
 
-void AAIManager::EnemySpawn()
+void AAIManager::EnemySearch()
 {
-	for (AActor* tempActor : SpawnPoints)
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemyBase::StaticClass(), Enemies);
+	for (AActor* enemy : Enemies)
 	{
-		switch (Cast<ASpawnPointer>(tempActor)->GetSelector())
-		{
-		case 1:
-		{
-			AEnemyBase* Swordman = GetWorld()->SpawnActor<AEnemyBase>(swordFactory, tempActor->GetActorLocation(), FRotator::ZeroRotator);
-			Enemies.AddUnique(Swordman);
-			Swordman->onSetManager(this);
-		}
-		break;
-		/*case 2:
-		{
-			AEnemyBase* Gunman = GetWorld()->SpawnActor<AEnemyBase>(gunFactory, tempActor->GetActorLocation(), FRotator::ZeroRotator);
-			Enemies.AddUnique(Gunman);
-			Gunman->onSetManager(this);
-		}
-		break;*/
-		case 3:
-		{
-			AEnemyBase* Shielder = GetWorld()->SpawnActor<AEnemyBase>(shielderFactory, tempActor->GetActorLocation(), FRotator::ZeroRotator);
-			Enemies.AddUnique(Shielder);
-			Shielder->onSetManager(this);
-		}
-		break;
-		}
+		Cast<AEnemyBase>(enemy)->onSetManager(this);
 	}
 }
 
@@ -90,7 +66,7 @@ void AAIManager::RunAI()
 				if (eNum != 3 || eNum != 4 || eNum != 5)
 					UAIBlueprintHelperLibrary::GetBlackboard(Enemies[i])->SetValueAsEnum(TEXT("AIState"), 1);
 				/*UAIBlueprintHelperLibrary::GetBlackboard(Enemies[i])->SetValueAsObject(TEXT("PlayerActor"), PlayerCharacter);*/
-				Enemies[i]->onGetSet();
+				Cast<AEnemyBase>(Enemies[i])->onGetSet();
 			}
 		}
 		return;
@@ -104,9 +80,4 @@ void AAIManager::EnemyDelete(AEnemyBase* const InPawn)
 	Enemies.Remove(InPawn);
 	if (Enemies.IsEmpty())
 		this->Destroy();
-}
-
-void AAIManager::InputPoint(AActor* const inActor)
-{
-	SpawnPoints.Add(inActor);
 }
