@@ -11,6 +11,7 @@
 #include <Kismet/KismetMathLibrary.h>
 #include "EnemyWidget.h"
 #include <Blueprint/AIBlueprintHelperLibrary.h>
+#include "PlayerCharacter.h"
 
 // Sets default values
 AEnemyBase::AEnemyBase()
@@ -169,6 +170,9 @@ void AEnemyBase::ActivateRagdoll()
 
 	// 래그돌 활성화
 	GetMesh()->SetSimulatePhysics(true);
+
+	// 플레이어 타게팅 해제
+	Cast<APlayerCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0))->bIsTargeting = false;
 }
 
 void AEnemyBase::onGetSet()

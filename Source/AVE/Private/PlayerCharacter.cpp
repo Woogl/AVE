@@ -316,9 +316,8 @@ void APlayerCharacter::StopDash()
 void APlayerCharacter::Finisher()
 {
 	if (CanAttack()) {
-		// 대상 찾기
-		// TODO: 체간 수치 체크
-		if (TryAutoTargeting() == true)
+		// 대상 찾고 태그 확인
+		if (TryAutoTargeting() == true && EnemyTarget->ActorHasTag(TEXT("Broken")))
 		{
 			PlayFinisherSequence();
 			bIsInvincible = true;
