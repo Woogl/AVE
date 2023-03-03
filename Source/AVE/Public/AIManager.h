@@ -30,14 +30,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int spawnSwordmanCount;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int spawnGunmanCount;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int spawnShielderCount;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float spawnRadius; 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int AttackChance;
 	UPROPERTY()
 	class UBlackboardComponent* blackboard;
