@@ -6,6 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "EnemyBase.h"
 #include "AC_Manager.h"
+#include "SpawnPointer.h"
 #include "AIManager.generated.h"
 
 UCLASS()
@@ -48,9 +49,8 @@ public:
 	TSubclassOf<class AEnemyBase> gunFactory;
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AEnemyBase> shielderFactory;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	/*TArray<FVector> SpawnPoints;*/
-	TArray<APawn*> SpawnPoints;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<AActor*> SpawnPoints;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<AEnemyBase*> Enemies;
 	UPROPERTY()
@@ -60,4 +60,5 @@ public:
 	void EnemySpawn();
 	void RunAI();
 	void EnemyDelete(AEnemyBase* const InPawn);
+	void InputPoint(AActor* const inActor);
 };

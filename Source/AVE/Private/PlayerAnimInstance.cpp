@@ -196,8 +196,6 @@ void UPlayerAnimInstance::AnimNotify_PlayLightningSequence() {
 	if (Player) {
 		Player->PlayLightningShockSequence();
 	}
-<<<<<<< HEAD
-=======
 }
 
 void UPlayerAnimInstance::AnimNotify_PlayFootstepSound() {
@@ -220,5 +218,4 @@ void UPlayerAnimInstance::AnimNotify_PlayFootstepSound() {
 void UPlayerAnimInstance::AnimNotify_InitGuard() {
 	if (Player)
 		Player->InitGuard();
->>>>>>> origin/Woogle(0.2.2)
 }
