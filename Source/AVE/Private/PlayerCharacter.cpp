@@ -705,10 +705,11 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	// 적 방향으로 회전
 	RotateToDirection(DamageCauser->GetActorLocation());
-	EnemyTarget = DamageCauser;
-	bIsTargeting = true;
-	FHitResult outHit;
-
+	if (DamageCauser->IsA(ACharacter::StaticClass()))
+	{
+		EnemyTarget = DamageCauser;
+		bIsTargeting = true;
+	}
 	if (DamageEvent.DamageTypeClass == ULightningDamageType::StaticClass()) {
 		if (MoveComp->IsFalling()) {
 			Charge();
@@ -743,7 +744,7 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		{
 			MotionMorphGanpa();
 			PlayAnimMontage(GanpaMontage);
-			UGameplayStatics::ApplyPointDamage(EnemyTarget, 0.1f, GetActorLocation(), outHit, GetController(), this, UGanpaDamageType::StaticClass());
+			UGameplayStatics::ApplyDamage(EnemyTarget, 0.1f, GetController(), this, UGanpaDamageType::StaticClass());
 		}
 		else if (bIsParrying)
 		{
@@ -845,6 +846,10 @@ void APlayerCharacter::Hit(float Damage, TSubclassOf<UDamageType> DamageType) {
 	else if (DamageType == UKnockUpDamageType::StaticClass()) {
 		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
 		PlayAnimMontage(HitReactionMontages[3]);
+	}
+	else if (DamageType == UGrabAttackDamageType::StaticClass()) {
+		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
+		PlayAnimMontage(HitReactionMontages[4]);
 	}
 	CurPosture -= Damage * 0.4f;
 	CurHealth -= Damage;
