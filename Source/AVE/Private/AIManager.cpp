@@ -24,10 +24,10 @@ AAIManager::AAIManager()
 void AAIManager::BeginPlay()
 {
 	Super::BeginPlay();
-	EnemySpawn();
 
 	PlayerCharacter = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	blackboard = UAIBlueprintHelperLibrary::GetBlackboard(this);
+
 }
 
 // Called every frame
@@ -44,37 +44,40 @@ void AAIManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 }
 
-void AAIManager::EnemySpawn()
+void AAIManager::EnemySearch()
 {
-	FVector SpawnPoint;
-	for (int i = 0; i < spawnSwordmanCount; i++)
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemyBase::StaticClass(), Enemies);
+	for (AActor* enemy : Enemies)
 	{
-		UNavigationSystemV1::K2_GetRandomLocationInNavigableRadius(GetWorld(), this->GetActorLocation(), SpawnPoint, spawnRadius, nullptr, nullptr);
-		UE_LOG(LogTemp, Warning, TEXT("%f"), SpawnPoint.X);
-		AEnemyBase* ab = GetWorld()->SpawnActor<AEnemyBase>(swordFactory, FTransform(FRotator(0), SpawnPoint, FVector(1)));
-
-		ab->onSetManager(this);
-
-		Enemies.AddUnique(ab);
+		Cast<AEnemyBase>(enemy)->onSetManager(this);
 	}
 }
 
-void AAIManager::StartAI()
+void AAIManager::RunAI()
 {
 	if (!running)
 	{
 		blackboard->SetValueAsObject(TEXT("PlayerActor"), UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 		running = true;
-		for (int i = 0; i < Enemies.Num() ; i++)
+		for (int i = 0; i < Enemies.Num(); i++)
 		{
 			{
 				int eNum = UAIBlueprintHelperLibrary::GetBlackboard(Enemies[i])->GetValueAsEnum(TEXT("AIState"));
-				if(eNum != 3 || eNum != 4 || eNum != 5)
-					UAIBlueprintHelperLibrary::GetBlackboard(Enemies[i])->SetValueAsEnum(TEXT("AIState"),1);
+				if (eNum != 3 || eNum != 4 || eNum != 5)
+					UAIBlueprintHelperLibrary::GetBlackboard(Enemies[i])->SetValueAsEnum(TEXT("AIState"), 1);
+				/*UAIBlueprintHelperLibrary::GetBlackboard(Enemies[i])->SetValueAsObject(TEXT("PlayerActor"), PlayerCharacter);*/
+				Cast<AEnemyBase>(Enemies[i])->onGetSet();
 			}
 		}
 		return;
 	}
 	else
-	return;
+		return;
+}
+
+void AAIManager::EnemyDelete(AEnemyBase* const InPawn)
+{
+	Enemies.Remove(InPawn);
+	/*if (Enemies.IsEmpty())
+		this->Destroy();*/
 }

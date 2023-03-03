@@ -12,16 +12,16 @@
 
 AAC_Swordman::AAC_Swordman()
 {
-	static ConstructorHelpers::FObjectFinder<UBlackboardData> BBObject(TEXT("BlackboardData'/Game/Team/TH/Tree/Swordman/BB_Swordman.BB_Swordman'"));
+	static ConstructorHelpers::FObjectFinder<UBlackboardData> BBObject(TEXT("BlackboardData'/Game/Team/TH/Tree/Shielder/BB_Shielder.BB_Shielder'"));
 	if (BBObject.Succeeded())
 	{
-		BB_Swordman = BBObject.Object;
+		BB_Shielder = BBObject.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UBehaviorTree> BTObject(TEXT("BehaviorTree'/Game/Team/TH/Tree/Swordman/BT_Swordman.BT_Swordman'"));
+	static ConstructorHelpers::FObjectFinder<UBehaviorTree> BTObject(TEXT("BehaviorTree'/Game/Team/TH/Tree/Shielder/BT_Shielder.BT_Shielder'"));
 	if (BBObject.Succeeded())
 	{
-		BT_Swordman = BTObject.Object;
+		BT_Shielder = BTObject.Object;
 	}
 
 	SetPerceptionSystem();
@@ -30,7 +30,7 @@ AAC_Swordman::AAC_Swordman()
 void AAC_Swordman::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	RunBehaviorTree(BT_Swordman);
+	RunBehaviorTree(BT_Shielder);
 }
 
 UBlackboardComponent* AAC_Swordman::get_blackboard() const
@@ -50,9 +50,10 @@ void AAC_Swordman::SetPerceptionSystem()
 
 void AAC_Swordman::OnTargetPerceptionUpdated(AActor* actor, FAIStimulus const Stimulus)
 {
-	//if (auto const player = Cast<APlayerCharacter>(actor))
-	//{
-	//	get_blackboard()->SetValueAsEnum(TEXT("AIState"),4);
-	//	get_blackboard()->SetValueAsObject(TEXT("PlayerActor"), player);
-	//}
+	if (auto const player = Cast<APlayerCharacter>(actor))
+	{
+		this->Blackboard->SetValueAsObject(TEXT("PlayerActor"), player);
+		this->Blackboard->SetValueAsEnum(TEXT("AIState"),4);
+		//get_blackboard()
+	}
 }

@@ -8,7 +8,7 @@
 #include "AC_Swordman.generated.h"
 
 /**
- * 
+ * 방패병임
  */
 UCLASS()
 class AVE_API AAC_Swordman : public AAIController
@@ -19,9 +19,9 @@ public:
 	virtual void OnPossess(APawn* InPawn) override;
 
 	UPROPERTY(EditAnywhere)
-		class UBehaviorTree* BT_Swordman;
+		class UBehaviorTree* BT_Shielder;
 	UPROPERTY(EditAnywhere)
-		class UBlackboardData* BB_Swordman;
+		class UBlackboardData* BB_Shielder;
 
 	class UAISenseConfig_Damage* DamageConfig;
 	class UBlackboardComponent* get_blackboard() const;
