@@ -43,17 +43,21 @@ public:
 	class UBlackboardComponent* blackboard;
 	bool running;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AEnemyBase> swordFactory;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AEnemyBase> gunFactory;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AEnemyBase> shielderFactory;
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<AActor*> SpawnPoints;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	FVector VectorPoint;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<AEnemyBase*> Enemies;
 	UPROPERTY()
 	class APawn* PlayerCharacter;
 
 	UFUNCTION(BlueprintCallable)
-	void EnemySpawn(AEnemyBase Enemy);
+	void EnemySpawn();
 	void RunAI();
 	void EnemyDelete(AEnemyBase* const InPawn);
 	void InputPoint(AActor* const inActor);

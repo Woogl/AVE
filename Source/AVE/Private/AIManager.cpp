@@ -46,11 +46,35 @@ void AAIManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 }
 
-void AAIManager::EnemySpawn(AEnemyBase Enemy)
+void AAIManager::EnemySpawn()
 {
-	AEnemyBase* tempEnemy = GetWorld()->SpawnActor<AEnemyBase>(Enemy,VectorPoint, FRotator::ZeroRotator);
-	Enemies.AddUnique(tempEnemy);
-	tempEnemy->onSetManager(this);
+	for (AActor* tempActor : SpawnPoints)
+	{
+		switch (Cast<ASpawnPointer>(tempActor)->GetSelector())
+		{
+		case 1:
+		{
+			AEnemyBase* Swordman = GetWorld()->SpawnActor<AEnemyBase>(swordFactory, tempActor->GetActorLocation(), FRotator::ZeroRotator);
+			Enemies.AddUnique(Swordman);
+			Swordman->onSetManager(this);
+		}
+		break;
+		/*case 2:
+		{
+			AEnemyBase* Gunman = GetWorld()->SpawnActor<AEnemyBase>(gunFactory, tempActor->GetActorLocation(), FRotator::ZeroRotator);
+			Enemies.AddUnique(Gunman);
+			Gunman->onSetManager(this);
+		}
+		break;*/
+		case 3:
+		{
+			AEnemyBase* Shielder = GetWorld()->SpawnActor<AEnemyBase>(shielderFactory, tempActor->GetActorLocation(), FRotator::ZeroRotator);
+			Enemies.AddUnique(Shielder);
+			Shielder->onSetManager(this);
+		}
+		break;
+		}
+	}
 }
 
 void AAIManager::RunAI()
