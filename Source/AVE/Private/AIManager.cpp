@@ -78,6 +78,6 @@ void AAIManager::RunAI()
 void AAIManager::EnemyDelete(AEnemyBase* const InPawn)
 {
 	Enemies.Remove(InPawn);
-	if (Enemies.IsEmpty())
-		this->Destroy();
+	/*if (Enemies.IsEmpty())
+		this->Destroy();*/
 }
