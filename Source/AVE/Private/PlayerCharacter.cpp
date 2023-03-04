@@ -491,10 +491,10 @@ void APlayerCharacter::PushProp()
 	PlayAnimMontage(InteractionMontages[1]);
 
 	// 딜레이 람다함수
-	FTimerHandle delayHandle;
-	float delayTime = 0.05f;
-	GetWorld()->GetTimerManager().SetTimer(delayHandle, FTimerDelegate::CreateLambda([&]()
-		{
+	//FTimerHandle delayHandle;
+	//float delayTime = 0.05f;
+	//GetWorld()->GetTimerManager().SetTimer(delayHandle, FTimerDelegate::CreateLambda([&]()
+	//	{
 			GrabbedActor->OnPushed();
 
 			// 발사하기
@@ -509,7 +509,7 @@ void APlayerCharacter::PushProp()
 			{
 				DropProp();
 			}
-		}), delayTime, false);
+	//	}), delayTime, false);
 }
 
 void APlayerCharacter::DropProp()

@@ -42,7 +42,7 @@ void AMeshSlicer::OnBoxOverlapEnd(UPrimitiveComponent* OverlappedComponent, AAct
 		SliceMesh(OtherComp);
 
 		// SFX
-		if (USoundWave* sfx = sliceTarget->SliceSound)
+		if (USoundBase* sfx = sliceTarget->SliceSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, sfx, GetActorLocation());
 		}

@@ -30,7 +30,7 @@ public:
 	class UProceduralMeshComponent* ProceduralMesh;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "FX")
-	class USoundWave* SliceSound;
+	class USoundBase* SliceSound;
 
 	// (선택사항) 단면에 덮어씌울 머터리얼
 	UPROPERTY(EditAnywhere, Category = "Option")
