@@ -890,6 +890,7 @@ void APlayerCharacter::Die() {
 
 void APlayerCharacter::Reset() {
 	InitState();
+	InitGuard();
 	CurPosture = MaxPosture;
 	CurHealth = MaxHealth;
 	CurKatasiro = 5;
