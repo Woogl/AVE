@@ -228,4 +228,14 @@ public:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	float bossArmor = 3.f;
+
+	// 튜토리얼용 (우성)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = "true"))
+	bool bTutorial;
+	UFUNCTION(BlueprintImplementableEvent)
+	void TutorialParrying();
+	UFUNCTION(BlueprintImplementableEvent)
+	void TutorialGanpa();
+	UFUNCTION(BlueprintImplementableEvent)
+	void TutorialLower();
 };

@@ -140,6 +140,12 @@ void ABoss::AnimDashATK()
 		bIsSuperArmor = true;
 		montageLength = PlayAnimMontage(animDashATK02, 1) / (1 * animDashATK02->RateScale);
 	}
+
+	// 우성
+	if (bTutorial)
+	{
+		TutorialGanpa();
+	}
 }
 
 void ABoss::AnimNormalATK()
@@ -157,6 +163,12 @@ void ABoss::AnimNormalATK()
 		//PlayAnimMontage(animNormalATKL01);
 		montageLength = PlayAnimMontage(animNormalATKL01, 1) / (1 * animNormalATKL01->RateScale);
 	}
+
+	// 우성
+	if (bTutorial)
+	{
+		TutorialParrying();
+	}
 }
 
 void ABoss::AnimJumpATK()
@@ -172,10 +184,22 @@ void ABoss::AnimStanceATK()
 	if (randomIntValue == 1)
 	{
 		montageLength = PlayAnimMontage(animStanceToStab, 1) / (1 * animStanceToStab->RateScale);
+
+		// 우성
+		if (bTutorial)
+		{
+			TutorialGanpa();
+		}
 	}
 	if (randomIntValue == 2)
 	{
 		montageLength = PlayAnimMontage(animStanceToLowATK, 1) / (1 * animStanceToLowATK->RateScale);
+
+		// 우성
+		if (bTutorial)
+		{
+			TutorialLower();
+		}
 	}
 }
 
@@ -195,6 +219,12 @@ void ABoss::AnimBladeRangeATK()
 {
 	bIsSuperArmor = true;
 	montageLength = PlayAnimMontage(animBladeRangeATK, 1) / (1 * animBladeRangeATK->RateScale);
+
+	// 우성
+	if (bTutorial)
+	{
+		TutorialLower();
+	}
 }
 
 void ABoss::AnimGrabATK()
@@ -207,12 +237,24 @@ void ABoss::AnimSlashATK()
 {
 	bIsSuperArmor = true;
 	montageLength = PlayAnimMontage(animSlashATK, 1) / (1 * animSlashATK->RateScale);
+
+	// 우성
+	if (bTutorial)
+	{
+		TutorialParrying();
+	}
 }
 
 void ABoss::AnimComboATK()
 {
 	bIsSuperArmor = true;
 	montageLength = PlayAnimMontage(animComboATK, 1) / (1 * animComboATK->RateScale);
+
+	// 우성
+	if (bTutorial)
+	{
+		TutorialParrying();
+	}
 }
 
 void ABoss::AnimWarCry()
