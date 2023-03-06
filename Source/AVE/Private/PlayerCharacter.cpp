@@ -933,7 +933,7 @@ void APlayerCharacter::MoveWeaponRight() {
 
 void APlayerCharacter::RegeneratePosture() {
 	if (!(bIsHit || bIsGuardBroken) && CurPosture < 100.f) {
-		CurPosture += 0.05f;
+		CurPosture += 0.15f;
 	}
 }
 
