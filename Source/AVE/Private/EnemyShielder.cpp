@@ -116,7 +116,13 @@ float AEnemyShielder::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 {
 	GetWorldTimerManager().ClearTimer(regenTimerHandle);
 	GetWorldTimerManager().SetTimer(regenTimerHandle, this, &AEnemyShielder::regenPosture, postureRate, true, postureCool);
-
+	if (DamageEvent.DamageTypeClass == ULightningDamageType::StaticClass())
+	{
+		Shield->SetCollisionProfileName(FName("Ragdoll"));
+		Shield->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		Shield->SetSimulatePhysics(true);
+		Shield->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	}
 	blackboard->SetValueAsObject(TEXT("PlayerActor"), DamageCauser);
 
 	UAISense_Damage::ReportDamageEvent(GetWorld(), this, DamageCauser, DamageAmount, this->GetActorLocation(), this->GetActorLocation(), NAME_None);
