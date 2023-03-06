@@ -732,7 +732,7 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		{
 			MotionMorphGanpa();
 			PlayAnimMontage(GanpaMontage);
-			UGameplayStatics::ApplyDamage(EnemyTarget, AttackPower * 2.f, GetController(), this, UGanpaDamageType::StaticClass());
+			UGameplayStatics::ApplyDamage(EnemyTarget, AttackPower, GetController(), this, UGanpaDamageType::StaticClass());
 		}
 		else if (bIsParrying)
 		{
@@ -896,7 +896,7 @@ void APlayerCharacter::Reset() {
 	InitGuard();
 	CurPosture = MaxPosture;
 	CurHealth = MaxHealth;
-	CurKatasiro = 5;
+	CurKatasiro = 3;
 }
 
 void APlayerCharacter::Skill() {
@@ -940,7 +940,7 @@ void APlayerCharacter::RegeneratePosture() {
 void APlayerCharacter::SpreadAoEDamage(TSubclassOf<UDamageType> AttackDamageType) {
 	TArray<AActor*> IgnoreList;
 	IgnoreList.Add(this);
-	UGameplayStatics::ApplyRadialDamage(GetWorld(), AttackPower * 3, GetActorLocation(), 1000.f, AttackDamageType, IgnoreList);
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), AttackPower, GetActorLocation(), 1000.f, AttackDamageType, IgnoreList);
 }
 
 void APlayerCharacter::PlayWetFootstepSound(FVector Location) {
