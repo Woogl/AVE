@@ -229,21 +229,23 @@ void APlayerCharacter::Guard()
 		DropProp();
 	}
 
-	// TODO: 가드 가능한 상태인지 체크
-	bIsBlocking = true;
+	if (!bIsGuardBroken) {
+		// TODO: 가드 가능한 상태인지 체크
+		bIsBlocking = true;
 
-	// 0.3초 동안 패링 판정 발동 
-	bIsParrying = true;
-	GetWorldTimerManager().SetTimer(ParryingTimer, this, &APlayerCharacter::OnParryEnd, 0.3f, false);
+		// 0.3초 동안 패링 판정 발동 
+		bIsParrying = true;
+		GetWorldTimerManager().SetTimer(ParryingTimer, this, &APlayerCharacter::OnParryEnd, 0.3f, false);
 
-	// ABP의 스테이트 변경
-	UPlayerAnimInstance* animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-	animIns->bIsBlocking = true;
+		// ABP의 스테이트 변경
+		UPlayerAnimInstance* animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+		animIns->bIsBlocking = true;
 
-	// 이동속도 감소
-	MoveComp->MaxWalkSpeed = 150.f;
-	MoveComp->MaxAcceleration = 512.f;
-	MoveComp->BrakingDecelerationWalking = 32.f;
+		// 이동속도 감소
+		MoveComp->MaxWalkSpeed = 150.f;
+		MoveComp->MaxAcceleration = 512.f;
+		MoveComp->BrakingDecelerationWalking = 32.f;
+	}
 }
 
 void APlayerCharacter::StopGuard()
@@ -868,6 +870,7 @@ void APlayerCharacter::Hit(float Damage, TSubclassOf<UDamageType> DamageType) {
 void APlayerCharacter::GuardBreak() {
 	PlayAnimMontage(GuardBreakMontage);
 	bIsGuardBroken = true;
+	StopGuard();
 }
 
 void APlayerCharacter::Groggy() {
