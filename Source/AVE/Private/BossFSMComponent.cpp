@@ -483,7 +483,7 @@ void UBossFSMComponent::ReturnToSecondPhase()
 {
 	if (bIsSecondPhase == false)
 	{
-		if (asBoss->bossPosture <= 0)
+		if (asBoss->bossPosture <= 0 || asBoss->currentHP <=0)
 		{
 			bossStates = EBossState::FallDown;
 			bHasExecuted = false;
