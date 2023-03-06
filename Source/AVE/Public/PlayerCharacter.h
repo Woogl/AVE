@@ -209,7 +209,7 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	int CurSkill;
 	UPROPERTY(BlueprintReadOnly)
-	int CurKatasiro = 5;
+	int CurKatasiro = 3;
 	UPROPERTY(BlueprintReadOnly)
 	float SkillCooltime = 5.f;
 	UPROPERTY(BlueprintReadOnly)
