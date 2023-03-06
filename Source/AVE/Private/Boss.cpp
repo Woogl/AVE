@@ -450,7 +450,7 @@ void ABoss::ReturnToBladeRangeATK()
 float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	// Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	float bossTakenDamage = DamageAmount / bossArmor;
+	
 	bTakeDamage = true;
 	GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::TakeDamageFalse, 1.f, false);
 	
@@ -479,8 +479,8 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 	}
 	else if (DamageEvent.DamageTypeClass == ULightningDamageType::StaticClass())
 	{
-		currentHP -= bossTakenDamage;
-		bossPosture -= bossTakenDamage;
+		currentHP -= 20.f;
+		bossPosture -= 15.f;
 		montageLength = PlayAnimMontage(animLightningGroggy, 1) / (1 * animLightningGroggy->RateScale);
 		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
 	}
@@ -494,8 +494,8 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 	else if (DamageEvent.DamageTypeClass == UGanpaDamageType::StaticClass())
 	{
 		// 간파 데미지가 들어왔을 때 당하는 모션
-		currentHP -= bossTakenDamage;
-		bossPosture -= bossTakenDamage;
+		currentHP -= 20.f;
+		bossPosture -= 15.f;
 		montageLength = PlayAnimMontage(animStanceCounter, 1) / (1 * animStanceCounter->RateScale);
 		GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::ReturnToMove, montageLength, false);
 	}
@@ -510,6 +510,7 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 				{
 					attackCount += 1;
 					parryCount += 1;
+					bossPosture -= 2.f;
 					PlayAnimMontage(animParryR);
 					//montageLength = PlayAnimMontage(animParryR, 1) / (1 * animParryR->RateScale);
 					//GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::AnimParryATK, montageLength, false);
@@ -518,6 +519,7 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 				{
 					attackCount += 1;
 					parryCount = 0;
+					bossPosture -= 2.f;
 					PlayAnimMontage(animParryL);
 					//montageLength = PlayAnimMontage(animParryL, 1) / (1 * animParryL->RateScale);
 					//GetWorldTimerManager().SetTimer(delayHandle, this, &ABoss::AnimParryATK, montageLength, false);
@@ -543,7 +545,12 @@ float ABoss::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, ACo
 			}
 		}
 		else
-			currentHP -= bossTakenDamage; // 슈퍼아머 상태이면 데미지 입음
+		{
+			currentHP -= DamageAmount; // 슈퍼아머 상태이면 데미지 입음
+			bossPosture -= 2.f;
+			PlaySoundHit();
+		}
+			
 	}
 	
 	return DamageAmount;

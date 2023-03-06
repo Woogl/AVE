@@ -27,7 +27,7 @@ void AAIManager::BeginPlay()
 
 	PlayerCharacter = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	blackboard = UAIBlueprintHelperLibrary::GetBlackboard(this);
-
+	EnemySearch();
 }
 
 // Called every frame

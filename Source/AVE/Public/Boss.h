@@ -194,6 +194,8 @@ public:
 	void ReturnToBladeRangeATK();
 	// UFUNCTION()
 	// void AnimReboundATK();
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlaySoundHit();
 
 
 	UFUNCTION()
