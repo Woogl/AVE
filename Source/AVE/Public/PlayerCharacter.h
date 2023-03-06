@@ -215,9 +215,11 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	float SpecialAttackCooltime = 5.f;
 	// 물리 내성
-	float Defense;
+	float Defense = 10.f;
 	// 전기 내성
 	float LightningDefense;
+	// 공격력
+	float AttackPower = 50.f;
 	void WInput();
 	void SInput();
 	void DInput();

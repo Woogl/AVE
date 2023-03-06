@@ -730,7 +730,7 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		{
 			MotionMorphGanpa();
 			PlayAnimMontage(GanpaMontage);
-			UGameplayStatics::ApplyDamage(EnemyTarget, 0.1f, GetController(), this, UGanpaDamageType::StaticClass());
+			UGameplayStatics::ApplyDamage(EnemyTarget, AttackPower * 2.f, GetController(), this, UGanpaDamageType::StaticClass());
 		}
 		else if (bIsParrying)
 		{
@@ -809,7 +809,7 @@ void APlayerCharacter::ParryHit(float Damage, TSubclassOf<UDamageType> DamageTyp
 		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
 		PlayAnimMontage(ParryHitMontages[3]);
 	}
-	CurPosture -= Damage;
+	CurPosture -= Damage * 1.5f;
 }
 
 void APlayerCharacter::GuardHit(float Damage, TSubclassOf<UDamageType> DamageType) {
@@ -829,7 +829,7 @@ void APlayerCharacter::GuardHit(float Damage, TSubclassOf<UDamageType> DamageTyp
 		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
 		PlayAnimMontage(GuardHitMontages[3]);
 	}
-	CurPosture -= Damage;
+	CurPosture -= Damage * 3;
 	if (CurPosture <= 0) {
 		GuardBreak();
 		return;
@@ -857,7 +857,7 @@ void APlayerCharacter::Hit(float Damage, TSubclassOf<UDamageType> DamageType) {
 		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
 		PlayAnimMontage(HitReactionMontages[4]);
 	}
-	CurPosture -= Damage * 0.4f;
+	CurPosture -= Damage * 3.f;
 	CurHealth -= Damage;
 	if (CurHealth <= 0) {
 		Die();
@@ -937,7 +937,7 @@ void APlayerCharacter::RegeneratePosture() {
 void APlayerCharacter::SpreadAoEDamage(TSubclassOf<UDamageType> AttackDamageType) {
 	TArray<AActor*> IgnoreList;
 	IgnoreList.Add(this);
-	UGameplayStatics::ApplyRadialDamage(GetWorld(), 50, GetActorLocation(), 1000.f, AttackDamageType, IgnoreList);
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), AttackPower * 3, GetActorLocation(), 1000.f, AttackDamageType, IgnoreList);
 }
 
 void APlayerCharacter::PlayWetFootstepSound(FVector Location) {
