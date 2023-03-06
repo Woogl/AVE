@@ -93,25 +93,6 @@ void AEnemyShielder::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 //	}
 //}
 
-//void AEnemyShielder::ReceivePointDamage(float Damage, const UDamageType* DamageType, FVector HitLocation, FVector HitNormal, UPrimitiveComponent* HitComponent, FName BoneName, FVector ShotFromDirection, AController* InstigatedBy, AActor* DamageCauser, const FHitResult& HitInfo)
-//{
-//	blackboard->SetValueAsObject(TEXT("PlayerActor"), DamageCauser);
-//
-//	UAISense_Damage::ReportDamageEvent(GetWorld(), this, DamageCauser, Damage, this->GetActorLocation(), this->GetActorLocation(), NAME_None);
-//	myManager->RunAI();
-//
-//	if (blackboard->GetValueAsBool(TEXT("Guard")))
-//		posture -= Damage;
-//	hp -= Damage;
-//
-//	if (hp <= 0)
-//		onDie();
-//	else if (posture <= 0)
-//		onHitCrushed();
-//	//else
-//	//	onHit();
-//}
-
 float AEnemyShielder::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	GetWorldTimerManager().ClearTimer(regenTimerHandle);
