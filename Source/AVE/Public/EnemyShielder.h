@@ -39,4 +39,8 @@ public:
 	void onHitCrushed() override;
 	void onDie() override;
 	void onGetSet() override;
+	UFUNCTION(BlueprintImplementableEvent)
+		void onBeginBP();
+	UFUNCTION(BlueprintImplementableEvent)
+		void onHitBP(float damageAmount);
 };
