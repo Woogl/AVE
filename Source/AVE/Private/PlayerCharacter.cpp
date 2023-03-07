@@ -326,9 +326,9 @@ void APlayerCharacter::Finisher()
 		if (TryAutoTargeting() == true && EnemyTarget->ActorHasTag(TEXT("Broken")))
 		{
 			PlayFinisherSequence();
-			bIsInvincible = true;
 			MotionMorph();
 			FinishEnemy();
+			bIsInvincible = true;
 		}
 	}
 }
