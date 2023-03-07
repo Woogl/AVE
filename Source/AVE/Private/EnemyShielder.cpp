@@ -38,7 +38,7 @@ AEnemyShielder::AEnemyShielder()
 
 	Shield = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Shield"));
 	Shield->SetupAttachment(GetMesh(), TEXT("ShieldSocket"));
-	Shield->SetRelativeLocationAndRotation(FVector(-125,-20, -20), FRotator(4,92,185));
+	Shield->SetRelativeLocationAndRotation(FVector(-125, -20, -20), FRotator(4, 92, 185));
 	Shield->SetCollisionProfileName(TEXT("NoCollision"));
 
 	/*enemyWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("BitalWidget"));
@@ -113,16 +113,18 @@ float AEnemyShielder::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		onDie();
 	else if (posture <= 0)
 		onHitCrushed();
-	//else
-	//	onHit();
+	else
+		onHit();
+	
 	onHitBP(DamageAmount);
+	
 	return 0.0f;
 }
 
 void AEnemyShielder::onActionAttack()
 {
 	PlayAnimMontage(enemyAttackMontage, 1, FName("ShielderAttack"));
-	blackboard->SetValueAsBool(TEXT("Guard"),false);
+	blackboard->SetValueAsBool(TEXT("Guard"), false);
 	blackboard->SetValueAsEnum(TEXT("AIState"), 6);
 }
 
@@ -130,25 +132,26 @@ void AEnemyShielder::onActionGuard()
 {
 	PlayAnimMontage(enemyAttackMontage, 1, FName("GuardHit0"));
 	blackboard->SetValueAsBool(TEXT("Guard"), true);
-	blackboard->SetValueAsEnum(TEXT("AIState"), 6);
 }
 
 void AEnemyShielder::onHit()
 {
 	PlayAnimMontage(enemyHitMontage, 1, FName("ShieldHit0"));
 	onGetSet();
-
-	blackboard->SetValueAsEnum(TEXT("AIState"), 6);
-
-	
-
 }
 
 void AEnemyShielder::onHitCrushed()
 {
 	PlayAnimMontage(enemyHitMontage, 1, FName("Break"));
-	blackboard->SetValueAsEnum(TEXT("AIState"), 6);
-	this->Tags.Add(FName("Broken"));
+	/*blackboard->SetValueAsEnum(TEXT("AIState"), 5);
+	blackboard->SetValueAsBool(TEXT("Guard"), false);
+	blackboard->SetValueAsBool(TEXT("Armed"), false);*/
+
+	/*Shield->SetCollisionProfileName(FName("Ragdoll"));
+	Shield->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	Shield->SetSimulatePhysics(true);
+	Shield->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	this->Tags.Add(FName("Broken"));*/
 }
 
 void AEnemyShielder::onDie()
@@ -156,7 +159,7 @@ void AEnemyShielder::onDie()
 	UAIBlueprintHelperLibrary::GetAIController(this)->K2_ClearFocus();
 	PlayAnimMontage(enemyHitMontage, 1, FName("Death0"));
 	blackboard->SetValueAsEnum(TEXT("AIState"), 3);
-	//myManager->EnemyDelete(this);
+	myManager->EnemyDelete(this);
 	Shield->SetCollisionProfileName(FName("Ragdoll"));
 	Shield->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	Shield->SetSimulatePhysics(true);
@@ -172,7 +175,7 @@ void AEnemyShielder::onDie()
 void AEnemyShielder::onGetSet()
 {
 	Super::onGetSet();
-	blackboard->SetValueAsObject(TEXT("PlayerActor"),myManager->PlayerCharacter);
+	blackboard->SetValueAsObject(TEXT("PlayerActor"), myManager->PlayerCharacter);
 	/*Shield->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::KeepWorldTransform, TEXT("hand_rSocket"));
 	Shield->SetRelativeLocationAndRotation(FVector(-25, -12, 34), FRotator(-66.8f, 62, -48));*/
 }
