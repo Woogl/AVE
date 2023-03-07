@@ -101,6 +101,9 @@ void AEnemyBase::OnFinishered()
 
 	// 테이크다운 애니메이션 실행
 	PlayAnimMontage(enemyHitMontage, 1, TEXT("Finish"));
+
+	hp=0;
+	myManager->EnemyDelete(this);
 }
 
 void AEnemyBase::SliceBodyPart(EBodyPart BodyIndex, FVector Impulse, float RagdollDelay)

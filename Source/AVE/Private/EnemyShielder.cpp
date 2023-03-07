@@ -41,7 +41,7 @@ AEnemyShielder::AEnemyShielder()
 	Shield->SetRelativeLocationAndRotation(FVector(-125,-20, -20), FRotator(4,92,185));
 	Shield->SetCollisionProfileName(TEXT("NoCollision"));
 
-	enemyWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("BitalWidget"));
+	/*enemyWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("BitalWidget"));
 	enemyWidget->SetupAttachment(GetMesh());
 	enemyWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
 	enemyWidget->SetWidgetSpace(EWidgetSpace::Screen);
@@ -50,7 +50,7 @@ AEnemyShielder::AEnemyShielder()
 	{
 		enemyWidget->SetWidgetClass(tempWidget.Class);
 		enemyWidget->SetDrawSize(FVector2D(150.0f, 50.0f));
-	}
+	}*/
 }
 
 // Called when the game starts or when spawned
@@ -59,10 +59,12 @@ void AEnemyShielder::BeginPlay()
 	Super::BeginPlay();
 	CombatComp->SetupWeapon(Shield);
 
-	UEnemyWidget* enemyBar = Cast<UEnemyWidget>(enemyWidget->GetUserWidgetObject());
-	enemyBar->SetOwnerEnemy(this);
+	/*UEnemyWidget* enemyBar = Cast<UEnemyWidget>(enemyWidget->GetUserWidgetObject());
+	enemyBar->SetOwnerEnemy(this);*/
 
 	blackboard->SetValueAsEnum(TEXT("AIState"), 0);
+
+	onBeginBP();
 
 }
 
@@ -113,7 +115,7 @@ float AEnemyShielder::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		onHitCrushed();
 	//else
 	//	onHit();
-
+	onHitBP(DamageAmount);
 	return 0.0f;
 }
 
@@ -138,6 +140,8 @@ void AEnemyShielder::onHit()
 
 	blackboard->SetValueAsEnum(TEXT("AIState"), 6);
 
+	
+
 }
 
 void AEnemyShielder::onHitCrushed()
@@ -152,13 +156,13 @@ void AEnemyShielder::onDie()
 	UAIBlueprintHelperLibrary::GetAIController(this)->K2_ClearFocus();
 	PlayAnimMontage(enemyHitMontage, 1, FName("Death0"));
 	blackboard->SetValueAsEnum(TEXT("AIState"), 3);
-	myManager->EnemyDelete(this);
+	//myManager->EnemyDelete(this);
 	Shield->SetCollisionProfileName(FName("Ragdoll"));
 	Shield->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	Shield->SetSimulatePhysics(true);
 	Shield->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	//enemyWidget->DestroyComponent();
-	enemyWidget->SetVisibility(false);
+	//enemyWidget->SetVisibility(false);
 	this->ActivateRagdoll();
 	/*GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	GetMesh()->SetSimulatePhysics(true);*/

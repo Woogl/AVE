@@ -408,7 +408,12 @@ void UBossFSMComponent::MoveToFSM()
 		}
 		else
 		{
-			ReturnToNormalATK();
+			if (asBoss->currentElectricEnergy >= 100.f)
+			{
+				ReturnToWarCry();
+			}
+			else
+				ReturnToNormalATK();
 		}
 	}
 	else if (randomFloatValue0To1 <= dashATKPercent && asBoss->DistanceBossToPlayer() <= 700 && asBoss->
