@@ -14,6 +14,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "AllAVEDamageTypes.h"
 #include <Components/SpotLightComponent.h>
+#include "MotionWarpingComponent.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -78,6 +79,9 @@ APlayerCharacter::APlayerCharacter()
 
 	// 공격 판정을 관리하는 컴포넌트
 	CombatComp = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp"));
+
+	// 모션워핑 컴포넌트
+	MotionWarpingComp = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarpingComp"));
 }
 
 void APlayerCharacter::BeginPlay()
