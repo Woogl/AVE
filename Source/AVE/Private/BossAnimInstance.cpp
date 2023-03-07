@@ -59,9 +59,10 @@ void UBossAnimInstance::AnimNotify_WarCryBegin()
 	asBoss->currentElectricEnergy = 1.f;
 	if (bDoOnce == false)
 	{
+		bDoOnce = true;
 		asBoss->bossPosture = 100;
 		asBoss->currentHP = asBoss->maxHP;
-		bDoOnce = true;
+		asBoss->bossFSMComp->bIsSecondPhase = true;
 	}
 }
 

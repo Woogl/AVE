@@ -105,6 +105,20 @@ void ABoss::Tick(float DeltaTime)
 	{
 		ElectricEnergyRecovery();
 	}
+
+	if (bossFSMComp->bIsSecondPhase == true)
+	{
+		if (bossPosture <= 0 || currentHP <= 0)
+		{
+			if (bDoOnce == false)
+			{
+				bDoOnce = true;
+				bossFSMComp->bossStates = EBossState::FallDown;
+				bossFSMComp->bHasExecuted = false;
+				EndSequencePlay();
+			}
+		}
+	}
 }
 
 // Called to bind functionality to input

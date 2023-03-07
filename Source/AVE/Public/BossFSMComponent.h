@@ -59,6 +59,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class AAIController* AiCtrl;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class AAVEGameModeBase* asGameMode;
 	
 	void TickIdle();
 	void TickWalk();

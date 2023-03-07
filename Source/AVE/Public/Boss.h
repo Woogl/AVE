@@ -154,7 +154,7 @@ public:
 	int parryCount = 0;
 	// float distanceValue;
 	bool bTakeDamage = false;
-	
+	bool bDoOnce = false;
 
 	// ÇÔ¼ö
 	UFUNCTION()
@@ -196,7 +196,8 @@ public:
 	// void AnimReboundATK();
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlaySoundHit();
-
+	UFUNCTION(BlueprintImplementableEvent)
+	void EndSequencePlay();
 
 	UFUNCTION()
 	void RandomInt(int min, int max);

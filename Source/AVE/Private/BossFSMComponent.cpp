@@ -2,12 +2,12 @@
 
 
 #include "BossFSMComponent.h"
-
+#include "AVEGameModeBase.h"
 #include "AIController.h"
 #include "Boss.h"
 #include "BossAnimInstance.h"
+#include "LevelSequencePlayer.h"
 #include "PlayerCharacter.h"
-#include "BehaviorTree/Blackboard/BlackboardKeyType.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -36,7 +36,8 @@ void UBossFSMComponent::BeginPlay()
 	asBossAnim = Cast<UBossAnimInstance>(asBoss->GetMesh()->GetAnimInstance());
 	bIsSecondPhase = false;
 	bHasExecuted = false;
-	//asBoss->GetWorldTimerManager().SetTimer(secondPhaseHandle, this, &UBossFSMComponent::ReturnToSecondPhase, 0.1f, true);
+	asBoss->GetWorldTimerManager().SetTimer(secondPhaseHandle, this, &UBossFSMComponent::ReturnToSecondPhase, 0.1f, true);
+	asGameMode = Cast<AAVEGameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 
@@ -69,7 +70,7 @@ void UBossFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	BossStateDebug();
 	
 	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("bIsSecondPhase %d"), bIsSecondPhase));
-	ReturnToSecondPhase();
+	// ReturnToSecondPhase();
 }
 
 void UBossFSMComponent::TickIdle()
@@ -488,12 +489,11 @@ void UBossFSMComponent::ReturnToSecondPhase()
 {
 	if (bIsSecondPhase == false)
 	{
-		if (asBoss->bossPosture <= 0 || asBoss->currentHP <=0)
+		if (asBoss->bossPosture <= 0 || asBoss->currentHP <= 0)
 		{
+			asBoss->GetWorldTimerManager().ClearTimer(secondPhaseHandle);
 			bossStates = EBossState::FallDown;
 			bHasExecuted = false;
-			bIsSecondPhase = true;
-			asBoss->GetWorldTimerManager().ClearTimer(secondPhaseHandle);
 		}
 	}
 }
