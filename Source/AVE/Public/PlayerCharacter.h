@@ -34,6 +34,9 @@ public:
 	class UCombatComponent* CombatComp;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UCharacterMovementComponent* MoveComp;
+	// 모션워핑 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
+	class UMotionWarpingComponent* MotionWarpingComp;
 	// 타게팅 대상
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	AActor* EnemyTarget = nullptr;
