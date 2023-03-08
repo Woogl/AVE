@@ -22,7 +22,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -30,19 +30,38 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int AttackChance;
+		int AttackChance;
 	UPROPERTY()
-	class UBlackboardComponent* blackboard;
+		class UBlackboardComponent* blackboard;
 	bool running;
 
+
+	UPROPERTY(EditAnywhere)
+		int spawnSwordmanCount;
+	UPROPERTY(EditAnywhere)
+		int spawnGunmanCount;
+	UPROPERTY(EditAnywhere)
+		int spawnShielderCount;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class AEnemyBase> swordFactory;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class AEnemyBase> gunFactory;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<class AEnemyBase> shielderFactory;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<AActor*> Enemies;
+		TArray<FVector> SpawnPoints;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<AActor*> Enemies;
 	UPROPERTY()
-	class APawn* PlayerCharacter;
+		class APawn* PlayerCharacter;
 
 	UFUNCTION(BlueprintCallable)
-	void RunAI();
+		void RunAI();
+	UFUNCTION(BlueprintCallable)
 	void EnemyDelete(AActor* const InPawn);
 	UFUNCTION(BlueprintCallable)
-	void EnemySearch();
+		void EnemySpawn(TArray<FVector> Points);
+	UFUNCTION(BlueprintCallable)
+		void EnemySearch();
 };
