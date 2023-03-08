@@ -65,7 +65,7 @@ void AAIManager::EnemySpawn(TArray<FVector> Points)
 		else if (i < spawnGunmanCount + spawnSwordmanCount)
 		{
 			AEnemyBase* Gunman = GetWorld()->SpawnActor<AEnemyBase>(gunFactory, Points[i], FRotator::ZeroRotator, SpawnInfo);
-			Enemies.AddUnique(Gunman);
+			//Enemies.AddUnique(Gunman);
 			Gunman->onSetManager(this);
 			continue;
 		}
