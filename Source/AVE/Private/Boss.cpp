@@ -168,16 +168,14 @@ void ABoss::AnimNormalATK()
 	if (randomIntValue == 1)
 	{
 		attackCount += 1;
-		//PlayAnimMontage(animNormalATKR01);
 		montageLength = PlayAnimMontage(animNormalATKR01, 1) / (1 * animNormalATKR01->RateScale);
 	}
 	if (randomIntValue == 2)
 	{
 		attackCount += 1;
-		//PlayAnimMontage(animNormalATKL01);
 		montageLength = PlayAnimMontage(animNormalATKL01, 1) / (1 * animNormalATKL01->RateScale);
 	}
-
+	
 	// 우성
 	if (bTutorial)
 	{
@@ -336,7 +334,6 @@ void ABoss::AnimTurnInPlace()
 			else
 				PlayAnimMontage(bossTurnL90);
 		}
-	
 }
 
 void ABoss::SetFocusPlayerInplace()
@@ -395,6 +392,7 @@ void ABoss::TakeDamageFalse()
 void ABoss::ClearFocus()
 {
 	GetWorldTimerManager().ClearTimer(laserATKHandle);
+	GetWorldTimerManager().ClearTimer(laserHitHandle);
 }
 
 void ABoss::ReturnToMove()
