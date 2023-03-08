@@ -88,9 +88,7 @@ public:
 		class UCombatComponent* CombatComp;
 	UPROPERTY()
 		class AAIManager* myManager;
-	UPROPERTY(EditAnywhere)
-		class UBaseBital* bital;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 		class UBlackboardComponent* blackboard;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget")
 		class UWidgetComponent* enemyWidget;

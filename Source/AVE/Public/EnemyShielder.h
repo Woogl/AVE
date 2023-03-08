@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "EnemyBase.h"
+#include <Particles/ParticleSystem.h>
 #include "EnemyShielder.generated.h"
 
 /**
@@ -32,13 +33,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		UStaticMeshComponent* Shield;
 
+	UPROPERTY(EditAnywhere)
+		USoundBase* fireSound;
+	UPROPERTY(EditAnywhere)
+		class UNiagaraSystem* bombingEffect;
+	FTimerHandle ft;
+
 	float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	void onActionAttack() override;
 	void onActionGuard() override;
+	void onRemoveGuard();
 	void onHit() override;
 	void onHitCrushed() override;
 	void onDie() override;
 	void onGetSet() override;
+	void onSuicide();
 	UFUNCTION(BlueprintImplementableEvent)
 		void onBeginBP();
 	UFUNCTION(BlueprintImplementableEvent)

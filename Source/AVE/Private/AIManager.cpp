@@ -28,20 +28,57 @@ void AAIManager::BeginPlay()
 	PlayerCharacter = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	blackboard = UAIBlueprintHelperLibrary::GetBlackboard(this);
 	EnemySearch();
+	SpawnPoints.Add(FVector(310, 210, 310));
+	SpawnPoints.Add(FVector(410, 210, 310));
+	SpawnPoints.Add(FVector(510, 210, 310));
+	SpawnPoints.Add(FVector(610, 210, 310));
+	EnemySpawn(SpawnPoints);
 }
 
 // Called every frame
 void AAIManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
 void AAIManager::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
 
+void AAIManager::EnemySpawn(TArray<FVector> Points)
+{
+	FActorSpawnParameters SpawnInfo;
+	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	for (int i = 0; i < Points.Num(); i++)
+	{
+		if (i < spawnSwordmanCount)
+		{
+			AEnemyBase* swordman = GetWorld()->SpawnActor<AEnemyBase>(swordFactory, Points[i], FRotator::ZeroRotator, SpawnInfo);
+			Enemies.AddUnique(swordman);
+			swordman->onSetManager(this);
+			continue;
+		}
+
+		// Spawn Gunman characters at current spawn point
+		else if (i < spawnGunmanCount + spawnSwordmanCount)
+		{
+			AEnemyBase* Gunman = GetWorld()->SpawnActor<AEnemyBase>(gunFactory, Points[i], FRotator::ZeroRotator, SpawnInfo);
+			Enemies.AddUnique(Gunman);
+			Gunman->onSetManager(this);
+			continue;
+		}
+
+		// Spawn Shielder characters at current spawn point
+		else if (i < spawnShielderCount + spawnGunmanCount + spawnSwordmanCount)
+		{
+			AEnemyBase* Shielder = GetWorld()->SpawnActor<AEnemyBase>(shielderFactory, Points[i], FRotator::ZeroRotator, SpawnInfo);
+			Enemies.AddUnique(Shielder);
+			Shielder->onSetManager(this);
+			continue;
+		}
+	}
 }
 
 void AAIManager::EnemySearch()
@@ -50,9 +87,9 @@ void AAIManager::EnemySearch()
 	for (AActor* enemy : Enemies)
 	{
 		Cast<AEnemyBase>(enemy)->onSetManager(this);
+		Enemies.AddUnique(Cast<AEnemyBase>(enemy));
 	}
 }
-
 void AAIManager::RunAI()
 {
 	if (!running)
@@ -78,6 +115,7 @@ void AAIManager::RunAI()
 void AAIManager::EnemyDelete(AActor* const InPawn)
 {
 	Enemies.Remove(InPawn);
-	/*if (Enemies.IsEmpty())
-		this->Destroy();*/
+	if (Enemies.IsEmpty())
+		EnemySpawn(SpawnPoints);
+		//this->Destroy();
 }

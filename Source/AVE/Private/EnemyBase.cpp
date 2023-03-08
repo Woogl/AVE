@@ -181,7 +181,7 @@ void AEnemyBase::ActivateRagdoll()
 void AEnemyBase::onGetSet()
 {
 	blackboard->SetValueAsBool(TEXT("Armed"), true);
-	blackboard->SetValueAsEnum(TEXT("AIState"), 6);
+	//blackboard->SetValueAsEnum(TEXT("AIState"), 6);
 }
 
 void AEnemyBase::onSetManager(AAIManager* Manager)
