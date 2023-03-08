@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/Pawn.h"
-#include "BaseBital.h"
 #include "AVEEnums.h"
 #include "EnemyBase.generated.h"
 
@@ -88,8 +87,6 @@ public:
 		class UCombatComponent* CombatComp;
 	UPROPERTY()
 		class AAIManager* myManager;
-	UPROPERTY(EditAnywhere)
-		class UBaseBital* bital;
 	UPROPERTY(EditAnywhere)
 		class UBlackboardComponent* blackboard;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget")
