@@ -27,6 +27,7 @@ AEnemyShielder::AEnemyShielder()
 	PrimaryActorTick.bCanEverTick = true;
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	AIControllerClass = AAC_Swordman::StaticClass();
+	broken = false;
 
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempBody(TEXT("SkeletalMesh'/Game/Team/TH/Resources/SciFi_Robot/MESHES/SCIFI_ROBOT_IK_SK.SCIFI_ROBOT_IK_SK'"));
 	if (tempBody.Succeeded()) {
@@ -159,23 +160,28 @@ void AEnemyShielder::onHit()
 
 void AEnemyShielder::onHitCrushed()
 {
-	PlayAnimMontage(enemyHitMontage, 1, FName("Break"));
-	blackboard->SetValueAsEnum(TEXT("AIState"), 5);
-	blackboard->SetValueAsBool(TEXT("Guard"), false);
-	//blackboard->SetValueAsBool(TEXT("Armed"), false);
+	if (!broken)
+	{
+		PlayAnimMontage(enemyHitMontage, 1, FName("Break"));
+		blackboard->SetValueAsEnum(TEXT("AIState"), 5);
+		blackboard->SetValueAsBool(TEXT("Guard"), false);
+		//blackboard->SetValueAsBool(TEXT("Armed"), false);
 
-	Shield->SetCollisionProfileName(FName("Ragdoll"));
-	Shield->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-	Shield->SetSimulatePhysics(true);
-	Shield->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	this->Tags.Add(FName("Broken"));
+		Shield->SetCollisionProfileName(FName("Ragdoll"));
+		Shield->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		Shield->SetSimulatePhysics(true);
+		Shield->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		this->Tags.Add(FName("Broken"));
 
-	PlayAnimMontage(enemyAttackMontage, 1, FName("Dive"));
-	GetWorldTimerManager().SetTimer(ft, this, &AEnemyShielder::onSuicide, 3, false, 3);
+		PlayAnimMontage(enemyAttackMontage, 1, FName("Dive"));
+		GetWorldTimerManager().SetTimer(ft, this, &AEnemyShielder::onSuicide, 3, false, 3);
+	}
+	broken = true;
 }
 
 void AEnemyShielder::onDie()
 {
+	GetWorldTimerManager().ClearTimer(ft);
 	UAIBlueprintHelperLibrary::GetAIController(this)->K2_ClearFocus();
 	PlayAnimMontage(enemyHitMontage, 1, FName("Death0"));
 	blackboard->SetValueAsEnum(TEXT("AIState"), 3);
@@ -205,8 +211,12 @@ void AEnemyShielder::onGetSet()
 
 void AEnemyShielder::onSuicide()
 {
+	TArray<AActor*> IgnoreList;
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), 30, this->GetActorLocation(), 2000, UKnockBackDamageType::StaticClass(), IgnoreList);
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), bombingEffect, this->GetActorLocation(), FRotator::ZeroRotator);
 	UGameplayStatics::PlaySound2D(GetWorld(), fireSound);
 	onHitBP(1000000);
+
+	
 	onDie();
 }

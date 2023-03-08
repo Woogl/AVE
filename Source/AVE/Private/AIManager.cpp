@@ -28,11 +28,11 @@ void AAIManager::BeginPlay()
 	PlayerCharacter = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	blackboard = UAIBlueprintHelperLibrary::GetBlackboard(this);
 	EnemySearch();
-	SpawnPoints.Add(FVector(310, 210, 310));
+	/*SpawnPoints.Add(FVector(310, 210, 310));
 	SpawnPoints.Add(FVector(410, 210, 310));
 	SpawnPoints.Add(FVector(510, 210, 310));
 	SpawnPoints.Add(FVector(610, 210, 310));
-	EnemySpawn(SpawnPoints);
+	EnemySpawn(SpawnPoints);*/
 }
 
 // Called every frame
