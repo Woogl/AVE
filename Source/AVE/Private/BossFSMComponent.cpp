@@ -6,7 +6,6 @@
 #include "AIController.h"
 #include "Boss.h"
 #include "BossAnimInstance.h"
-#include "LevelSequencePlayer.h"
 #include "PlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
