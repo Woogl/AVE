@@ -86,7 +86,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 		class UCombatComponent* CombatComp;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class AAIManager* myManager;
 	UPROPERTY()
 		class UBlackboardComponent* blackboard;
