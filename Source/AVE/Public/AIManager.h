@@ -58,6 +58,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void RunAI();
+	UFUNCTION(BlueprintCallable)
 	void EnemyDelete(AActor* const InPawn);
 	UFUNCTION(BlueprintCallable)
 		void EnemySpawn(TArray<FVector> Points);
