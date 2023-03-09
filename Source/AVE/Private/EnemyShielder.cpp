@@ -32,8 +32,8 @@ AEnemyShielder::AEnemyShielder()
 		GetMesh()->SetSkeletalMesh(tempBody.Object);
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 
-		static ConstructorHelpers::FObjectFinder<UAnimBlueprint> tempAnim(TEXT("AnimBlueprint'/Game/Team/TH/Animation/ABP_Swordman.ABP_Swordman'"));
-		this->GetMesh()->SetAnimInstanceClass(tempAnim.Object->GetAnimBlueprintGeneratedClass());
+		//static ConstructorHelpers::FObjectFinder<UAnimBlueprint> tempAnim(TEXT("AnimBlueprint'/Game/Team/TH/Animation/ABP_Swordman.ABP_Swordman'"));
+		//this->GetMesh()->SetAnimInstanceClass(tempAnim.Object->GetAnimBlueprintGeneratedClass());
 	}
 
 	Shield = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Shield"));

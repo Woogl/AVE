@@ -37,7 +37,6 @@ void UBossFSMComponent::BeginPlay()
 	bIsSecondPhase = false;
 	bHasExecuted = false;
 	asBoss->GetWorldTimerManager().SetTimer(secondPhaseHandle, this, &UBossFSMComponent::ReturnToSecondPhase, 0.1f, true);
-	asGameMode = Cast<AAVEGameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 
@@ -91,8 +90,8 @@ void UBossFSMComponent::TickWalk()
 	{
 		bHasExecuted = true;
 		SetWalkRandomIntCpp();
-		//WalkDelayCpp(); // 실제 사용할 함수
-		WalkDelay(); // 블루프린트에서 상태 수동 변환 테스트 용
+		WalkDelayCpp(); // 실제 사용할 함수
+		// WalkDelay(); // 블루프린트에서 상태 수동 변환 테스트 용
 	}
 	asBoss->GetCharacterMovement()->MaxWalkSpeed = 125.f;
 	WalkToLocation(1000);

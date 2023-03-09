@@ -323,12 +323,15 @@ void APlayerCharacter::Finisher()
 {
 	if (CanAttack()) {
 		// 대상 찾고 태그 확인
-		if (TryAutoTargeting() == true && EnemyTarget->ActorHasTag(TEXT("Broken")))
+		if (TryAutoTargeting() == true)
 		{
-			PlayFinisherSequence();
-			MotionMorph();
-			FinishEnemy();
-			bIsInvincible = true;
+			if (EnemyTarget->ActorHasTag(TEXT("Broken")))
+			{
+				PlayFinisherSequence();
+				MotionMorph();
+				FinishEnemy();
+				bIsInvincible = true;
+			}
 		}
 	}
 }

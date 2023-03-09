@@ -395,6 +395,7 @@ void ABoss::TakeDamageFalse()
 void ABoss::ClearFocus()
 {
 	GetWorldTimerManager().ClearTimer(laserATKHandle);
+	GetWorldTimerManager().ClearTimer(laserHitHandle);
 }
 
 void ABoss::ReturnToMove()
