@@ -125,12 +125,12 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	LastMoveTime += DeltaTime;
 	LastAttackTime += DeltaTime;
-	// 마지막 방향키 인풋이 0.4초를 지났으면
+	// <문성훈> 마지막 방향키 인풋이 0.4초를 지났으면
 	if (LastMoveTime > MoveResetLimit) {
 		LastMoveTime = 0.f;
 		Tail = -1;
 	}
-	// 공격 모션이 끝나고 0.6초가 지나면
+	// <문성훈> 공격 모션이 끝나고 0.6초가 지나면
 	if (!bIsAttacking && LastAttackTime > ComboResetLimit) {
 		// 콤보를 초기화
 		Combo = -1;
@@ -146,7 +146,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	check(PlayerInputComponent);
-	// 움직임 커맨드 생성을 위한 WASD 프레스 이벤트 바인딩
+	// <문성훈> 움직임 커맨드 생성을 위한 WASD 프레스 이벤트 바인딩
 	PlayerInputComponent->BindAction("WInput", IE_Pressed, this, &APlayerCharacter::WInput);
 	PlayerInputComponent->BindAction("SInput", IE_Pressed, this, &APlayerCharacter::SInput);
 	PlayerInputComponent->BindAction("DInput", IE_Pressed, this, &APlayerCharacter::DInput);
@@ -177,10 +177,8 @@ void APlayerCharacter::MoveForward(float Value)
 {
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
-		// find out which way is forward
 		const FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
 
-		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, Value);
 	}
@@ -190,25 +188,20 @@ void APlayerCharacter::MoveRight(float Value)
 {
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
-		// find out which way is right
 		const FRotator YawRotation(0, Controller->GetControlRotation().Yaw, 0);
 
-		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
 }
 
 void APlayerCharacter::TurnAtRate(float Rate)
 {
-	// calculate delta for this frame from the rate information
 	AddControllerYawInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
 }
 
 void APlayerCharacter::LookUpAtRate(float Rate)
 {
-	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * TurnRateGamepad * GetWorld()->GetDeltaSeconds());
 }
 
@@ -227,7 +220,7 @@ void APlayerCharacter::Jump()
 
 void APlayerCharacter::Guard()
 {
-	// 물건 들고 있으면 떨구기
+	// 물건 들고 있으면 떨구기 - 우성
 	if (bIsGrabbing == true && GrabbedActor)
 	{
 		DropProp();
@@ -256,15 +249,15 @@ void APlayerCharacter::StopGuard()
 {
 	bIsBlocking = false;
 
-	// 패링 판정 종료
+	// <문성훈> 패링 판정 종료
 	bIsParrying = false;
 	GetWorldTimerManager().ClearTimer(ParryingTimer);
 
-	// ABP의 스테이트 변경
+	// <문성훈> ABP의 스테이트 변경
 	UPlayerAnimInstance* animIns = Cast<UPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	animIns->bIsBlocking = false;
 
-	// 이동속도 초기화
+	// <문성훈> 이동속도 초기화
 	MoveComp->MaxWalkSpeed = 300.f;
 	MoveComp->MaxAcceleration = 2048.f;
 	MoveComp->BrakingDecelerationWalking = 500.f;
@@ -344,7 +337,7 @@ bool APlayerCharacter::CanJump()
 
 bool APlayerCharacter::CanAttack()	
 {
-	// 공격중이거나 회피/스킬사용, 가드브레이크 중이 아니면 true 리턴
+	// <문성훈> 공격중이거나 회피/스킬사용, 가드브레이크 중이 아니면 true 리턴
 	return !(bIsAttacking || bIsInvincible || bIsGuardBroken || bIsHit);
 }
 
@@ -593,6 +586,7 @@ void APlayerCharacter::AInput() {
 	CreateMoveCommand(FVector2D(0, -1));
 }
 
+// <문성훈> 이동 입력 시에 개념적인 커맨드를 생성하는 함수
 void APlayerCharacter::CreateMoveCommand(FVector2D InputDirection) {
 	// 움직임 커맨드 어레이가 꽉차면
 	if (Tail >= 9) {
@@ -607,42 +601,37 @@ void APlayerCharacter::CreateMoveCommand(FVector2D InputDirection) {
 	LastMoveTime = 0.f;
 }
 
+// <문성훈> 좌클릭 입력 시 누적된 커맨드와 조합, 다른 공격을 재생하는 함수
 void APlayerCharacter::Attack() {
-	// 공격 중이 아니면
+	// 공격이 가능한 상태이면
 	if (CanAttack()) {
-
-		// 물건 들고 있을 경우에는 공격 대체
-		if (bIsGrabbing == true)
-		{
-			Interact();
-			return;
-		}
 
 		// 오토 타겟팅으로 타겟 지정
 		TryAutoTargeting();
-
-		// 스무스하게 회전
+		// 회전 속도
 		RInterpSpeed = 5.f;
 
 		// 점프 중이면 점프공격
 		if (MoveComp->IsFalling()) {
 			JumpAttack();
 		}
-		// 움직임 커맨드 어레이에 2개 이상의 원소가 있으면
+		// 커맨드 어레이에 2개 이상의 원소가 있으면
 		else if (Tail > 0) {
 			// 마지막과 마지막의 앞에 있는 원소를 합치고 길이를 저장
 			float vectorLength = (MoveCommands[Tail] + MoveCommands[Tail - 1]).Size();
-			if (vectorLength <= 0) {
+			// 마지막과 마지막의 앞에 있는 원소가 서로 반대 방향이면(W + S, S + W, A + D, D + A) 특수 공격 발동
+			if (vectorLength <= 0) 
 				SpecialAttack();
-			}
-			else if (vectorLength >= 2) {
+			// 같은 방향이면(W + W, S + S, D + D, A + A) 대시 공격 발동
+			else if (vectorLength >= 2) 
 				DashAttack();
-			}
-			else {
+			// 의미 있는 조합이 아니라면 일반 콤보 공격 발동
+			else 
 				ComboAttack();
-			}
 		}
+		// 커맨드 어레이가 비어 있으면
 		else {
+			// 일반 콤보 공격 발동
 			ComboAttack();
 		}
 
@@ -655,6 +644,7 @@ void APlayerCharacter::Attack() {
 	}
 }
 
+// <문성훈> 플레이어 일반상태 초기화
 void APlayerCharacter::InitState() {
 	bIsAttacking = false;
 	bIsGuardBroken = false;
@@ -662,20 +652,24 @@ void APlayerCharacter::InitState() {
 	bIsHit = false;
 }
 
+// <문성훈> 플레이어 무적상태 초기화
 void APlayerCharacter::InitInvincibility() {
 	bIsInvincible = false;
 }
 
+// <문성훈> 플레이어 번개 충전상태 초기화
 void APlayerCharacter::InitCharge() {
 	bIsLightningCharged = false;
 }
 
+// <문성훈> 플레이어 가드상태 초기화
 void APlayerCharacter::InitGuard()
 {
 	StopGuard();
 	bIsParrying = false;
 }
 
+// <문성훈> 공중에서 번개 충전 상태시 뇌반, 아닐시 일반 공격
 void APlayerCharacter::JumpAttack() {
 	if (bIsLightningCharged) {
 		PlayAnimMontage(JumpAttackMontages[1]);
@@ -685,22 +679,28 @@ void APlayerCharacter::JumpAttack() {
 	else {
 		PlayAnimMontage(JumpAttackMontages[0]);
 	}
+	// 콤보 초기화
 	Combo = -1;
 }
 
+// <문성훈> 커맨드 특수공격 입력(반대방향 이동 커맨드 조합) 발도, 상하 2연격, 회전베기 3종
 void APlayerCharacter::SpecialAttack() {
+	// 쿨타임이 지났으면(스킬 준비 상태면)
 	if (SpecialAttackCooltime > 3.f) {
+		// 현재 장착한 특수공격 발동, 콤보 초기화, 쿨타임 돌게
 		PlayAnimMontage(SpecialAttackMontages[CurSpecialAttack]);
 		Combo = -1;
 		SpecialAttackCooltime = 0.f;
 	}
 }
 
+// <문성훈> 대쉬 특수공격 입력(단일 방향 이동 커맨드 조합)
 void APlayerCharacter::DashAttack() {
 	PlayAnimMontage(DashAttackMontage);
 	Combo = -1;
 }
 
+// <문성훈> 일반공격(콤보)
 void APlayerCharacter::ComboAttack() {
 	Combo++;
 	if (Combo > 3) {
@@ -709,6 +709,7 @@ void APlayerCharacter::ComboAttack() {
 	PlayAnimMontage(ComboAttackMontages[Combo]);
 }
 
+// <문성훈> 데미지 타입별 리액션, 
 float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
 
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
@@ -722,25 +723,39 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		EnemyTarget = DamageCauser;
 		bIsTargeting = true;
 	}
+	// <문성훈> 번개 타입 데미지를 받을 때의 케이스
 	if (DamageEvent.DamageTypeClass == ULightningDamageType::StaticClass()) {
+		// 공중에 있으면
 		if (MoveComp->IsFalling()) {
+			// 뇌반 차지
 			Charge();
 		}
+		// 땅에 닿아 있으면
 		else {
+			// 감전 그로기 상태로 진입
 			Groggy();
 		}
 	}
+	// <문성훈> 찌르기 타입 데미지를 받을 때의 케이스
 	else if (DamageEvent.DamageTypeClass == UPierceDamageType::StaticClass())
 	{
-		FVector dirEnemy = (GetActorLocation() - DamageCauser->GetActorLocation()).GetSafeNormal();
+		// 플레이어의 위치에서 공격을 한 적의 위치로의 방향 벡터(공격이 들어온 방향 벡터)
+		FVector dirEnemy = (DamageCauser->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+		// 플레이어의 전방 벡터
 		FVector dirPlayer = GetActorForwardVector();
-		float enemyDotPlayer = FVector::DotProduct(-dirEnemy, dirPlayer);
+		// 두 벡터를 내적한 값
+		float enemyDotPlayer = FVector::DotProduct(dirEnemy, dirPlayer);
+		// 플레이어가 대쉬 입력을 했고 그 방향이 공격이 들어온 방향과 일치할 때(내적값이 0.5 이상일 때)
 		if (bIsDashing && enemyDotPlayer > 0.5f)
 		{
+			// 모션 워핑
 			MotionMorphGanpa();
+			// 간파 기믹 발동
 			PlayAnimMontage(GanpaMontage);
+			// 데미지 피드백 전송
 			UGameplayStatics::ApplyDamage(EnemyTarget, AttackPower, GetController(), this, UGanpaDamageType::StaticClass());
 		}
+		// 리팩토링 필요
 		else if (bIsParrying)
 		{
 			ParryHit(DamageAmount, UKnockBackDamageType::StaticClass());
@@ -761,10 +776,12 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 			}
 		}
 	}
+	// 가불기 피격
 	else if (DamageEvent.DamageTypeClass == UUnguardableDamageType::StaticClass())
 	{
 		Hit(DamageAmount, UKnockBackDamageType::StaticClass());
 	}
+	// 하단공격, 점프시 회피
 	else if (DamageEvent.DamageTypeClass == ULowAttackDamageType::StaticClass())
 	{
 		if (MoveComp->IsFalling() == true)
@@ -773,22 +790,27 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		}
 		Hit(DamageAmount, UKnockBackDamageType::StaticClass());
 	}
+	// 잡기 공격
 	else if (DamageEvent.DamageTypeClass == UGrabAttackDamageType::StaticClass())
 	{
 		MotionMorphGrabHit();
 		Hit(DamageAmount, UGrabAttackDamageType::StaticClass());
 	}
+	// 일반 공격은 대쉬나 스킬 사용시 무적일 때도 회피 가능
 	else if (bIsInvincible) {
 		return DamageAmount;
 	}
+	// 패링 액션시 적에게 패리데미지타입 데미지 피드백 전송
 	else if (bIsParrying) {
 		ParryHit(DamageAmount, DamageEvent.DamageTypeClass);
 		//UGameplayStatics::ApplyPointDamage(EnemyTarget,0.1f,GetActorLocation(),outHit,GetController(),this,UParryDamageType::StaticClass());
 		UGameplayStatics::ApplyDamage(EnemyTarget, 0.1f, GetController(), this, UParryDamageType::StaticClass());
 	}
+	// 가드 시
 	else if (bIsBlocking) {
 		GuardHit(DamageAmount, DamageEvent.DamageTypeClass);
 	}
+	// 노말 히트시
 	else {
 		Hit(DamageAmount, DamageEvent.DamageTypeClass);
 		// 물건 주운	 상태에서 피격 시 물건 떨굼
@@ -797,10 +819,12 @@ float APlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 			DropProp();
 		}
 	}
+	// 피격 상태 on
 	bIsHit = true;
 	return DamageAmount;
 }
 
+// <문성훈> 데미지 타입별 패링 리액션
 void APlayerCharacter::ParryHit(float Damage, TSubclassOf<UDamageType> DamageType) {
 	if (DamageType == UStandardDamageType::StaticClass()) {
 		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
@@ -821,6 +845,7 @@ void APlayerCharacter::ParryHit(float Damage, TSubclassOf<UDamageType> DamageTyp
 	CurPosture -= Damage * 1.5f;
 }
 
+// <문성훈> 데미지 타입별 가드 리액션
 void APlayerCharacter::GuardHit(float Damage, TSubclassOf<UDamageType> DamageType) {
 	if (DamageType == UStandardDamageType::StaticClass()) {
 		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
@@ -838,6 +863,7 @@ void APlayerCharacter::GuardHit(float Damage, TSubclassOf<UDamageType> DamageTyp
 		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
 		PlayAnimMontage(GuardHitMontages[3]);
 	}
+	// 체간이 0보다 작아지면 가드브레이크 진입
 	CurPosture -= Damage * 3;
 	if (CurPosture <= 0) {
 		GuardBreak();
@@ -845,6 +871,7 @@ void APlayerCharacter::GuardHit(float Damage, TSubclassOf<UDamageType> DamageTyp
 	}
 }
 
+// <문성훈> 데미지 타입별 히트 리액션
 void APlayerCharacter::Hit(float Damage, TSubclassOf<UDamageType> DamageType) {
 	if (DamageType == UStandardDamageType::StaticClass()) {
 		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
@@ -866,6 +893,7 @@ void APlayerCharacter::Hit(float Damage, TSubclassOf<UDamageType> DamageType) {
 		Damage = UAVEDamageType::CalculateDamage(Damage, Defense);
 		PlayAnimMontage(HitReactionMontages[4]);
 	}
+	// 체력이 0보다 작으면 죽음
 	CurPosture -= Damage * 3.f;
 	CurHealth -= Damage;
 	if (CurHealth <= 0) {
@@ -874,30 +902,37 @@ void APlayerCharacter::Hit(float Damage, TSubclassOf<UDamageType> DamageType) {
 	}
 }
 
+// <문성훈> 가드브레이크 상태
 void APlayerCharacter::GuardBreak() {
 	PlayAnimMontage(GuardBreakMontage);
 	bIsGuardBroken = true;
 	StopGuard();
 }
 
+// <문성훈> 감전 그로기 상태(가드브레이크와 동일)
 void APlayerCharacter::Groggy() {
 	InitCharge();
 	PlayAnimMontage(GroggyMontage);
 	bIsGuardBroken = true;
 }
 
+// <문성훈> 번개 충전 상태(공중에서만 가능)
 void APlayerCharacter::Charge() {
 	PlayAnimMontage(ChargeMontage);
 	bIsLightningCharged = true;
 }
 
+// <문성훈> 죽음
 void APlayerCharacter::Die() {
 	PlayAnimMontage(DieMontage);
 	bIsDead = true;
+	// 인풋 비활성화
 	DisableInput(UGameplayStatics::GetPlayerController(GetWorld(),0));
+	// 게임 종료, 다시 처음 상태 맵 로드
 	EndGame();
 }
 
+// <문성훈> 플레이어 상태 리셋
 void APlayerCharacter::Reset() {
 	InitState();
 	InitGuard();
@@ -906,54 +941,66 @@ void APlayerCharacter::Reset() {
 	CurKatasiro = 3;
 }
 
+// <문성훈> 스킬(광역기, 시전 시 무적상태)
 void APlayerCharacter::Skill() {
+	// 공격 가능하고 카타시로가 남아있고 쿨타임이 돌았으면
 	if (CanAttack() && CurKatasiro > 0 && SkillCooltime > 5.f) {
 		PlayAnimMontage(SkillMontages[CurSkill]);
 		bIsAttacking = true;
 		bIsInvincible = true;
+		// 카타시로 소모, 쿨타임 돌리기
 		CurKatasiro--;
 		SkillCooltime = 0.f;
 	}
 }
 
+// <문성훈> 현재 스킬 변경(라이트닝 임팩트, 저지먼트 컷 2종)
 void APlayerCharacter::ChangeSkill() {
 	CurSkill++;
 	if (CurSkill >= SkillMontages.Num())
 		CurSkill = 0;
 }
 
+// <문성훈> 현재 특수공격 변경(발도, 상하 2연격, 회전베기 3종)
 void APlayerCharacter::ChangeSpecialAttack() {
 	CurSpecialAttack++;
 	if (CurSpecialAttack >= SpecialAttackMontages.Num())
 		CurSpecialAttack = 0;
 }
 
+// <문성훈> 저지먼트 컷에서 애님노티파이로 무기 왼손으로 잠깐 옮기는 함수
 void APlayerCharacter::MoveWeaponLeft() {
 	Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("katana2"));
 	Scabbard->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("katana2"));
 }
 
+// <문성훈> 저지먼트 컷에서 애님노티파이로 무기 오른손으로 다시 옮기는 함수
 void APlayerCharacter::MoveWeaponRight() {
 	Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("katana3"));
 	Scabbard->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("katana1"));
 }
 
+// <문성훈> 체간 재생
 void APlayerCharacter::RegeneratePosture() {
+	// 피격 중이거나 가드브레이크 중에는 재생 안되도록
 	if (!(bIsHit || bIsGuardBroken) && CurPosture < 100.f) {
 		CurPosture += 0.15f;
 	}
 }
 
+// <문성훈> 광역 데미지 발동(스킬에 노티파이로 데미지 타입 전달, 저지먼트 컷은 넉백데미지, 라이트닝 임팩트는 번개 데미지)
 void APlayerCharacter::SpreadAoEDamage(TSubclassOf<UDamageType> AttackDamageType) {
 	TArray<AActor*> IgnoreList;
 	IgnoreList.Add(this);
 	UGameplayStatics::ApplyRadialDamage(GetWorld(), AttackPower, GetActorLocation(), 1000.f, AttackDamageType, IgnoreList);
 }
 
+// <문성훈> 젖은 마테리얼 발소리 재생
 void APlayerCharacter::PlayWetFootstepSound(FVector Location) {
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), WetFootstep, Location, 0.5f);
 }
 
+// <문성훈> 마른 마테리얼 발소리 재생
 void APlayerCharacter::PlayDryFootstepSound(FVector Location) {
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), DryFootstep, Location, 0.5f);
 }
