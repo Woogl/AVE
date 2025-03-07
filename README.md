@@ -8,4 +8,5 @@ __*Github*__
 + 절차적 맵 생성 로직 적용
 + Behavior Tree 활용
 ---
+https://youtu.be/yeHOE-68XNA?si=0Ksb3dN378seOTla
 [상세보기(Notion)](https://www.notion.so/1b4e5016c4394e6c8d2d139c7860e43b?pvs=4)
