@@ -6,6 +6,6 @@ __*Github*__
 + 5인 프로젝트
 + 커맨드 디자인 패턴 적용
 + 절차적 맵 생성 로직 적용
-+ Behavior Tree 활용
 ---
+## 유튜브 영상
 [![Video Label](http://img.youtube.com/vi/yeHOE-68XNA/0.jpg)](https://youtu.be/yeHOE-68XNA)
